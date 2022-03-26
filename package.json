@@ -1,5 +1,5 @@
 {
-  "name": "vscode-image-gallery",
+	"name": "vscode-image-gallery",
 	"displayName": "Image Gallery",
 	"description": "A VS Code extension that improves image browsing experience.",
 	"version": "0.0.1",
@@ -10,14 +10,14 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:vscode-image-gallery.helloWorld"
+        "onCommand:vscode-image-gallery.start"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "vscode-image-gallery.helloWorld",
-				"title": "Hello World"
+				"command": "vscode-image-gallery.start",
+				"title": "Open Image Gallery"
 			}
 		]
 	},
