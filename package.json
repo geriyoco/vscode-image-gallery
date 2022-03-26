@@ -1,0 +1,40 @@
+{
+  "name": "vscode-image-gallery",
+	"displayName": "Image Gallery",
+	"description": "A VS Code extension that improves image browsing experience.",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.65.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+        "onCommand:vscode-image-gallery.helloWorld"
+	],
+	"main": "./extension.js",
+	"contributes": {
+		"commands": [{
+            "command": "vscode-image-gallery.helloWorld",
+            "title": "Hello World"
+
+		}]
+	},
+	"scripts": {
+		"lint": "eslint .",
+		"pretest": "npm run lint",
+		"test": "node ./test/runTest.js"
+	},
+	"devDependencies": {
+        "@types/vscode": "^1.65.0",
+        "@types/glob": "^7.2.0",
+        "@types/mocha": "^9.1.0",
+        "@types/node": "14.x",
+        "eslint": "^8.11.0",
+        "glob": "^7.2.0",
+        "mocha": "^9.2.2",
+        "typescript": "^4.5.5",
+        "@vscode/test-electron": "^2.1.3"
+    }
+
+}
