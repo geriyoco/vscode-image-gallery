@@ -1,9 +1,9 @@
-import lozad from 'lozad';
+// import lozad from 'lozad';
 
 (function() {
     const vscode = acquireVsCodeApi();
-    const observer = lozad(); // lazy loads elements with default selector as '.lozad'
-    observer.observe();
+//     const observer = lozad(); // lazy loads elements with default selector as '.lozad'
+//     observer.observe();
 
     window.addEventListener('scroll', () => {
         const {
@@ -23,4 +23,15 @@ import lozad from 'lozad';
     }, {
         passive: true
     });
+
+    document.addEventListener('click', event => {
+        let node = event && event.target;
+        if (!node.classList.contains('image')) { return; }
+
+        vscode.postMessage({
+            command: 'vscode-image-gallery.openImageViewer',
+            src: node.src,
+        });
+        console.log('User clicked on: ' + node.src);
+    }, true);
 }());

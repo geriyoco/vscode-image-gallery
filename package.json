@@ -17,7 +17,7 @@
 		"commands": [
 			{
 				"command": "vscode-image-gallery.start",
-				"title": "Open Image Gallery"
+				"title": "Image Gallery: Open Image Gallery"
 			}
 		]
 	},
