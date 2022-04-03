@@ -1,3 +1,12 @@
 * {
-    user-select: none;
+	user-select: none;
+}
+
+.center {
+	display: flex;
+	overflow: hidden;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	min-height: 100vh;
 }
