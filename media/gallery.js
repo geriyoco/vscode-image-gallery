@@ -1,9 +1,8 @@
-// import lozad from 'lozad';
 
-(function() {
+(function () {
     const vscode = acquireVsCodeApi();
-//     const observer = lozad(); // lazy loads elements with default selector as '.lozad'
-//     observer.observe();
+    // const observer = window.lozad();
+    // observer.observe();
 
     window.addEventListener('scroll', () => {
         const {
