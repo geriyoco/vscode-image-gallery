@@ -42,7 +42,11 @@ export function getWebviewContent(
 		'scheme': 'vscode-resource'
 	});
 
-	const nonce = utils.getNonce();
+	// <div id="container" class="center" draggable = "true" >
+	// 	<img id="container" src = "${imgSrc}" >
+	// 		</div>
+
+	// const nonce = utils.getNonce();
 
 	return (
 		`<!DOCTYPE html>
@@ -50,18 +54,18 @@ export function getWebviewContent(
 		<head>
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}'; style-src ${webview.cspSource};">
+			<meta http-equiv="Content-Security-Policy" content="img-src ${webview.cspSource} https:; style-src ${webview.cspSource};">
 
 			<link href="${styleHref}" rel="stylesheet" />
 
 			<title>Image Gallery: Viewer</title>
-		</head>
+			</head>
 		<body>
-			<div class="center">
-				<img src="${imgSrc}" class="zoom">
+			<div id="container">
+				<img id="image" src="${imgSrc}" ondragstart="return false;" draggable="true">
 			</div>
-
-			<script nonce="${nonce}" src="${scriptUri}"></script>
+				
+			<script nonce="${utils.nonce}" src="${scriptUri}"></script>
 		</body>
 		</html>`
 	);

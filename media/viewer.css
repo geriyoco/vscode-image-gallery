@@ -2,11 +2,31 @@
 	user-select: none;
 }
 
-.center {
+#container {
 	display: flex;
+	/* height: 100%; */
+	/* margin: auto; */
 	overflow: hidden;
 	justify-content: center;
 	align-items: center;
-	text-align: center;
+	/* text-align: center; */
 	min-height: 100vh;
+	cursor: move;
+	cursor: grab;
+	/* position: relative; */
 }
+
+#container:active {
+	cursor: grabbing;
+}
+
+#image {
+	position: relative;
+}
+
+/* #image { */
+/* left: 0; */
+/* pointer-events: none; */
+/* position: relative; */
+/* top: 0; */
+/* } */

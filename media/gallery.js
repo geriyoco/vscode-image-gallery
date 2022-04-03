@@ -14,10 +14,10 @@
 
 		if (scrollTop + clientHeight >= scrollHeight - 5) {
 			console.log("help");
-			vscode.postMessage({
-				command: 'alert',
-				text: '🐛  on line ' + currentCount
-			});
+			// vscode.postMessage({
+			// 	command: 'alert',
+			// 	text: '🐛  on line ' + currentCount
+			// });
 		}
 	}, {
 		passive: true
