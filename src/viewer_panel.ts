@@ -57,7 +57,7 @@ export function getWebviewContent(
 			<title>Image Gallery: Viewer</title>
 		</head>
 		<body>
-			<div class="test">
+			<div class="center">
 				<img src="${imgSrc}" class="zoom">
 			</div>
 

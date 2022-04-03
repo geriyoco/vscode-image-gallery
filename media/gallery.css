@@ -1,22 +1,22 @@
 * {
-    user-select: none;
+	user-select: none;
 }
 
 .grid {
-    display: grid;
-    gap: 50em;
-    place-items: stretch;
-    place-content: center;
-    grid-auto-flow: initial;
-    grid-template-rows: repeat(auto-fit, 200px);
+	display: grid;
+	gap: 50em;
+	place-items: stretch;
+	place-content: center;
+	grid-auto-flow: initial;
+	grid-template-rows: repeat(auto-fit, 200px);
 }
 
 .image {
-    height: 200px;
-    width: auto;
-    transition: all .2s ease-in-out;
+	height: 200px;
+	width: auto;
+	transition: all .2s ease-in-out;
 }
 
 .image:hover {
-    transform: scale(1.1);
+	transform: scale(1.1);
 }
