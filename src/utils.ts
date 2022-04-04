@@ -7,7 +7,7 @@ export function getCwd() {
 		return '';
 	}
 	let cwd = vscode.workspace.workspaceFolders[0].uri.path;
-	let message = `Image Gallery: folder: ${cwd}`;
+	let message = `Image Gallery current folder: ${cwd}`;
 	vscode.window.showInformationMessage(message);
 	return cwd;
 }
@@ -20,3 +20,5 @@ export function getNonce() {
 	}
 	return text;
 }
+
+export const nonce = getNonce();

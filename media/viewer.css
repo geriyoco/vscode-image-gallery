@@ -1,12 +1,36 @@
 * {
-	user-select: none;
+	padding: 0;
+	margin: 0;
+	outline: 0;
 }
 
-.center {
+html, body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+}
+
+#container {
 	display: flex;
 	overflow: hidden;
 	justify-content: center;
 	align-items: center;
-	text-align: center;
-	min-height: 100vh;
+	width: 100%;
+	height: 100%;
+	transform-origin: 0px 0px;
+	transform: scale(1) translate(0px, 0px);
+}
+
+#image {
+	width: auto;
+	height: auto;
+}
+
+#image:hover {
+	cursor: grab;
+}
+
+#image:active {
+	cursor: grabbing;
 }

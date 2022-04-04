@@ -11,7 +11,7 @@ export async function createPanel(context: vscode.ExtensionContext) {
             localResourceRoots: [
                 vscode.Uri.file(
                     utils.getCwd()),
-                    vscode.Uri.file(path.join(context.extensionPath, 'media'),
+                vscode.Uri.file(path.join(context.extensionPath, 'media'),
                 ),
             ],
             enableScripts: true,
@@ -47,31 +47,28 @@ export function getWebviewContent(
     webview: vscode.Webview,
     imgWebviewUris: vscode.Uri[],
 ) {
-	const imgHtml = imgWebviewUris.map(
+    const imgHtml = imgWebviewUris.map(
         img => `<img src="${img}" class="image lozad">`
     ).join('\n');
 
-	const styleHref = webview.asWebviewUri(
+    const styleHref = webview.asWebviewUri(
         vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.css')
     );
 
-	const scriptUri = vscode.Uri.joinPath(
+    const scriptUri = vscode.Uri.joinPath(
         context.extensionUri, 'media', 'gallery.js'
     ).with({
         'scheme': 'vscode-resource'
     });
 
-	const nonce = utils.getNonce();
-
-	return (
-		`<!DOCTYPE html>
+    return (
+        `<!DOCTYPE html>
 		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}'; style-src ${webview.cspSource};">
+			<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${utils.nonce}'; img-src ${webview.cspSource} https:; style-src ${webview.cspSource};">
 			
-            <script nonce="${nonce}" type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script>
 			<link href="${styleHref}" rel="stylesheet" />
 
 			<title>Image Gallery</title>
@@ -83,8 +80,8 @@ export function getWebviewContent(
 				</div>
 			</div>
 			
-			<script nonce="${nonce}" src="${scriptUri}"></script>
+			<script nonce="${utils.nonce}" src="${scriptUri}"></script>
 		</body>
 		</html>`
-	);
+    );
 }
