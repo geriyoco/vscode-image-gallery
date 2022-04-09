@@ -30,10 +30,15 @@ export async function createPanel(context: vscode.ExtensionContext) {
 export async function getImagePaths() {
     const imgExtensions = [
         'jpg',
+        'JPG',
         'jpeg',
+        'JPEG',
         'png',
+        'PNG',
         'gif',
+        'GIF',
         'webp',
+        'WEBP',
     ];
     const files = await vscode.workspace.findFiles('**/*.{' + imgExtensions.join(',') + '}');
     const imgPaths = files.map(
@@ -47,11 +52,11 @@ export function getWebviewContent(
     webview: vscode.Webview,
     imgWebviewUris: vscode.Uri[],
 ) {
-    const placeholder_url = "https://www.prowebdesign.ro/wp-content/uploads/2012/12/2-150x150.jpg"
+    const placeholderUrl = "https://www.prowebdesign.ro/wp-content/uploads/2012/12/2-150x150.jpg";
     const imgHtml = imgWebviewUris.map(
         img => `
         <div class="image-container">
-            <img src="${placeholder_url}" data-src="${img}" class="image lazy">
+            <img src="${placeholderUrl}" data-src="${img}" class="image lazy">
         </div>
         `
     ).join('\n');
