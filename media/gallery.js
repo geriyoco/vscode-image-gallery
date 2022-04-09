@@ -1,26 +1,25 @@
 
 (function () {
 	const vscode = acquireVsCodeApi();
-	// const observer = window.lozad();
-	// observer.observe();
 
-	window.addEventListener('scroll', () => {
-		const {
-			scrollTop,
-			scrollHeight,
-			clientHeight
-		} = document.documentElement;
-		console.log(scrollHeight, scrollTop, clientHeight);
+	// Page is loaded
+	lazyloadImages = document.querySelectorAll(".lazy");
+	var imageObserver = new IntersectionObserver(function (entries, observer) {
+		entries.forEach(function (entry) {
+			if (entry.isIntersecting) {
+				var image = entry.target;
+				imageObserver.unobserve(image);
+				image.src = image.dataset.src;
+				image.onload = () => {
+					image.classList.remove("lazy");
+					image.classList.add("loaded");
+				};
+			}
+		});
+	});
 
-		if (scrollTop + clientHeight >= scrollHeight - 5) {
-			console.log("help");
-			// vscode.postMessage({
-			// 	command: 'alert',
-			// 	text: '🐛  on line ' + currentCount
-			// });
-		}
-	}, {
-		passive: true
+	lazyloadImages.forEach(function (image) {
+		imageObserver.observe(image);
 	});
 
 	document.addEventListener('click', event => {
