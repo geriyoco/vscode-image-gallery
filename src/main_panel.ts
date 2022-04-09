@@ -47,8 +47,13 @@ export function getWebviewContent(
     webview: vscode.Webview,
     imgWebviewUris: vscode.Uri[],
 ) {
+    const placeholder_url = "https://www.prowebdesign.ro/wp-content/uploads/2012/12/2-150x150.jpg"
     const imgHtml = imgWebviewUris.map(
-        img => `<img src="${img}" class="image lozad">`
+        img => `
+        <div class="image-container">
+            <img src="${placeholder_url}" data-src="${img}" class="image lazy">
+        </div>
+        `
     ).join('\n');
 
     const styleHref = webview.asWebviewUri(
@@ -75,9 +80,7 @@ export function getWebviewContent(
 		</head>
 		<body>
 			<div class="grid">
-				<div>
-					${imgHtml}
-				</div>
+                ${imgHtml}
 			</div>
 			
 			<script nonce="${utils.nonce}" src="${scriptUri}"></script>

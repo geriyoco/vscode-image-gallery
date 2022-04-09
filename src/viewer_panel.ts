@@ -42,12 +42,6 @@ export function getWebviewContent(
 		'scheme': 'vscode-resource'
 	});
 
-	// <div id="container" class="center" draggable = "true" >
-	// 	<img id="container" src = "${imgSrc}" >
-	// 		</div>
-
-	// const nonce = utils.getNonce();
-
 	return (
 		`<!DOCTYPE html>
 		<html lang="en">
