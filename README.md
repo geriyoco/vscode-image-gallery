@@ -1,6 +1,5 @@
 # VS Code Extension: Image Gallery
-
-<img src="docs/logo.png" alt="logo" width="50" height="50" />
+![logo](docs/logo-128.png)
 
 A Visual Studio Code extension that improves image browsing experience.
 
