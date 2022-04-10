@@ -16,16 +16,25 @@
 		"Visualization"
 	],
 	"activationEvents": [
-		"onCommand:vscode-image-gallery.start"
+		"onCommand:vscodeImageGallery.openGallery"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "vscode-image-gallery.start",
-				"title": "Image Gallery: Open Image Gallery"
+				"command": "vscodeImageGallery.openGallery",
+				"title": "Open Image Gallery"
 			}
-		]
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"command": "vscodeImageGallery.openGallery",
+					"group": "3_imageGallery",
+					"when": "explorerResourceIsFolder"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
