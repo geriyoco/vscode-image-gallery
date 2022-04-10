@@ -1,0 +1,105 @@
+<svg fill="none" viewBox="0 0 500 500" width="500" height="500" xmlns="http://www.w3.org/2000/svg">
+	<foreignObject width="100%" height="100%">
+		<div xmlns="http://www.w3.org/1999/xhtml">
+			<style>
+				.container {
+					display: flex;
+					width: 100vw;
+					height: 100vh;
+					justify-content: center;
+					align-items: center;
+					background-color: white;
+				}
+				.logo {
+					display: relative;
+					width: 480px;
+					height: 480px;
+					background-color: none;
+				}
+				.logo .background {
+					position: relative;
+					top: 0px;
+					left: 0px;
+					width: 100%;
+					height: 100%;
+					background: linear-gradient(340deg, rgba(2,0,36,1) 0%, rgba(59,58,155,1) 56%, rgba(85,85,209,1) 78%, rgba(0,212,255,1) 100%);
+					border-radius: 25%;
+				}
+				.logo .mountain {
+					position: absolute;
+					width: 0;
+					height: 0;
+					border-left: 120px solid transparent;
+					border-right: 120px solid transparent;
+				}
+				.logo .mountain-left {
+					top: 180px;
+					left: 50px;
+					border-bottom: 220px solid navy;
+				}
+				.logo .mountain-right {
+					top: 180px;
+					left: 210px;
+					border-bottom: 220px solid darkblue;
+				}
+				.logo .crescent {
+					position: absolute;
+					top: 50px;
+					left: 100px;
+					width: 130px;
+					height: 130px;
+					box-shadow: -30px -10px 0 5px gold;
+					border-radius: 50%;
+				}
+				.logo .stars {
+					position: absolute;
+					top: 100px;
+					left: 300px;
+				}
+				.logo .star {
+					position: absolute;
+					width: 10px;
+					height: 10px;
+					border-radius: 50%;
+					background-color: cyan;
+				}
+				.logo .star1 {
+					top: 0px;
+					left: 50px;
+					background-color: gold;
+				}
+				.logo .star2 {
+					top: 10px;
+					left: 80px;
+					width: 7px;
+					height: 7px;
+				}
+				.logo .star3 {
+					top: 28px;
+					left: 30px;
+				}
+				.logo .star4 {
+					top: 60px;
+					left: 65px;
+					width: 11px;
+					height: 11px;
+				}
+			</style>
+			<div class="container">
+				<div class="logo">
+					<div class="background">
+						<div class="mountain mountain-left"></div>
+						<div class="mountain mountain-right"></div>
+						<div class="crescent"></div>
+						<div class="stars">
+							<div class="star star1"></div>
+							<div class="star star2"></div>
+							<div class="star star3"></div>
+							<div class="star star4"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</foreignObject>
+</svg>
