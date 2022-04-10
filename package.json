@@ -3,11 +3,12 @@
 	"displayName": "Image Gallery",
 	"description": "A VS Code extension that improves image browsing experience.",
 	"version": "0.0.1",
+	"icon": "docs/logo-128.png",
 	"engines": {
 		"vscode": "^1.65.0"
 	},
 	"categories": [
-		"Other"
+		"Visualization"
 	],
 	"activationEvents": [
 		"onCommand:vscode-image-gallery.start"
