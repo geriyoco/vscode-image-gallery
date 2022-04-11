@@ -1,9 +1,8 @@
 # Change Log
 
-All notable changes to the "vscode-image-gallery" extension will be documented in this file.
+## [0.0.2] - 2022-04-11
+### Added
+- Gallery can be opened by right clicking folders in the Explorer sidebar
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
+## [0.0.1] - 2022-04-10
 - Initial release

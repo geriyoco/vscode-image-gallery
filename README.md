@@ -1,5 +1,4 @@
 # VS Code Extension: Image Gallery
-![logo](docs/logo-128.png)
 
 A Visual Studio Code extension that improves image browsing experience.
 
@@ -7,16 +6,15 @@ A Visual Studio Code extension that improves image browsing experience.
 
 See [here](docs/photo_credits.md) for the photo credits.
 
+## How to use
+- Right click at a folder on the Explorer sidebar and select `Open Image Gallery` to open images under the selected folder.
+- Open command palette (`Ctrl+Shift+P`) and select `Image Gallery: Open Image Gallery` to open all images under current workspace.
+
 ## Features
-- Open command palette (`Ctrl+Shift+P`) and select `Image Gallery: Open Image Gallery`
-- Gallery view of images in the current folder (including subfolders)
+- Gallery view of images
 - Lazily load images as they are scrolled into view
 - Clicking on an image opens it up in a viewer tab
 - Smooth panning and zooming in the viewer
 
-
-## Release Notes
-
-### v0.0.1
-
-Initial release.
+## Releases
+See [CHANGELOG.md](CHANGELOG.md).

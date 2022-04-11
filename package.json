@@ -1,8 +1,8 @@
 {
 	"name": "vscode-image-gallery",
 	"displayName": "Image Gallery",
-	"description": "A VS Code extension that improves image browsing experience.",
-	"version": "0.0.1",
+	"description": "An extension that enhances image browsing experience.",
+	"version": "0.0.2",
 	"publisher": "GeriYoco",
 	"repository": {
 		"type": "git",
