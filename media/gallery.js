@@ -27,7 +27,7 @@
 		if (!node.classList.contains('image')) { return; }
 
 		vscode.postMessage({
-			command: 'vscodeImageGallery.openImageViewer',
+			command: 'vscodeImageGallery.openViewer',
 			src: node.src,
 		});
 		console.log('User clicked on: ' + node.src);

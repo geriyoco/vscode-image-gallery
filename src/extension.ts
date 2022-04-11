@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 			mainPanel.webview.onDidReceiveMessage(
 				message => {
 					switch (message.command) {
-						case 'vscodeImageGallery.openImageViewer':
+						case 'vscodeImageGallery.openViewer':
 							viewer_panel.createPanel(context, mainPanel.webview, message.src);
 							return;
 					}
