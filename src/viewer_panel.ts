@@ -8,7 +8,7 @@ export function createPanel(
 	imgSrc: string,
 ) {
 	const panel = vscode.window.createWebviewPanel(
-		'imagegallery',
+		'imageGallery',
 		'Image Gallery: Viewer',
 		vscode.ViewColumn.Two,
 		{

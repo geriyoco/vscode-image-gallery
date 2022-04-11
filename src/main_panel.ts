@@ -2,15 +2,14 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as utils from './utils';
 
-export async function createPanel(context: vscode.ExtensionContext) {
+export async function createPanel(context: vscode.ExtensionContext, galleryFolder?: vscode.Uri) {
     const panel = vscode.window.createWebviewPanel(
-        'imagegallery',
+        'imageGallery',
         'Image Gallery',
         vscode.ViewColumn.One,
         {
             localResourceRoots: [
-                vscode.Uri.file(
-                    utils.getCwd()),
+                vscode.Uri.file(utils.getCwd()),
                 vscode.Uri.file(path.join(context.extensionPath, 'media'),
                 ),
             ],
@@ -18,7 +17,9 @@ export async function createPanel(context: vscode.ExtensionContext) {
         }
     );
 
-    const imgPaths = await getImagePaths();
+    const imgPaths = await getImagePaths(
+        galleryFolder ? vscode.workspace.asRelativePath(galleryFolder, false) : undefined
+    );
     const imgWebviewUris = imgPaths.map(
         imgPath => panel.webview.asWebviewUri(imgPath)
     );
@@ -27,7 +28,7 @@ export async function createPanel(context: vscode.ExtensionContext) {
     return panel;
 }
 
-export async function getImagePaths() {
+export async function getImagePaths(galleryFolder?: string) {
     const imgExtensions = [
         'jpg',
         'JPG',
@@ -40,7 +41,10 @@ export async function getImagePaths() {
         'webp',
         'WEBP',
     ];
-    const files = await vscode.workspace.findFiles('**/*.{' + imgExtensions.join(',') + '}');
+    const globPattern = '**/*.{' + imgExtensions.join(',') + '}';
+    const files = await vscode.workspace.findFiles(
+        galleryFolder ? galleryFolder + globPattern : globPattern
+    );
     const imgPaths = files.map(
         file => vscode.Uri.file(file.fsPath)
     );
