@@ -43,7 +43,7 @@ export async function getImagePaths(galleryFolder?: string) {
     ];
     const globPattern = '**/*.{' + imgExtensions.join(',') + '}';
     const files = await vscode.workspace.findFiles(
-        galleryFolder ? galleryFolder + globPattern : globPattern
+        galleryFolder ? path.join(galleryFolder, globPattern) : globPattern
     );
     const imgPaths = files.map(
         file => vscode.Uri.file(file.fsPath)
