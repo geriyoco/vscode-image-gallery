@@ -12,7 +12,5 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 
-docs/logo.png
-docs/logo-opaque.png
-docs/logo.pptx
+docs/**
 images/**
