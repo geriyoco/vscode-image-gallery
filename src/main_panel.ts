@@ -14,6 +14,7 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
                 ),
             ],
             enableScripts: true,
+            retainContextWhenHidden: true,
         }
     );
 
