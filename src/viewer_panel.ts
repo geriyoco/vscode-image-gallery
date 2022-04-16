@@ -4,25 +4,23 @@ import * as utils from './utils';
 
 export function createPanel(
 	context: vscode.ExtensionContext,
-	webview: vscode.Webview,
 	imgSrc: string,
 ) {
 	const panel = vscode.window.createWebviewPanel(
-		'imageGallery',
+		'gryc.viewer',
 		'Image Gallery: Viewer',
 		vscode.ViewColumn.Two,
 		{
 			enableScripts: true,
 			localResourceRoots: [
-				vscode.Uri.file(
-					utils.getCwd()),
+				vscode.Uri.file(utils.getCwd()),
 				vscode.Uri.file(path.join(context.extensionPath, 'media'),
 				),
 			],
 		},
 	);
 
-	panel.webview.html = getWebviewContent(context, webview, imgSrc);
+	panel.webview.html = getWebviewContent(context, panel.webview, imgSrc);
 
 	return panel;
 }

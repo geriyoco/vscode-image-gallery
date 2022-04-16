@@ -4,14 +4,13 @@ import * as utils from './utils';
 
 export async function createPanel(context: vscode.ExtensionContext, galleryFolder?: vscode.Uri) {
     const panel = vscode.window.createWebviewPanel(
-        'imageGallery',
+        'gryc.gallery',
         'Image Gallery',
         vscode.ViewColumn.One,
         {
             localResourceRoots: [
                 vscode.Uri.file(utils.getCwd()),
-                vscode.Uri.file(path.join(context.extensionPath, 'media'),
-                ),
+                vscode.Uri.file(path.join(context.extensionPath, 'media')),
             ],
             enableScripts: true,
         }
@@ -82,16 +81,13 @@ export function getWebviewContent(
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${utils.nonce}'; img-src ${webview.cspSource} https:; style-src ${webview.cspSource};">
-			
 			<link href="${styleHref}" rel="stylesheet" />
-
 			<title>Image Gallery</title>
 		</head>
 		<body>
 			<div class="grid">
                 ${imgHtml}
 			</div>
-			
 			<script nonce="${utils.nonce}" src="${scriptUri}"></script>
 		</body>
 		</html>`
