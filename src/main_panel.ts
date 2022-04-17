@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import * as utils from './utils';
 
 export async function createPanel(context: vscode.ExtensionContext, galleryFolder?: vscode.Uri) {
@@ -8,17 +7,11 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
         'Image Gallery',
         vscode.ViewColumn.One,
         {
-            localResourceRoots: [
-                vscode.Uri.file(utils.getCwd()),
-                vscode.Uri.file(path.join(context.extensionPath, 'media')),
-            ],
             enableScripts: true,
         }
     );
 
-    const imgPaths = await getImagePaths(
-        galleryFolder ? vscode.workspace.asRelativePath(galleryFolder, false) : undefined
-    );
+    const imgPaths = await getImagePaths(galleryFolder);
     const imgWebviewUris = imgPaths.map(
         imgPath => panel.webview.asWebviewUri(imgPath)
     );
@@ -27,7 +20,7 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
     return panel;
 }
 
-export async function getImagePaths(galleryFolder?: string) {
+export async function getImagePaths(galleryFolder?: vscode.Uri) {
     const imgExtensions = [
         'jpg',
         'JPG',
@@ -42,7 +35,7 @@ export async function getImagePaths(galleryFolder?: string) {
     ];
     const globPattern = '**/*.{' + imgExtensions.join(',') + '}';
     const files = await vscode.workspace.findFiles(
-        galleryFolder ? path.join(galleryFolder, globPattern) : globPattern
+        galleryFolder ? new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
     );
     const imgPaths = files.map(
         file => vscode.Uri.file(file.fsPath)
@@ -64,15 +57,8 @@ export function getWebviewContent(
         `
     ).join('\n');
 
-    const styleHref = webview.asWebviewUri(
-        vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.css')
-    );
-
-    const scriptUri = vscode.Uri.joinPath(
-        context.extensionUri, 'media', 'gallery.js'
-    ).with({
-        'scheme': 'vscode-resource'
-    });
+    const styleHref = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.css'));
+    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.js'));
 
     return (
         `<!DOCTYPE html>
