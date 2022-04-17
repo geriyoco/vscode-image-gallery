@@ -49,6 +49,23 @@ export function getWebviewContent(
     webview: vscode.Webview,
     imgWebviewUris: vscode.Uri[],
 ) {
+    if (imgWebviewUris.length === 0) {
+        return (
+            `<!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${utils.nonce}'; img-src ${webview.cspSource} https:; style-src ${webview.cspSource};">
+                <title>Image Gallery</title>
+            </head>
+            <body>
+                <p>No image found in this folder.</p>
+            </body>
+            </html>`
+        );
+    }
+
     const placeholderUrl = "https://www.prowebdesign.ro/wp-content/uploads/2012/12/2-150x150.jpg";
     const imgHtml = imgWebviewUris.map(
         img => `
