@@ -2,7 +2,7 @@
 	"name": "vscode-image-gallery",
 	"displayName": "Image Gallery",
 	"description": "An extension that enhances image browsing experience.",
-	"version": "0.0.2",
+	"version": "0.1.0",
 	"publisher": "GeriYoco",
 	"repository": {
 		"type": "git",
@@ -50,6 +50,7 @@
 		}
 	},
 	"scripts": {
+		"deploy": "vsce publish --githubBranch production",
 		"open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
 		"vscode:prepublish": "npm run package",
 		"compile": "webpack",
@@ -75,6 +76,7 @@
 		"mocha": "^9.2.2",
 		"ts-loader": "^9.2.8",
 		"typescript": "^4.5.5",
+		"vsce": "^2.7.0",
 		"webpack": "^5.70.0",
 		"webpack-cli": "^4.9.2"
 	},
