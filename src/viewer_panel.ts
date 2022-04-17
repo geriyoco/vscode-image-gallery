@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import * as utils from './utils';
 
 export function createPanel(
@@ -12,12 +11,7 @@ export function createPanel(
 		vscode.ViewColumn.Two,
 		{
 			enableScripts: true,
-			localResourceRoots: [
-				vscode.Uri.file(utils.getCwd()),
-				vscode.Uri.file(path.join(context.extensionPath, 'media'),
-				),
-			],
-		},
+		}
 	);
 
 	panel.webview.html = getWebviewContent(context, panel.webview, imgSrc);
@@ -30,15 +24,8 @@ export function getWebviewContent(
 	webview: vscode.Webview,
 	imgSrc: string,
 ) {
-	const styleHref = webview.asWebviewUri(
-		vscode.Uri.joinPath(context.extensionUri, 'media', 'viewer.css')
-	);
-
-	const scriptUri = vscode.Uri.joinPath(
-		context.extensionUri, 'media', 'viewer.js'
-	).with({
-		'scheme': 'vscode-resource'
-	});
+	const styleHref = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'viewer.css'));
+	const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'viewer.js'));
 
 	return (
 		`<!DOCTYPE html>
