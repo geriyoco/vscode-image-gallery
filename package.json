@@ -16,10 +16,22 @@
 		"Visualization"
 	],
 	"activationEvents": [
-		"onCommand:vscodeImageGallery.openGallery"
+		"onStartupFinished"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
+		"customEditors": [
+			{
+				"viewType": "gryc.editor",
+				"displayName": "GRYC: Image Viewer",
+				"priority": "default",
+				"selector": [
+					{
+						"filenamePattern": "*.{jpg,jpe,jpeg,png,bmp,gif,ico,webp,avif}"
+					}
+				]
+			}
+		],
 		"commands": [
 			{
 				"command": "vscodeImageGallery.openGallery",
@@ -30,7 +42,7 @@
 			"explorer/context": [
 				{
 					"command": "vscodeImageGallery.openGallery",
-					"group": "3_imageGallery",
+					"group": "2_grycImageGallery@1",
 					"when": "explorerResourceIsFolder"
 				}
 			]
@@ -49,7 +61,6 @@
 	},
 	"devDependencies": {
 		"@types/glob": "^7.2.0",
-		"@types/lozad": "^1.16.1",
 		"@types/mocha": "^9.1.0",
 		"@types/node": "14.x",
 		"@types/vscode": "^1.65.0",
