@@ -35,6 +35,7 @@ class ViewerWebview {
 			enableScripts: true,
 			enableForms: false,
 			localResourceRoots: [
+				vscode.Uri.file(utils.getCwd()),
 				resourceRoot,
 				extensionUri,
 			]
