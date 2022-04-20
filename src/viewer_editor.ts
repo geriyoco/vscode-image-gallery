@@ -20,6 +20,5 @@ export class ViewerCustomEditor implements vscode.CustomReadonlyEditorProvider {
 		};
 		let documentPath = webviewPanel.webview.asWebviewUri(document.uri).toString();
 		webviewPanel.webview.html = viewer_panel.getWebviewContent(this.context, webviewPanel.webview, documentPath);
-		webviewPanel.webview.postMessage({ type: 'setActive', value: webviewPanel.active });
 	}
 }

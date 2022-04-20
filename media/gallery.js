@@ -2,10 +2,10 @@
 (function () {
 	const vscode = acquireVsCodeApi();
 
-	// Page is loaded
-	lazyloadImages = document.querySelectorAll(".lazy");
-	var imageObserver = new IntersectionObserver(function (entries, observer) {
-		entries.forEach(function (entry) {
+	let grid = document.getElementsByClassName("grid")[0];
+	let lazyloadImages = document.querySelectorAll(".lazy");
+	let imageObserver = new IntersectionObserver((entries, observer) => {
+		entries.forEach(entry => {
 			if (entry.isIntersecting) {
 				var image = entry.target;
 				imageObserver.unobserve(image);
@@ -14,11 +14,14 @@
 					image.classList.remove("lazy");
 					image.classList.add("loaded");
 				};
+				if (lazyloadImages[lazyloadImages.length - 1].src === image.src) {
+					imageObserver.disconnect();
+				}
 			}
 		});
 	});
 
-	lazyloadImages.forEach(function (image) {
+	lazyloadImages.forEach((image) => {
 		imageObserver.observe(image);
 	});
 
@@ -30,6 +33,34 @@
 			command: 'vscodeImageGallery.openViewer',
 			src: node.src,
 		});
-		console.log('User clicked on: ' + node.src);
+	}, true);
+
+	window.addEventListener('message', event => {
+		const message = event.data;
+
+		switch (message.command) {
+			case 'vscodeImageGallery.addImage':
+				let imgNode = document.createElement("img");
+				imgNode.setAttribute("class", "image loaded");
+				imgNode.setAttribute("id", message.imgPath);
+				imgNode.setAttribute("src", message.imgSrc);
+				imgNode.setAttribute("data-src", message.imgSrc);
+
+				let containerNode = document.createElement("div");
+				containerNode.setAttribute("class", "image-container");
+				containerNode.appendChild(imgNode);
+				grid.appendChild(containerNode);
+				break;
+			case 'vscodeImageGallery.changeImage':
+				let timestamp = new Date().getTime();
+				let changeImage = document.getElementById(message.imgPath);
+				changeImage.setAttribute("src", message.imgSrc + "?t=" + timestamp);
+				changeImage.setAttribute("data-src", message.imgSrc + "?t=" + timestamp);
+				break;
+			case 'vscodeImageGallery.deleteImage':
+				let deleteImage = document.getElementById(message.imgPath);
+				deleteImage.parentElement.remove();
+				break;
+		}
 	}, true);
 }());
