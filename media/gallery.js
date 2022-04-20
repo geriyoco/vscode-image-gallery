@@ -42,6 +42,7 @@
 			case 'vscodeImageGallery.addImage':
 				let imgNode = document.createElement("img");
 				imgNode.setAttribute("class", "image loaded");
+				imgNode.setAttribute("id", message.imgPath);
 				imgNode.setAttribute("src", message.imgSrc);
 				imgNode.setAttribute("data-src", message.imgSrc);
 
