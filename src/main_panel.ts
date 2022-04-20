@@ -34,7 +34,7 @@ export function getWebviewContent(
     const placeholderUrl = "https://www.prowebdesign.ro/wp-content/uploads/2012/12/2-150x150.jpg";
     const imgHtml = imgWebviewUris.map(
         img => {
-            `
+            return `
             <div class="image-container">
                 <img id="${img.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img)}" class="image lazy">
             </div>
