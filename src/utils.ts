@@ -22,3 +22,24 @@ export function getNonce() {
 }
 
 export const nonce = getNonce();
+
+export function getGlob() {
+	const imgExtensions = [
+		'avif',
+		'bmp',
+		'gif',
+		'ico',
+		'jpg',
+		'jpe',
+		'jpeg',
+		'jif',
+		'jfif',
+		'jfi',
+		'png',
+		'webp',
+		'svg',
+	];
+	let upperCaseImg = imgExtensions.map(ext => ext.toUpperCase());
+	const globPattern = '**/*.{' + [...imgExtensions, ...upperCaseImg].join(',') + '}';
+	return globPattern;
+}

@@ -13,35 +13,17 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
     );
 
     const imgPaths = await getImagePaths(galleryFolder);
-    const imgWebviewUris = imgPaths.map(
-        imgPath => panel.webview.asWebviewUri(imgPath)
-    );
-    panel.webview.html = getWebviewContent(context, panel.webview, imgWebviewUris);
+    panel.webview.html = getWebviewContent(context, panel.webview, imgPaths);
 
     return panel;
 }
 
 export async function getImagePaths(galleryFolder?: vscode.Uri) {
-    const imgExtensions = [
-        'jpg',
-        'JPG',
-        'jpeg',
-        'JPEG',
-        'png',
-        'PNG',
-        'gif',
-        'GIF',
-        'webp',
-        'WEBP',
-    ];
-    const globPattern = '**/*.{' + imgExtensions.join(',') + '}';
+    const globPattern = utils.getGlob();
     const files = await vscode.workspace.findFiles(
         galleryFolder ? new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
     );
-    const imgPaths = files.map(
-        file => vscode.Uri.file(file.fsPath)
-    );
-    return imgPaths;
+    return files;
 }
 
 export function getWebviewContent(
@@ -49,30 +31,15 @@ export function getWebviewContent(
     webview: vscode.Webview,
     imgWebviewUris: vscode.Uri[],
 ) {
-    if (imgWebviewUris.length === 0) {
-        return (
-            `<!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${utils.nonce}'; img-src ${webview.cspSource} https:; style-src ${webview.cspSource};">
-                <title>Image Gallery</title>
-            </head>
-            <body>
-                <p>No image found in this folder.</p>
-            </body>
-            </html>`
-        );
-    }
-
     const placeholderUrl = "https://www.prowebdesign.ro/wp-content/uploads/2012/12/2-150x150.jpg";
     const imgHtml = imgWebviewUris.map(
-        img => `
-        <div class="image-container">
-            <img src="${placeholderUrl}" data-src="${img}" class="image lazy">
-        </div>
-        `
+        img => {
+            `
+            <div class="image-container">
+                <img id="${img.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img)}" class="image lazy">
+            </div>
+            `;
+        }
     ).join('\n');
 
     const styleHref = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.css'));
@@ -89,9 +56,7 @@ export function getWebviewContent(
 			<title>Image Gallery</title>
 		</head>
 		<body>
-			<div class="grid">
-                ${imgHtml}
-			</div>
+            ${imgWebviewUris.length === 0 ? '<p>No image found in this folder.</p>' : `<div class="grid">${imgHtml}</div>`}
 			<script nonce="${utils.nonce}" src="${scriptUri}"></script>
 		</body>
 		</html>`
