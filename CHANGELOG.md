@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.2.1] - 2022-04-17
+### Added
+- Auto refresh
+
 ## [0.2.0] - 2022-04-17
 ### Added
 - Image viewer can be opened by left clicking images on the side bar (File Explorer)
