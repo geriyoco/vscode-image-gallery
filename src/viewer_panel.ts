@@ -11,6 +11,7 @@ export function createPanel(
 		vscode.ViewColumn.Two,
 		{
 			enableScripts: true,
+			retainContextWhenHidden: true,
 		}
 	);
 
