@@ -13,7 +13,12 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.registerCustomEditorProvider(
 			viewer_editor.ViewerCustomEditor.viewType,
 			viewerEditor,
-			{ supportsMultipleEditorsPerDocument: true },
+			{
+				supportsMultipleEditorsPerDocument: true,
+				webviewOptions: {
+					retainContextWhenHidden: true,
+				}
+			},
 		)
 	);
 
