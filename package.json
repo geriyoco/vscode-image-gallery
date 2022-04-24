@@ -6,7 +6,7 @@
 	"publisher": "GeriYoco",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/fanurs/vscode-image-gallery"
+		"url": "https://github.com/geriyoco/vscode-image-gallery"
 	},
 	"icon": "docs/logo-128.png",
 	"engines": {

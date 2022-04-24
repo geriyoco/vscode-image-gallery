@@ -7,7 +7,8 @@ A light-weighted extension that brings you the best image browsing experience in
 - Gallery view of images
 - Lazily load images as they are scrolled into view
 - Clicking on an image opens it up in a viewer tab
-- Extension size less than 10KB
+- Auto-refresh when modified
+- Extension size less than 1 MB
 
 ### Panning and zooming
 ![demo-editor](docs/demo-editor.gif)
