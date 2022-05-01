@@ -31,7 +31,7 @@ export function getWebviewContent(
     webview: vscode.Webview,
     imgWebviewUris: vscode.Uri[],
 ) {
-    const placeholderUrl = "https://www.prowebdesign.ro/wp-content/uploads/2012/12/2-150x150.jpg";
+    const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
     const imgHtml = imgWebviewUris.map(
         img => {
             return `
