@@ -4,7 +4,7 @@ import * as utils from './utils';
 export async function createPanel(context: vscode.ExtensionContext, galleryFolder?: vscode.Uri) {
     const panel = vscode.window.createWebviewPanel(
         'gryc.gallery',
-        'Image Gallery',
+        `Image Gallery${galleryFolder ? ': ' + utils.getFilename(galleryFolder.path) : ''}`,
         vscode.ViewColumn.One,
         {
             enableScripts: true,
