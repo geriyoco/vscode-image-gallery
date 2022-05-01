@@ -4,7 +4,7 @@ import * as utils from './utils';
 export async function createPanel(context: vscode.ExtensionContext, galleryFolder?: vscode.Uri) {
     const panel = vscode.window.createWebviewPanel(
         'gryc.gallery',
-        'Image Gallery',
+        `Image Gallery${galleryFolder ? ': ' + utils.getFilename(galleryFolder.path) : ''}`,
         vscode.ViewColumn.One,
         {
             enableScripts: true,
@@ -31,12 +31,13 @@ export function getWebviewContent(
     webview: vscode.Webview,
     imgWebviewUris: vscode.Uri[],
 ) {
-    const placeholderUrl = "https://www.prowebdesign.ro/wp-content/uploads/2012/12/2-150x150.jpg";
+    const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
     const imgHtml = imgWebviewUris.map(
         img => {
             return `
             <div class="image-container">
                 <img id="${img.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img)}" class="image lazy">
+                <div id="${img.path}-filename" class="filename">${utils.getFilename(img.path)}</div>
             </div>
             `;
         }
