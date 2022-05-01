@@ -17,6 +17,8 @@ html {
 
 .image-container {
 	overflow: hidden;
+	padding: 2%;
+	width: 100%;
 	justify-self: center;
 	border-radius: 5px;
 	background-color: none;
@@ -32,7 +34,8 @@ html {
 
 .image {
 	border-radius: 5px;
-	height: 100%;
+	padding-top: 2%;
+	height: 85%;
 	width: 100%;
 	object-fit: scale-down;
 }
@@ -45,4 +48,12 @@ html {
 
 .loaded {
 	opacity: 1;
+}
+
+.filename {
+	width: 100%;
+	text-align: center;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 }

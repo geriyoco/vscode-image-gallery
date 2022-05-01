@@ -25,21 +25,54 @@ export const nonce = getNonce();
 
 export function getGlob() {
 	const imgExtensions = [
+		'ai',
 		'avif',
 		'bmp',
+		'dib',
 		'gif',
+		'heif',
+		'heic',
+		'eps',
 		'ico',
+		'ind',
+		'indd',
+		'indt',
+		'jp2',
+		'j2k',
+		'jpf',
+		'jpx',
+		'jpm',
+		'mj2',
 		'jpg',
 		'jpe',
 		'jpeg',
+		'jpg_orig',
 		'jif',
 		'jfif',
 		'jfi',
+		'tif',
+		'tiff',
+		'psd',
 		'png',
+		'raw',
+		'arw',
+		'cr2',
+		'nrw',
+		'k25',
 		'webp',
 		'svg',
+		'svgz',
 	];
 	let upperCaseImg = imgExtensions.map(ext => ext.toUpperCase());
 	const globPattern = '**/*.{' + [...imgExtensions, ...upperCaseImg].join(',') + '}';
 	return globPattern;
+}
+
+export function getFilename(imgPath: string) {
+	let filename = decodeURI(imgPath).split("/").pop();
+
+	if (filename) {
+		return filename.split("?").shift();
+	}
+	return filename;
 }

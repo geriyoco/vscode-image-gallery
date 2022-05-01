@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.2.3] - 2022-04-28
+### Added
+- Display filename as tab title in the viewer
+- Display filename underneath each image in gallery
+
 ## [0.2.2] - 2022-04-27
 ### Added
 - Content persistence when switching between tabs
