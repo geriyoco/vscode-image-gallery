@@ -7,7 +7,7 @@ export function createPanel(
 ) {
 	const panel = vscode.window.createWebviewPanel(
 		'gryc.viewer',
-		'Image Gallery: Viewer',
+		`${utils.getFilename(imgSrc)}`,
 		vscode.ViewColumn.Two,
 		{
 			enableScripts: true,

@@ -37,6 +37,7 @@ export function getWebviewContent(
             return `
             <div class="image-container">
                 <img id="${img.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img)}" class="image lazy">
+                <div id="${img.path}-filename" class="filename">${utils.getFilename(img.path)}</div>
             </div>
             `;
         }

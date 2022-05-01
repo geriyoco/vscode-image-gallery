@@ -43,3 +43,12 @@ export function getGlob() {
 	const globPattern = '**/*.{' + [...imgExtensions, ...upperCaseImg].join(',') + '}';
 	return globPattern;
 }
+
+export function getFilename(imgPath: string) {
+	let filename = decodeURI(imgPath).split("/").pop();
+
+	if (filename) {
+		return filename.split("?").shift();
+	}
+	return filename;
+}
