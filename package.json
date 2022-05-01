@@ -16,7 +16,10 @@
 		"Visualization"
 	],
 	"activationEvents": [
-		"onStartupFinished"
+		"onCommand:vscodeImageGallery.openGallery",
+		"onWebviewPanel:gryc.gallery",
+		"onWebviewPanel:gryc.viewer",
+		"onCustomEditor:gryc.editor"
 	],
 	"main": "./dist/extension.js",
 	"browser": "./dist/extension.js",
