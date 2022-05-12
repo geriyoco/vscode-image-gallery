@@ -53,7 +53,7 @@
 		}
 	},
 	"scripts": {
-		"deploy": "vsce publish --githubBranch production",
+		"deploy": "vsce publish",
 		"open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
 		"vscode:prepublish": "npm run package",
 		"compile": "webpack",
