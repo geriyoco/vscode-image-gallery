@@ -24,8 +24,8 @@ jobs:
 
     # bump version and publish using vsce
     - name: Publish version
-      if: startsWith(github.event.head_commit.message, 'v')
-      run: npm run deploy ${{github.event.head_commit.message[1:]}} --githubBranch production
+      if: startsWith(github.event.head_commit.message, '\d.\d.\d')
+      run: npm run deploy ${{github.event.head_commit.message}} --githubBranch production
       env:
         bump_success: ${{ true }}
 
@@ -35,5 +35,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: 'v${{github.event.head_commit.message[1:]}}'
-        release_name: 'v${{github.event.head_commit.message[1:]}}'
+        tag_name: 'v${{github.event.head_commit.message}}'
+        release_name: 'v${{github.event.head_commit.message}}'
