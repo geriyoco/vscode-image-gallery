@@ -4,14 +4,13 @@ on:
   push:
     branches:
     - production
+  release:
+    types:
+    - created
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      VSCE_PAT: ${{ secrets.VSCE_PAT }}
-      bump_success: ${{ false }}
-
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -21,16 +20,7 @@ jobs:
         node-version: 16.x
     - name: Install extension
       run: npm install
-
-    # bump version and publish using vsce
-    - name: Publish version
-      run: npm run deploy 0.2.4 --githubBranch production
-
-    # create tags and push to origin
-    - name: Create tag
-      uses: actions/create-release@v1
+    - name: Deploy with PAT
+      run: npm run deploy
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: '${{github.ref}}'
-        release_name: '${{github.ref}}'
+        VSCE_PAT: ${{ secrets.VSCE_PAT }}
