@@ -1,4 +1,5 @@
 # Image Gallery
+[![.github/workflows/vsce_publish.yml](https://github.com/geriyoco/vscode-image-gallery/actions/workflows/vsce_publish.yml/badge.svg?branch=production&event=release)](https://github.com/geriyoco/vscode-image-gallery/actions/workflows/vsce_publish.yml)
 
 A light-weighted extension that brings you the best image browsing experience in VS Code.
 
