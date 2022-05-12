@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VSCE_PAT: ${{ secrets.VSCE_PAT }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       bump_success: ${{ false }}
 
     steps:
@@ -29,13 +28,12 @@ jobs:
       run: npm run deploy ${{github.event.head_commit.message[1:]}} --githubBranch production
       env:
         bump_success: ${{ true }}
-    - name: Check bump success # exit
-      if: ${{ !bump_success }}
-      exit-on-failure: true
 
     # create tags and push to origin
     - name: Create tag
       uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: 'v${{github.event.head_commit.message[1:]}}'
         release_name: 'v${{github.event.head_commit.message[1:]}}'
