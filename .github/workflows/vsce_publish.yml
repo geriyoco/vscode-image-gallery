@@ -24,7 +24,7 @@ jobs:
 
     # bump version and publish using vsce
     - name: Publish version
-      run: npm run deploy ${{github.event.head_commit.message}} --githubBranch production
+      run: npm run deploy 0.2.4 --githubBranch production
 
     # create tags and push to origin
     - name: Create tag
