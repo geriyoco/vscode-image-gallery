@@ -24,10 +24,7 @@ jobs:
 
     # bump version and publish using vsce
     - name: Publish version
-      if: startsWith(github.event.head_commit.message, '\d.\d.\d')
       run: npm run deploy ${{github.event.head_commit.message}} --githubBranch production
-      env:
-        bump_success: ${{ true }}
 
     # create tags and push to origin
     - name: Create tag
@@ -35,5 +32,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: '${{github.event.head_commit.message}}'
-        release_name: '${{github.event.head_commit.message}}'
+        tag_name: '${{github.ref}}'
+        release_name: '${{github.ref}}'
