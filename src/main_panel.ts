@@ -13,6 +13,9 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
     );
 
     const imgPaths = await getImagePaths(galleryFolder);
+    imgPaths.sort((path1, path2) => {
+        return path1.path.localeCompare(path2.path);
+    });
     panel.webview.html = getWebviewContent(context, panel.webview, imgPaths);
 
     return panel;
