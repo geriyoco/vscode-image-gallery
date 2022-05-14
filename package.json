@@ -35,7 +35,7 @@
 				"sorting.byPathOptions.sensitivity": {
 					"type": "string",
 					"default": "variant",
-					"markdownDescription": "Which differences in the strings should be taken into accout. Possible values are:\n- \"`base`\": Only strings that differ in base letters compare as unequal. Examples: a ≠ b, a = á, a = A.\n- \"`accent`\": Only strings that differ in base letters or accents compare as unequal. Examples: a ≠ b, a ≠ á, a = A.\n- \"`case`\": Only strings that differ in base letters or case compare as unequal. Examples: a ≠ b, a = á, a ≠ A.\n- \"`variant`\": All strings compare as unequal."
+					"markdownDescription": "Which differences in the strings should be taken into account. Possible values are:\n- \"`base`\": Only strings that differ in base letters compare as unequal. Examples: a ≠ b, a = á, a = A.\n- \"`accent`\": Only strings that differ in base letters or accents compare as unequal. Examples: a ≠ b, a ≠ á, a = A.\n- \"`case`\": Only strings that differ in base letters or case compare as unequal. Examples: a ≠ b, a = á, a ≠ A.\n- \"`variant`\": All strings compare as unequal."
 				},
 				"sorting.byPathOptions.ignorePunctuation": {
 					"type": "boolean",
