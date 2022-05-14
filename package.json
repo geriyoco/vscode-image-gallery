@@ -24,6 +24,41 @@
 	"main": "./dist/extension.js",
 	"browser": "./dist/extension.js",
 	"contributes": {
+		"configuration": {
+			"title": "Image Gallery",
+			"properties": {
+				"sorting.byPathOptions.localeMatcher": {
+					"type": "string",
+					"default": "best fit",
+					"markdownDescription": "The locale matching algorithm to use. Possible values are \"`lookup`\" and \"`best fit`\"."
+				},
+				"sorting.byPathOptions.sensitivity": {
+					"type": "string",
+					"default": "variant",
+					"markdownDescription": "Which differences in the strings should be taken into accout. Possible values are:\n- \"`base`\": Only strings that differ in base letters compare as unequal. Examples: a ≠ b, a = á, a = A.\n- \"`accent`\": Only strings that differ in base letters or accents compare as unequal. Examples: a ≠ b, a ≠ á, a = A.\n- \"`case`\": Only strings that differ in base letters or case compare as unequal. Examples: a ≠ b, a = á, a ≠ A.\n- \"`variant`\": All strings compare as unequal."
+				},
+				"sorting.byPathOptions.ignorePunctuation": {
+					"type": "boolean",
+					"default": false,
+					"markdownDescription": "Whether punctuation should be ignored."
+				},
+				"sorting.byPathOptions.numeric": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Whether numeric collation should be used, such that \"`img1.jpg`\" > \"`img2.jpg`\" > \"`img10.jpg`\", instead of \"`img1.jpg`\" > \"`img10.jpg`\" > \"`img2.jpg`\"."
+				},
+				"sorting.byPathOptions.caseFirst": {
+					"type": "string",
+					"default": "false",
+					"markdownDescription": "Whether upper case or lower case should sort first. Possible values are \"`upper`\", \"`lower`\" or \"`false`\" (use the locale's default)."
+				},
+				"sorting.byPathOptions.collation": {
+					"type": "string",
+					"default": null,
+					"markdownDescription": "Variant collations for certain locales. Possible values include:\n- \"`compat`\" - Arabic\n- \"`dict`\" - Sinhala\n- \"`emoji`\" - root\n- \"`eor`\" - root\n- \"`phonebk`\" - German\n- \"`phonetic`\" - Lingala\n- \"`pinyin`\" - Chinese\n- \"`reformed`\" - Swedish\n- \"`stroke`\" - Chinese\n- \"`trad`\"\n- \"`zhuyin`\" - Chinese"
+				}
+			}
+		},
 		"customEditors": [
 			{
 				"viewType": "gryc.editor",

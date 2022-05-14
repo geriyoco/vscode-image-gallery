@@ -13,8 +13,23 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
     );
 
     const imgPaths = await getImagePaths(galleryFolder);
+    const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
+    const keys = [
+        'localeMatcher',
+        'sensitivity',
+        'ignorePunctuation',
+        'numeric',
+        'caseFirst',
+        'collation',
+    ];
     imgPaths.sort((path1, path2) => {
-        return path1.path.localeCompare(path2.path);
+        return path1.path.localeCompare(
+            path2.path,
+            undefined,
+            Object.fromEntries(
+                keys.map(key => [key, config.get(key)])
+            )
+        );
     });
     panel.webview.html = getWebviewContent(context, panel.webview, imgPaths);
 
