@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.2.5] - 2022-04-28
+### Added
+- Sort filenames by alphanumeric order by default
+- Added additional configuration for sorting in settings
+
 ## [0.2.3] - 2022-04-28
 ### Added
 - Display filename as tab title in the viewer
