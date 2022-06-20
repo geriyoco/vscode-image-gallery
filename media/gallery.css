@@ -4,6 +4,7 @@
 
 html {
 	scroll-behavior: smooth;
+	overflow-y: scroll;
 }
 
 .grid {
@@ -56,4 +57,26 @@ html {
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
+}
+
+.folder {
+	margin-top: 5px;
+	padding: 15px;
+	display: flex;
+	width: 100%;
+	background-color: black;
+	color: white;
+	border: 0;
+}
+
+.folder-title {
+	flex-grow: 1;
+}
+
+/* .folder-arrow {
+	color: white;
+} */
+
+.folder:hover {
+	box-shadow: 0 0 10px purple;
 }

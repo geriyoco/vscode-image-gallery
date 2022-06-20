@@ -62,7 +62,7 @@ export function getGlob() {
 		'svgz',
 	];
 	let upperCaseImg = imgExtensions.map(ext => ext.toUpperCase());
-	const globPattern = '**/*.{' + [...imgExtensions, ...upperCaseImg].join(',') + '}';
+	const globPattern = `**/*.{${[...imgExtensions, ...upperCaseImg].join(',')}}`;
 	return globPattern;
 }
 

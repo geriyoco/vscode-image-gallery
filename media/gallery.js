@@ -14,9 +14,6 @@
 					image.classList.remove("lazy");
 					image.classList.add("loaded");
 				};
-				if (lazyloadImages[lazyloadImages.length - 1].src === image.src) {
-					imageObserver.disconnect();
-				}
 			}
 		});
 	});
@@ -24,16 +21,36 @@
 	lazyloadImages.forEach((image) => {
 		imageObserver.observe(image);
 	});
-
+	
 	document.addEventListener('click', event => {
 		let node = event && event.target;
+		const folderHeader = ['folder','folder-title','folder-arrow'];
+		if (folderHeader.some(el => node.classList.contains(el))) {
+			console.log(node);
+			let id = '';
+			if (node.classList.contains('folder')) {
+				id = node.id;
+			} else {
+				let lastIndexToSplit = node.id.lastIndexOf('-');
+				id = node.id.slice(0, lastIndexToSplit);
+
+			}
+
+			let folderGrid = document.getElementById(id + '-grid');
+			let folderArrow = document.getElementById(id + '-arrow');
+			console.log({folderGrid, folderArrow});
+			folderGrid.style.display = folderGrid.style.display === "none" ? "" : "none";
+			folderArrow.textContent = folderArrow.textContent === "⮟" ? "⮜" : "⮟";
+		}
 		if (!node.classList.contains('image')) { return; }
 
 		vscode.postMessage({
 			command: 'vscodeImageGallery.openViewer',
 			src: node.src,
 		});
+
 	}, true);
+
 
 	window.addEventListener('message', event => {
 		const message = event.data;
