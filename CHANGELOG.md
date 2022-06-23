@@ -1,11 +1,18 @@
 # Change Log
 
-## [0.2.5] - 2022-04-28
+## [0.2.6]
+### Added
+- Gallery supports collapsible subfolders
+- Sort subfolders and files by alphanumeric order
+
+## [0.2.5] - 2022-05-14
 ### Added
 - Sort filenames by alphanumeric order by default
 - Added additional configuration for sorting in settings
 
-## [0.2.3] - 2022-04-28
+## [0.2.4] - 2022-05-12
+
+## [0.2.3] - 2022-05-01
 ### Added
 - Display filename as tab title in the viewer
 - Display filename underneath each image in gallery
