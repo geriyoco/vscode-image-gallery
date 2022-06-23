@@ -2,13 +2,17 @@
 	"name": "vscode-image-gallery",
 	"displayName": "Image Gallery",
 	"description": "An extension that enhances image browsing experience.",
-	"version": "0.2.5",
+	"version": "0.2.6",
 	"publisher": "GeriYoco",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/geriyoco/vscode-image-gallery"
 	},
 	"icon": "docs/logo-128.png",
+	"galleryBanner": {
+		"color": "#000000",
+		"theme": "dark"
+	},
 	"engines": {
 		"vscode": "^1.65.0"
 	},

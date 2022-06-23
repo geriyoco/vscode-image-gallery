@@ -13,25 +13,10 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
     );
 
     const imgPaths = await getImagePaths(galleryFolder);
-    const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
-    const keys = [
-        'localeMatcher',
-        'sensitivity',
-        'ignorePunctuation',
-        'numeric',
-        'caseFirst',
-        'collation',
-    ];
-    imgPaths.sort((path1, path2) => {
-        return path1.path.localeCompare(
-            path2.path,
-            undefined,
-            Object.fromEntries(
-                keys.map(key => [key, config.get(key)])
-            )
-        );
-    });
-    panel.webview.html = getWebviewContent(context, panel.webview, imgPaths);
+    let pathsBySubFolders = utils.getPathsBySubFolders(imgPaths);
+    pathsBySubFolders = sortPathsBySubFolders(pathsBySubFolders);
+
+    panel.webview.html = getWebviewContent(context, panel.webview, pathsBySubFolders);
 
     return panel;
 }
@@ -44,18 +29,58 @@ export async function getImagePaths(galleryFolder?: vscode.Uri) {
     return files;
 }
 
+export function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }): { [key: string]: Array<vscode.Uri> } {
+    const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
+    const keys = [
+        'localeMatcher',
+        'sensitivity',
+        'ignorePunctuation',
+        'numeric',
+        'caseFirst',
+        'collation',
+    ];
+    const comparator = (a: string, b: string) => {
+        return a.localeCompare(
+            b,
+            undefined,
+            Object.fromEntries(keys.map(key => [key, config.get(key)]))
+        );
+    };
+
+    const sortedResult: { [key: string]: Array<vscode.Uri> } = {};
+    Object.keys(pathsBySubFolders).sort(comparator).forEach(
+        subfolder => {
+            sortedResult[subfolder] = pathsBySubFolders[subfolder].sort(
+                (path1: vscode.Uri, path2: vscode.Uri) => path1.path.localeCompare(path2.path)
+            );
+        }
+    );
+
+    return sortedResult;
+}
+
 export function getWebviewContent(
     context: vscode.ExtensionContext,
     webview: vscode.Webview,
-    imgWebviewUris: vscode.Uri[],
+    pathsBySubFolders: { [key: string]: Array<vscode.Uri> },
 ) {
     const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
-    const imgHtml = imgWebviewUris.map(
-        img => {
+    const imgHtml = Object.keys(pathsBySubFolders).map(
+        folder => {
             return `
-            <div class="image-container">
-                <img id="${img.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img)}" class="image lazy">
-                <div id="${img.path}-filename" class="filename">${utils.getFilename(img.path)}</div>
+            <button id="${folder}" class="folder">
+                <div id="${folder}-arrow" class="folder-arrow">⮟</div>
+                <div id="${folder}-title" class="folder-title">${folder}</div>
+            </button>
+            <div id="${folder}-grid" class="grid">
+                ${pathsBySubFolders[folder].map(img => {
+                return `
+                    <div class="image-container">
+                        <img id="${img.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img)}" class="image lazy">
+                        <div id="${img.path}-filename" class="filename">${utils.getFilename(img.path)}</div>
+                    </div>
+                    `;
+            }).join('')}
             </div>
             `;
         }
@@ -75,7 +100,7 @@ export function getWebviewContent(
 			<title>Image Gallery</title>
 		</head>
 		<body>
-            ${imgWebviewUris.length === 0 ? '<p>No image found in this folder.</p>' : `<div class="grid">${imgHtml}</div>`}
+            ${Object.keys(pathsBySubFolders).length === 0 ? '<p>No image found in this folder.</p>' : `${imgHtml}`}
 			<script nonce="${utils.nonce}" src="${scriptUri}"></script>
 		</body>
 		</html>`
