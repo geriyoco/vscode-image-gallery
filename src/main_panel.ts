@@ -13,7 +13,7 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
     );
 
     const imgPaths = await getImagePaths(galleryFolder);
-    let arrangedFiles: { [key: string]: any } = {};
+    let pathsBySubFolders: { [key: string]: Array<vscode.Uri> } = {};
     if (vscode.workspace.workspaceFolders) {
         vscode.workspace.workspaceFolders?.forEach(workspaceFolder => {
             imgPaths.forEach(imgPath => {
@@ -23,35 +23,17 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
                     pathElements.pop();
                     let folderElements = pathElements.join('/');
                     let key = `${workspaceFolder.uri.path}/${folderElements}`;
-                    if (!arrangedFiles[key]) {
-                        arrangedFiles[key] = [];
+                    if (!pathsBySubFolders[key]) {
+                        pathsBySubFolders[key] = [];
                     }
-                    arrangedFiles[key].push(imgPath);
+                    pathsBySubFolders[key].push(imgPath);
                 }
             });
         });
     }
-    console.log(arrangedFiles);
+    pathsBySubFolders = sortFilesInSubFolders(pathsBySubFolders);
 
-    // const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
-    // const keys = [
-    //     'localeMatcher',
-    //     'sensitivity',
-    //     'ignorePunctuation',
-    //     'numeric',
-    //     'caseFirst',
-    //     'collation',
-    // ];
-    // imgPaths.sort((path1, path2) => {
-    //     return path1.path.localeCompare(
-    //         path2.path,
-    //         undefined,
-    //         Object.fromEntries(
-    //             keys.map(key => [key, config.get(key)])
-    //         )
-    //     );
-    // });
-    panel.webview.html = getWebviewContent(context, panel.webview, arrangedFiles);
+    panel.webview.html = getWebviewContent(context, panel.webview, pathsBySubFolders);
 
     return panel;
 }
@@ -64,13 +46,38 @@ export async function getImagePaths(galleryFolder?: vscode.Uri) {
     return files;
 }
 
+export function sortFilesInSubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }) : { [key: string]: Array<vscode.Uri> } {
+    const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
+    const keys = [
+        'localeMatcher',
+        'sensitivity',
+        'ignorePunctuation',
+        'numeric',
+        'caseFirst',
+        'collation',
+    ];
+    const localOptions = Object.fromEntries(
+        keys.map(key => [key, config.get(key)])
+    );
+
+    for (const key in pathsBySubFolders) {
+        pathsBySubFolders[key] = pathsBySubFolders[key].sort(
+            (path1: vscode.Uri, path2: vscode.Uri) => {
+                return path1.path.localeCompare(path2.path, undefined, localOptions);
+            }
+        );
+    }
+
+    return pathsBySubFolders;
+}
+
 export function getWebviewContent(
     context: vscode.ExtensionContext,
     webview: vscode.Webview,
-    arrangedFiles: { [key: string]: Array<vscode.Uri> },
+    pathsBySubFolders: { [key: string]: Array<vscode.Uri> },
 ) {
     const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
-    const imgHtml = Object.keys(arrangedFiles).map(
+    const imgHtml = Object.keys(pathsBySubFolders).map(
         folder => {
             return `
             <button id="${folder}" class="folder">
@@ -78,7 +85,7 @@ export function getWebviewContent(
                 <div id="${folder}-arrow" class="folder-arrow">⮟</div>
             </button>
             <div id="${folder}-grid" class="grid">
-                ${arrangedFiles[folder].map(img => {
+                ${pathsBySubFolders[folder].map(img => {
                 return `
                     <div class="image-container">
                         <img id="${img.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img)}" class="image lazy">
@@ -105,7 +112,7 @@ export function getWebviewContent(
 			<title>Image Gallery</title>
 		</head>
 		<body>
-            ${Object.keys(arrangedFiles).length === 0 ? '<p>No image found in this folder.</p>' : `${imgHtml}`}
+            ${Object.keys(pathsBySubFolders).length === 0 ? '<p>No image found in this folder.</p>' : `${imgHtml}`}
 			<script nonce="${utils.nonce}" src="${scriptUri}"></script>
 		</body>
 		</html>`
