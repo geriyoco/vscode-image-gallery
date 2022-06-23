@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.2.6]
+## [0.2.6] - 2022-06-23
 ### Added
 - Gallery supports collapsible subfolders
 - Sort subfolders and files by alphanumeric order
