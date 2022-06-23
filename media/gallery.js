@@ -2,7 +2,6 @@
 (function () {
 	const vscode = acquireVsCodeApi();
 
-	let grid = document.getElementsByClassName("grid")[0];
 	let lazyloadImages = document.querySelectorAll(".lazy");
 	let imageObserver = new IntersectionObserver((entries, observer) => {
 		entries.forEach(entry => {
@@ -40,7 +39,7 @@
 			let folderArrow = document.getElementById(id + '-arrow');
 			console.log({folderGrid, folderArrow});
 			folderGrid.style.display = folderGrid.style.display === "none" ? "" : "none";
-			folderArrow.textContent = folderArrow.textContent === "⮟" ? "⮜" : "⮟";
+			folderArrow.textContent = folderArrow.textContent === "⮟" ? "⮞" : "⮟";
 		}
 		if (!node.classList.contains('image')) { return; }
 
@@ -57,11 +56,12 @@
 
 		switch (message.command) {
 			case 'vscodeImageGallery.addImage':
+				let addedTimestamp = new Date().getTime();
 				let imgNode = document.createElement("img");
 				imgNode.setAttribute("class", "image loaded");
 				imgNode.setAttribute("id", message.imgPath);
-				imgNode.setAttribute("src", message.imgSrc);
-				imgNode.setAttribute("data-src", message.imgSrc);
+				imgNode.setAttribute("src", `${message.imgSrc}?t=${addedTimestamp}`);
+				imgNode.setAttribute("data-src", `${message.imgSrc}?t=${addedTimestamp}`);
 
 				let divNode = document.createElement("div");
 				divNode.setAttribute("class", "filename");
@@ -72,13 +72,15 @@
 				containerNode.setAttribute("class", "image-container");
 				containerNode.appendChild(imgNode);
 				containerNode.appendChild(divNode);
+
+				let grid = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-grid`);
 				grid.appendChild(containerNode);
 				break;
 			case 'vscodeImageGallery.changeImage':
-				let timestamp = new Date().getTime();
+				let changedTimestamp = new Date().getTime();
 				let changeImage = document.getElementById(message.imgPath);
-				changeImage.setAttribute("src", message.imgSrc + "?t=" + timestamp);
-				changeImage.setAttribute("data-src", message.imgSrc + "?t=" + timestamp);
+				changeImage.setAttribute("src", `${message.imgSrc}?t=${changedTimestamp}`);
+				changeImage.setAttribute("data-src", `${message.imgSrc}?t=${changedTimestamp}`);
 
 				let changeFilename = document.getElementById(message.imgPath + "-filename");
 				changeFilename.setAttribute("class", "filename");

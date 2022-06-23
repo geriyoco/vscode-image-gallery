@@ -13,24 +13,7 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
     );
 
     const imgPaths = await getImagePaths(galleryFolder);
-    let pathsBySubFolders: { [key: string]: Array<vscode.Uri> } = {};
-    if (vscode.workspace.workspaceFolders) {
-        vscode.workspace.workspaceFolders?.forEach(workspaceFolder => {
-            imgPaths.forEach(imgPath => {
-                if (imgPath.toString().includes(workspaceFolder.uri.toString())) {
-                    let fsPath = imgPath.toString().replace(`${workspaceFolder.uri.toString()}/`, '');
-                    let pathElements = fsPath.split('/');
-                    pathElements.pop();
-                    let folderElements = pathElements.join('/');
-                    let key = `${workspaceFolder.uri.path}/${folderElements}`;
-                    if (!pathsBySubFolders[key]) {
-                        pathsBySubFolders[key] = [];
-                    }
-                    pathsBySubFolders[key].push(imgPath);
-                }
-            });
-        });
-    }
+    let pathsBySubFolders = utils.getPathsBySubFolders(imgPaths);
     pathsBySubFolders = sortPathsBySubFolders(pathsBySubFolders);
 
     panel.webview.html = getWebviewContent(context, panel.webview, pathsBySubFolders);
@@ -46,7 +29,7 @@ export async function getImagePaths(galleryFolder?: vscode.Uri) {
     return files;
 }
 
-export function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }) : { [key: string]: Array<vscode.Uri> } {
+export function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }): { [key: string]: Array<vscode.Uri> } {
     const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
     const keys = [
         'localeMatcher',
@@ -86,8 +69,8 @@ export function getWebviewContent(
         folder => {
             return `
             <button id="${folder}" class="folder">
-                <div id="${folder}-title" class="folder-title">${folder}</div>
                 <div id="${folder}-arrow" class="folder-arrow">⮟</div>
+                <div id="${folder}-title" class="folder-title">${folder}</div>
             </button>
             <div id="${folder}-grid" class="grid">
                 ${pathsBySubFolders[folder].map(img => {
