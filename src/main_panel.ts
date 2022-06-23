@@ -56,14 +56,14 @@ export function sortFilesInSubFolders(pathsBySubFolders: { [key: string]: Array<
         'caseFirst',
         'collation',
     ];
-    const localOptions = Object.fromEntries(
+    const localeOptions = Object.fromEntries(
         keys.map(key => [key, config.get(key)])
     );
 
     for (const key in pathsBySubFolders) {
         pathsBySubFolders[key] = pathsBySubFolders[key].sort(
             (path1: vscode.Uri, path2: vscode.Uri) => {
-                return path1.path.localeCompare(path2.path, undefined, localOptions);
+                return path1.path.localeCompare(path2.path, undefined, localeOptions);
             }
         );
     }
