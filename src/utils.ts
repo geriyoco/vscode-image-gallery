@@ -62,7 +62,7 @@ export function getGlob() {
 		'svgz',
 	];
 	let upperCaseImg = imgExtensions.map(ext => ext.toUpperCase());
-	const globPattern = '**/*.{' + [...imgExtensions, ...upperCaseImg].join(',') + '}';
+	const globPattern = `**/*.{${[...imgExtensions, ...upperCaseImg].join(',')}}`;
 	return globPattern;
 }
 
@@ -73,4 +73,26 @@ export function getFilename(imgPath: string) {
 		return filename.split("?").shift();
 	}
 	return filename;
+}
+
+export function getPathsBySubFolders(imgPaths: vscode.Uri[]) {
+	let pathsBySubFolders: { [key: string]: Array<vscode.Uri> } = {};
+	if (vscode.workspace.workspaceFolders) {
+		vscode.workspace.workspaceFolders?.forEach(workspaceFolder => {
+			imgPaths.forEach(imgPath => {
+				if (imgPath.toString().includes(workspaceFolder.uri.toString())) {
+					let fsPath = imgPath.toString().replace(`${workspaceFolder.uri.toString()}/`, '');
+					let pathElements = fsPath.split('/');
+					pathElements.pop();
+					let folderElements = pathElements.join('/');
+					let key = `${workspaceFolder.uri.path}/${folderElements}`;
+					if (!pathsBySubFolders[key]) {
+						pathsBySubFolders[key] = [];
+					}
+					pathsBySubFolders[key].push(imgPath);
+				}
+			});
+		});
+	}
+	return pathsBySubFolders;
 }
