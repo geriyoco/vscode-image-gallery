@@ -64,12 +64,14 @@ html {
 	padding: 15px;
 	display: flex;
 	width: 100%;
-	background-color: black;
+	background-color: hsl(0, 0%, 17%);
 	color: white;
 	border: 0;
 }
 
 .folder-title {
+	padding-left: 10px;
+	text-align: left;
 	flex-grow: 1;
 }
 
