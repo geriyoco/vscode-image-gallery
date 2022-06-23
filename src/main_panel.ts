@@ -31,7 +31,7 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
             });
         });
     }
-    pathsBySubFolders = sortFilesInSubFolders(pathsBySubFolders);
+    pathsBySubFolders = sortPathsBySubFolders(pathsBySubFolders);
 
     panel.webview.html = getWebviewContent(context, panel.webview, pathsBySubFolders);
 
@@ -46,7 +46,7 @@ export async function getImagePaths(galleryFolder?: vscode.Uri) {
     return files;
 }
 
-export function sortFilesInSubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }) : { [key: string]: Array<vscode.Uri> } {
+export function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }) : { [key: string]: Array<vscode.Uri> } {
     const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
     const keys = [
         'localeMatcher',
@@ -56,19 +56,24 @@ export function sortFilesInSubFolders(pathsBySubFolders: { [key: string]: Array<
         'caseFirst',
         'collation',
     ];
-    const localeOptions = Object.fromEntries(
-        keys.map(key => [key, config.get(key)])
+    const comparator = (a: string, b: string) => {
+        return a.localeCompare(
+            b,
+            undefined,
+            Object.fromEntries(keys.map(key => [key, config.get(key)]))
+        );
+    };
+
+    const sortedResult: { [key: string]: Array<vscode.Uri> } = {};
+    Object.keys(pathsBySubFolders).sort(comparator).forEach(
+        subfolder => {
+            sortedResult[subfolder] = pathsBySubFolders[subfolder].sort(
+                (path1: vscode.Uri, path2: vscode.Uri) => path1.path.localeCompare(path2.path)
+            );
+        }
     );
 
-    for (const key in pathsBySubFolders) {
-        pathsBySubFolders[key] = pathsBySubFolders[key].sort(
-            (path1: vscode.Uri, path2: vscode.Uri) => {
-                return path1.path.localeCompare(path2.path, undefined, localeOptions);
-            }
-        );
-    }
-
-    return pathsBySubFolders;
+    return sortedResult;
 }
 
 export function getWebviewContent(
