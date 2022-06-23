@@ -73,10 +73,6 @@ html {
 	flex-grow: 1;
 }
 
-/* .folder-arrow {
-	color: white;
-} */
-
 .folder:hover {
-	box-shadow: 0 0 10px purple;
+	box-shadow: 0 0 10px hsl(60, 65%, 90%);
 }
