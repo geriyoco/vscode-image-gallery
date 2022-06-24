@@ -2,6 +2,14 @@
 (function () {
 	const vscode = acquireVsCodeApi();
 
+	let gridElements = document.querySelectorAll(".grid");
+	gridElements.forEach((gridElement) => {
+		if (!gridElement.className.includes("grid-0")) {
+			gridElement.style.display = "none";
+			gridElement.previousElementSibling.firstElementChild.textContent = "⮞";
+		}
+	});
+
 	let lazyloadImages = document.querySelectorAll(".lazy");
 	let imageObserver = new IntersectionObserver((entries, observer) => {
 		entries.forEach(entry => {
@@ -22,25 +30,36 @@
 	});
 
 	const clickHandler = (event, preview) => {
+		event.preventDefault();
+		event.stopPropagation();
 		let node = event && event.target;
 		const folderHeader = ['folder','folder-title','folder-arrow'];
 		if (folderHeader.some(el => node.classList.contains(el))) {
-			console.log(node);
 			let id = '';
 			if (node.classList.contains('folder')) {
 				id = node.id;
 			} else {
 				let lastIndexToSplit = node.id.lastIndexOf('-');
 				id = node.id.slice(0, lastIndexToSplit);
-
 			}
 
 			let folderGrid = document.getElementById(id + '-grid');
 			let folderArrow = document.getElementById(id + '-arrow');
-			console.log({folderGrid, folderArrow});
-			folderGrid.style.display = folderGrid.style.display === "none" ? "" : "none";
+			folderGrid.style.display = folderGrid.style.display === "none" ? "grid" : "none";
 			folderArrow.textContent = folderArrow.textContent === "⮟" ? "⮞" : "⮟";
+
+			let expandAll = Array.from(gridElements).some(el => el.style.display === "none");
+			if (expandAll) {
+				vscode.postMessage({
+					command: "vscodeImageGallery.expandAll"
+				});
+			} else {
+				vscode.postMessage({
+					command: "vscodeImageGallery.collapseAll"
+				});
+			}
 		}
+
 		if (!node.classList.contains('image')) { return; }
 
 		vscode.postMessage({
@@ -92,6 +111,25 @@
 				let deleteImage = document.getElementById(message.imgPath);
 				deleteImage.parentElement.remove();
 				break;
+			case 'vscodeImageGallery.expandAll':
+				gridElements.forEach((gridElement) => {
+					gridElement.style.display = "grid";
+					gridElement.previousElementSibling.firstElementChild.textContent = "⮟";
+				});
+				vscode.postMessage({
+					command: "vscodeImageGallery.collapseAll"
+				});
+				break;
+			case 'vscodeImageGallery.collapseAll':
+				gridElements.forEach((gridElement) => {
+					gridElement.style.display = "none";
+					gridElement.previousElementSibling.firstElementChild.textContent = "⮞";
+				});
+				vscode.postMessage({
+					command: "vscodeImageGallery.expandAll"
+				});
+				break;
+			
 		}
 	}, true);
 }());

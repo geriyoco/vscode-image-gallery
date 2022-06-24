@@ -1,3 +1,4 @@
+import path from 'path';
 import * as vscode from 'vscode';
 
 export function getCwd() {
@@ -77,22 +78,13 @@ export function getFilename(imgPath: string) {
 
 export function getPathsBySubFolders(imgPaths: vscode.Uri[]) {
 	let pathsBySubFolders: { [key: string]: Array<vscode.Uri> } = {};
-	if (vscode.workspace.workspaceFolders) {
-		vscode.workspace.workspaceFolders?.forEach(workspaceFolder => {
-			imgPaths.forEach(imgPath => {
-				if (imgPath.toString().includes(workspaceFolder.uri.toString())) {
-					let fsPath = imgPath.toString().replace(`${workspaceFolder.uri.toString()}/`, '');
-					let pathElements = fsPath.split('/');
-					pathElements.pop();
-					let folderElements = pathElements.join('/');
-					let key = `${workspaceFolder.uri.path}/${folderElements}`;
-					if (!pathsBySubFolders[key]) {
-						pathsBySubFolders[key] = [];
-					}
-					pathsBySubFolders[key].push(imgPath);
-				}
-			});
-		});
-	}
+	imgPaths.forEach(imgPath => {
+		let key = path.dirname(imgPath.fsPath);
+		key = key[0].toUpperCase() + key.slice(1,);
+		if (!pathsBySubFolders[key]) {
+			pathsBySubFolders[key] = [];
+		}
+		pathsBySubFolders[key].push(imgPath);
+	});
 	return pathsBySubFolders;
 }

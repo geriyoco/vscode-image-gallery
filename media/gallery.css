@@ -75,6 +75,10 @@ html {
 	flex-grow: 1;
 }
 
+.folder-arrow {
+	margin-top: -2px;
+}
+
 .folder:hover {
 	box-shadow: 0 0 10px hsl(60, 65%, 90%);
 }

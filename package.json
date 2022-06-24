@@ -21,6 +21,8 @@
 	],
 	"activationEvents": [
 		"onCommand:vscodeImageGallery.openGallery",
+		"onCommand:vscodeImageGallery.expandAll",
+		"onCommand:vscodeImageGallery.collapseAll",
 		"onWebviewPanel:gryc.gallery",
 		"onWebviewPanel:gryc.viewer",
 		"onCustomEditor:gryc.editor"
@@ -78,7 +80,18 @@
 		"commands": [
 			{
 				"command": "vscodeImageGallery.openGallery",
-				"title": "Open Image Gallery"
+				"title": "Open Image Gallery",
+				"category": "Image Gallery"
+			},
+			{
+				"command": "vscodeImageGallery.expandAll",
+				"title": "Expand All Folders",
+				"icon": "$(expand-all)"
+			},
+			{
+				"command": "vscodeImageGallery.collapseAll",
+				"title": "Collapse All Folders",
+				"icon": "$(collapse-all)"
 			}
 		],
 		"menus": {
@@ -87,6 +100,18 @@
 					"command": "vscodeImageGallery.openGallery",
 					"group": "2_grycImageGallery@1",
 					"when": "explorerResourceIsFolder && !virtualWorkspace"
+				}
+			],
+			"editor/title": [
+				{
+					"when": "ext.viewType == gryc.gallery && !collapse",
+					"command": "vscodeImageGallery.expandAll",
+					"group": "navigation"
+				},
+				{
+					"when": "ext.viewType == gryc.gallery && collapse",
+					"command": "vscodeImageGallery.collapseAll",
+					"group": "navigation"
 				}
 			]
 		}

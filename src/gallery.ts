@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as utils from './utils';
 
 export async function createPanel(context: vscode.ExtensionContext, galleryFolder?: vscode.Uri) {
+    vscode.commands.executeCommand('setContext', 'ext.viewType', 'gryc.gallery');
     const panel = vscode.window.createWebviewPanel(
         'gryc.gallery',
         `Image Gallery${galleryFolder ? ': ' + utils.getFilename(galleryFolder.path) : ''}`,
@@ -66,13 +67,13 @@ export function getWebviewContent(
 ) {
     const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
     const imgHtml = Object.keys(pathsBySubFolders).map(
-        folder => {
+        (folder, index) => {
             return `
             <button id="${folder}" class="folder">
                 <div id="${folder}-arrow" class="folder-arrow">⮟</div>
                 <div id="${folder}-title" class="folder-title">${folder}</div>
             </button>
-            <div id="${folder}-grid" class="grid">
+            <div id="${folder}-grid" class="grid grid-${index}">
                 ${pathsBySubFolders[folder].map(img => {
                 return `
                     <div class="image-container">

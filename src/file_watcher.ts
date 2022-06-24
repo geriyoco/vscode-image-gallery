@@ -34,19 +34,3 @@ export function galleryFileWatcher(mainPanel: vscode.WebviewPanel, galleryFolder
 
     return watcher;
 }
-
-export function viewerFileWatcher(viewerPanel: vscode.WebviewPanel) {
-    let globPattern = utils.getGlob();
-    const watcher = vscode.workspace.createFileSystemWatcher(globPattern, true, false, false);
-    watcher.onDidChange(uri => {
-        viewerPanel.webview.postMessage({
-            command: 'vscodeImageGalleryViewer.changeImage',
-            imgSrc: viewerPanel.webview.asWebviewUri(uri).toString(),
-        });
-    });
-    watcher.onDidDelete(uri => {
-        viewerPanel.dispose();
-    });
-
-    return watcher;
-}
