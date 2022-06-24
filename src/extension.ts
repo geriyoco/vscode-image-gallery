@@ -34,12 +34,11 @@ export function activate(context: vscode.ExtensionContext) {
 						case 'vscodeImageGallery.openViewer':
 							const resource = vscode.Uri.file(vscode.Uri.parse(message.src).path);
 							await vscode.commands.executeCommand(
-								'vscode.openWith',
+								'vscode.open',
 								resource,
-								'gryc.editor',
 								{
-									preserveFocus: true, // not working?
-									preview: true, // not working?
+									preserveFocus: true,
+									preview: message.preview,
 									viewColumn: vscode.ViewColumn.Two,
 								},
 							);
