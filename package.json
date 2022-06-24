@@ -86,12 +86,22 @@
 			{
 				"command": "vscodeImageGallery.expandAll",
 				"title": "Expand All Folders",
-				"icon": "$(expand-all)"
+				"icon": "$(expand-all)",
+				"selector": [
+					{
+						"viewType": "gryc.gallery"
+					}
+				]
 			},
 			{
 				"command": "vscodeImageGallery.collapseAll",
 				"title": "Collapse All Folders",
-				"icon": "$(collapse-all)"
+				"icon": "$(collapse-all)",
+				"selector": [
+					{
+						"viewType": "gryc.gallery"
+					}
+				]
 			}
 		],
 		"menus": {
@@ -104,11 +114,13 @@
 			],
 			"editor/title": [
 				{
+					"viewType": "gryc.gallery",
 					"when": "ext.viewType == gryc.gallery && !collapse",
 					"command": "vscodeImageGallery.expandAll",
 					"group": "navigation"
 				},
 				{
+					"viewType": "gryc.gallery",
 					"when": "ext.viewType == gryc.gallery && collapse",
 					"command": "vscodeImageGallery.collapseAll",
 					"group": "navigation"

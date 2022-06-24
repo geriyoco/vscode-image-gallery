@@ -33,7 +33,7 @@
 		event.preventDefault();
 		event.stopPropagation();
 		let node = event && event.target;
-		const folderHeader = ['folder','folder-title','folder-arrow'];
+		const folderHeader = ['folder', 'folder-title', 'folder-arrow'];
 		if (folderHeader.some(el => node.classList.contains(el))) {
 			let id = '';
 			if (node.classList.contains('folder')) {
