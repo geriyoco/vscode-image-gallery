@@ -1,17 +1,16 @@
 import * as vscode from 'vscode';
-import * as main_panel from './main_panel';
-import * as viewer_panel from './viewer_panel';
-import * as viewer_editor from './viewer_editor';
+import * as gallery from './gallery';
+import * as viewer from './viewer';
 import * as file_watcher from './file_watcher';
 
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Welcome! VS Code extension "GeriYoco: Image Gallery" is now active.');
 
-	const viewerEditor = new viewer_editor.ViewerCustomEditor(context);
+	const viewerEditor = new viewer.ViewerCustomEditor(context);
 	context.subscriptions.push(
 		vscode.window.registerCustomEditorProvider(
-			viewer_editor.ViewerCustomEditor.viewType,
+			viewer.ViewerCustomEditor.viewType,
 			viewerEditor,
 			{
 				supportsMultipleEditorsPerDocument: true,
@@ -25,23 +24,24 @@ export function activate(context: vscode.ExtensionContext) {
 	let dispGallery = vscode.commands.registerCommand(
 		'vscodeImageGallery.openGallery',
 		async (galleryFolder?: vscode.Uri) => {
-			const mainPanel = await main_panel.createPanel(context, galleryFolder);
+			const mainPanel = await gallery.createPanel(context, galleryFolder);
 			const galleryFileWatcher = file_watcher.galleryFileWatcher(mainPanel, galleryFolder);
 			context.subscriptions.push(galleryFileWatcher);
 
 			mainPanel.webview.onDidReceiveMessage(
-				message => {
+				async message => {
 					switch (message.command) {
 						case 'vscodeImageGallery.openViewer':
-							const viewerPanel = viewer_panel.createPanel(context, message.src);
-							const viewerFileWatcher = file_watcher.viewerFileWatcher(viewerPanel);
-
-							viewerPanel.onDidDispose(
-								() => {
-									viewerFileWatcher.dispose();
+							const resource = vscode.Uri.file(vscode.Uri.parse(message.src).path);
+							await vscode.commands.executeCommand(
+								'vscode.openWith',
+								resource,
+								'gryc.editor',
+								{
+									preserveFocus: true, // not working?
+									preview: true, // not working?
+									viewColumn: vscode.ViewColumn.Two,
 								},
-								undefined,
-								context.subscriptions
 							);
 							return;
 					}
