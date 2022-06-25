@@ -21,8 +21,9 @@
 		imageObserver.observe(image);
 	});
 
+	// click events
 	const clickHandler = (event, preview) => {
-		let node = event && event.target;
+		const node = event && event.target;
 		const folderHeader = ['folder','folder-title','folder-arrow'];
 		if (folderHeader.some(el => node.classList.contains(el))) {
 			console.log(node);
@@ -37,20 +38,29 @@
 
 			let folderGrid = document.getElementById(id + '-grid');
 			let folderArrow = document.getElementById(id + '-arrow');
-			console.log({folderGrid, folderArrow});
 			folderGrid.style.display = folderGrid.style.display === "none" ? "" : "none";
 			folderArrow.textContent = folderArrow.textContent === "⮟" ? "⮞" : "⮟";
 		}
 		if (!node.classList.contains('image')) { return; }
 
 		vscode.postMessage({
-			command: 'vscodeImageGallery.openViewer',
+			command: 'POST.click',
 			src: node.src,
 			preview: preview,
 		});
 	};
 	document.addEventListener('click', event => clickHandler(event, preview=true), true);
 	document.addEventListener('dblclick', event => clickHandler(event, preview=false), true);
+
+	// hover events
+	document.addEventListener('mouseover', event => {
+		const node = event && event.target;
+		if (!node.classList.contains('image')) { return; }
+		vscode.postMessage({
+			command: 'POST.hover',
+			src: node.src,
+		});
+	});
 
 	window.addEventListener('message', event => {
 		const message = event.data;

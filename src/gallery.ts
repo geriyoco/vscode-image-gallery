@@ -113,12 +113,16 @@ export function getMessageListener() {
         src: string,
         preview: boolean,
     }) => {
+        const resource = vscode.Uri.file(vscode.Uri.parse(message.src).path);
         switch (message.command) {
-            case 'vscodeImageGallery.openViewer':
+            case 'POST.click':
                 openViewerOnClick(
-                    vscode.Uri.file(vscode.Uri.parse(message.src).path),
+                    resource,
                     message.preview,
                 );
+                break;
+            case 'POST.hover':
+                showHoverTooltip(resource);
                 break;
         }
     };
@@ -134,4 +138,9 @@ async function openViewerOnClick(resource: vscode.Uri, preview: boolean) {
             viewColumn: vscode.ViewColumn.Two,
         },
     );
+}
+
+async function showHoverTooltip(resource: vscode.Uri) {
+    const stat = (await vscode.workspace.fs.stat(resource));
+    console.log(stat);
 }
