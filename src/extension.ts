@@ -29,30 +29,12 @@ export function activate(context: vscode.ExtensionContext) {
 			context.subscriptions.push(galleryFileWatcher);
 
 			mainPanel.webview.onDidReceiveMessage(
-				async message => {
-					switch (message.command) {
-						case 'vscodeImageGallery.openViewer':
-							const resource = vscode.Uri.file(vscode.Uri.parse(message.src).path);
-							await vscode.commands.executeCommand(
-								'vscode.open',
-								resource,
-								{
-									preserveFocus: true,
-									preview: message.preview,
-									viewColumn: vscode.ViewColumn.Two,
-								},
-							);
-							return;
-					}
-				},
+				gallery.getMessageListener(),
 				undefined,
-				context.subscriptions,
+				context.subscriptions
 			);
-
 			mainPanel.onDidDispose(
-				() => {
-					galleryFileWatcher.dispose();
-				},
+				() => galleryFileWatcher.dispose(),
 				undefined,
 				context.subscriptions
 			);

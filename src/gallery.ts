@@ -21,7 +21,7 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
     return panel;
 }
 
-export async function getImagePaths(galleryFolder?: vscode.Uri) {
+async function getImagePaths(galleryFolder?: vscode.Uri) {
     const globPattern = utils.getGlob();
     const files = await vscode.workspace.findFiles(
         galleryFolder ? new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
@@ -29,7 +29,7 @@ export async function getImagePaths(galleryFolder?: vscode.Uri) {
     return files;
 }
 
-export function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }): { [key: string]: Array<vscode.Uri> } {
+function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }): { [key: string]: Array<vscode.Uri> } {
     const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
     const keys = [
         'localeMatcher',
@@ -59,7 +59,7 @@ export function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<
     return sortedResult;
 }
 
-export function getWebviewContent(
+function getWebviewContent(
     context: vscode.ExtensionContext,
     webview: vscode.Webview,
     pathsBySubFolders: { [key: string]: Array<vscode.Uri> },
@@ -105,4 +105,43 @@ export function getWebviewContent(
 		</body>
 		</html>`
     );
+}
+
+export function getMessageListener() {
+    return async (message: {
+        command: string,
+        src: string,
+        preview: boolean,
+    }) => {
+        switch (message.command) {
+            case 'vscodeImageGallery.openViewer':
+                openViewerOnClick(
+                    vscode.Uri.file(vscode.Uri.parse(message.src).path),
+                    message.preview,
+                );
+                break;
+        }
+    };
+}
+
+async function openViewerOnClick(resource: vscode.Uri, preview: boolean) {
+    await vscode.commands.executeCommand(
+        'vscode.open',
+        resource,
+        {
+            preserveFocus: true,
+            preview: preview,
+            viewColumn: vscode.ViewColumn.Two,
+        },
+    );
+
+    const explorerVisible = vscode.workspace.getConfiguration('explorer').get('visible');
+    if (explorerVisible) {
+        await vscode.commands.executeCommand(
+            'workbench.files.action.showActiveFileInExplorer',
+            resource,
+        );
+    }
+
+    return;
 }
