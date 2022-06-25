@@ -134,14 +134,4 @@ async function openViewerOnClick(resource: vscode.Uri, preview: boolean) {
             viewColumn: vscode.ViewColumn.Two,
         },
     );
-
-    const explorerVisible = vscode.workspace.getConfiguration('explorer').get('visible');
-    if (explorerVisible) {
-        await vscode.commands.executeCommand(
-            'workbench.files.action.showActiveFileInExplorer',
-            resource,
-        );
-    }
-
-    return;
 }
