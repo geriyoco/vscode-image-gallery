@@ -129,7 +129,7 @@ function openViewerOnClick(resource: vscode.Uri, preview: boolean) {
         'vscode.open',
         resource,
         {
-            preserveFocus: true,
+            preserveFocus: false,
             preview: preview,
             viewColumn: vscode.ViewColumn.Two,
         },
