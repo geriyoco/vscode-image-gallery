@@ -108,7 +108,7 @@ function getWebviewContent(
 }
 
 export function getMessageListener() {
-    return async (message: {
+    return (message: {
         command: string,
         src: string,
         preview: boolean,
@@ -124,8 +124,8 @@ export function getMessageListener() {
     };
 }
 
-async function openViewerOnClick(resource: vscode.Uri, preview: boolean) {
-    await vscode.commands.executeCommand(
+function openViewerOnClick(resource: vscode.Uri, preview: boolean) {
+    vscode.commands.executeCommand(
         'vscode.open',
         resource,
         {
