@@ -107,31 +107,18 @@ function getWebviewContent(
     );
 }
 
-export function getMessageListener() {
-    return (message: {
-        command: string,
-        src: string,
-        preview: boolean,
-    }) => {
-        switch (message.command) {
-            case 'vscodeImageGallery.openViewer':
-                openViewerOnClick(
-                    vscode.Uri.file(vscode.Uri.parse(message.src).path),
-                    message.preview,
-                );
-                break;
-        }
-    };
-}
-
-function openViewerOnClick(resource: vscode.Uri, preview: boolean) {
-    vscode.commands.executeCommand(
-        'vscode.open',
-        resource,
-        {
-            preserveFocus: false,
-            preview: preview,
-            viewColumn: vscode.ViewColumn.Two,
-        },
-    );
+export function getMessageListener(message: any) {
+    switch (message.command) {
+        case 'vscodeImageGallery.openViewer':
+            vscode.commands.executeCommand(
+                'vscode.open',
+                vscode.Uri.file(vscode.Uri.parse(message.src).path),
+                {
+                    preserveFocus: false,
+                    preview: message.preview,
+                    viewColumn: vscode.ViewColumn.Two,
+                },
+            );
+            break;
+    }
 }

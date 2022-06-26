@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 			context.subscriptions.push(galleryFileWatcher);
 
 			mainPanel.webview.onDidReceiveMessage(
-				gallery.getMessageListener(),
+				(message) => gallery.getMessageListener(message),
 				undefined,
 				context.subscriptions
 			);
