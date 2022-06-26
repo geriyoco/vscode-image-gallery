@@ -21,7 +21,7 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
     return panel;
 }
 
-export async function getImagePaths(galleryFolder?: vscode.Uri) {
+async function getImagePaths(galleryFolder?: vscode.Uri) {
     const globPattern = utils.getGlob();
     const files = await vscode.workspace.findFiles(
         galleryFolder ? new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
@@ -29,7 +29,7 @@ export async function getImagePaths(galleryFolder?: vscode.Uri) {
     return files;
 }
 
-export function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }): { [key: string]: Array<vscode.Uri> } {
+function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }): { [key: string]: Array<vscode.Uri> } {
     const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
     const keys = [
         'localeMatcher',
@@ -59,7 +59,7 @@ export function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<
     return sortedResult;
 }
 
-export function getWebviewContent(
+function getWebviewContent(
     context: vscode.ExtensionContext,
     webview: vscode.Webview,
     pathsBySubFolders: { [key: string]: Array<vscode.Uri> },
@@ -105,4 +105,20 @@ export function getWebviewContent(
 		</body>
 		</html>`
     );
+}
+
+export function getMessageListener(message: any) {
+    switch (message.command) {
+        case 'vscodeImageGallery.openViewer':
+            vscode.commands.executeCommand(
+                'vscode.open',
+                vscode.Uri.file(vscode.Uri.parse(message.src).path),
+                {
+                    preserveFocus: false,
+                    preview: message.preview,
+                    viewColumn: vscode.ViewColumn.Two,
+                },
+            );
+            break;
+    }
 }
