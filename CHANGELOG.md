@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.2.7] - 2022-06-26
+### Changed
+- Single clicking an image in Gallery view opens up the image in Preview Mode
+- Double clicking an image in Gallery view opens up the image (not in Preview Mode)
+### Fixed
+- Files within subfolders were not being sorted correctly
+
 ## [0.2.6] - 2022-06-23
 ### Added
 - Gallery supports collapsible subfolders

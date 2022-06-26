@@ -20,8 +20,8 @@
 	lazyloadImages.forEach((image) => {
 		imageObserver.observe(image);
 	});
-	
-	document.addEventListener('click', event => {
+
+	const clickHandler = (event, preview) => {
 		let node = event && event.target;
 		const folderHeader = ['folder','folder-title','folder-arrow'];
 		if (folderHeader.some(el => node.classList.contains(el))) {
@@ -46,10 +46,11 @@
 		vscode.postMessage({
 			command: 'vscodeImageGallery.openViewer',
 			src: node.src,
+			preview: preview,
 		});
-
-	}, true);
-
+	};
+	document.addEventListener('click', event => clickHandler(event, preview=true), true);
+	document.addEventListener('dblclick', event => clickHandler(event, preview=false), true);
 
 	window.addEventListener('message', event => {
 		const message = event.data;

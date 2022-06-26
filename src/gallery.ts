@@ -51,7 +51,7 @@ export function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<
     Object.keys(pathsBySubFolders).sort(comparator).forEach(
         subfolder => {
             sortedResult[subfolder] = pathsBySubFolders[subfolder].sort(
-                (path1: vscode.Uri, path2: vscode.Uri) => path1.path.localeCompare(path2.path)
+                (path1: vscode.Uri, path2: vscode.Uri) => comparator(path1.path, path2.path)
             );
         }
     );
