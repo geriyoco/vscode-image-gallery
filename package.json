@@ -124,6 +124,7 @@
 		"webpack-cli": "^4.9.2"
 	},
 	"dependencies": {
+		"@vscode/codicons": "^0.0.31",
 		"panzoom": "^9.4.2"
 	}
 }

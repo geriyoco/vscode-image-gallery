@@ -30,8 +30,6 @@
 	});
 
 	const clickHandler = (event, preview) => {
-		event.preventDefault();
-		event.stopPropagation();
 		let node = event && event.target;
 		const folderHeader = ['folder', 'folder-title', 'folder-arrow'];
 		if (folderHeader.some(el => node.classList.contains(el))) {
@@ -50,14 +48,34 @@
 
 			let expandAll = Array.from(gridElements).some(el => el.style.display === "none");
 			if (expandAll) {
-				vscode.postMessage({
-					command: "vscodeImageGallery.expandAll"
-				});
+				let collapseAllButton = document.getElementsByClassName("codicon-collapse-all");
+				if (collapseAllButton.length !== 0) {
+					collapseAllButton[0].setAttribute("class", "codicon codicon-expand-all");
+				}
 			} else {
-				vscode.postMessage({
-					command: "vscodeImageGallery.collapseAll"
-				});
+				let expandAllButton = document.getElementsByClassName("codicon-expand-all");
+				if (expandAllButton.length !== 0) {
+					expandAllButton[0].setAttribute("class", "codicon codicon-collapse-all");
+				}
 			}
+			return;
+		}
+
+		if (node.classList.contains("codicon-expand-all")) {
+			gridElements.forEach((gridElement) => {
+				gridElement.style.display = "grid";
+				gridElement.previousElementSibling.firstElementChild.textContent = "⮟";
+			});
+			node.setAttribute("class", "codicon codicon-collapse-all");
+			return;
+		}
+		if (node.classList.contains("codicon-collapse-all")) {
+			gridElements.forEach((gridElement) => {
+				gridElement.style.display = "none";
+				gridElement.previousElementSibling.firstElementChild.textContent = "⮞";
+			});
+			node.setAttribute("class", "codicon codicon-expand-all");
+			return;
 		}
 
 		if (!node.classList.contains('image')) { return; }
@@ -68,8 +86,8 @@
 			preview: preview,
 		});
 	};
-	document.addEventListener('click', event => clickHandler(event, preview=true), true);
-	document.addEventListener('dblclick', event => clickHandler(event, preview=false), true);
+	document.addEventListener('click', event => clickHandler(event, preview = true), { passive: true });
+	document.addEventListener('dblclick', event => clickHandler(event, preview = false), { passive: true });
 
 	window.addEventListener('message', event => {
 		const message = event.data;
@@ -95,6 +113,9 @@
 
 				let grid = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-grid`);
 				grid.appendChild(containerNode);
+
+				let folderItemsCountOnAdd = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-items-count`);
+				folderItemsCountOnAdd.textContent = folderItemsCountOnAdd.textContent.replace(/\d+/g, (match, _) => parseInt(match) + 1);
 				break;
 			case 'vscodeImageGallery.changeImage':
 				let changedTimestamp = new Date().getTime();
@@ -110,26 +131,10 @@
 			case 'vscodeImageGallery.deleteImage':
 				let deleteImage = document.getElementById(message.imgPath);
 				deleteImage.parentElement.remove();
+
+				let folderItemsCountOnDel = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-items-count`);
+				folderItemsCountOnDel.textContent = folderItemsCountOnDel.textContent.replace(/\d+/g, (match, _) => parseInt(match) - 1);
 				break;
-			case 'vscodeImageGallery.expandAll':
-				gridElements.forEach((gridElement) => {
-					gridElement.style.display = "grid";
-					gridElement.previousElementSibling.firstElementChild.textContent = "⮟";
-				});
-				vscode.postMessage({
-					command: "vscodeImageGallery.collapseAll"
-				});
-				break;
-			case 'vscodeImageGallery.collapseAll':
-				gridElements.forEach((gridElement) => {
-					gridElement.style.display = "none";
-					gridElement.previousElementSibling.firstElementChild.textContent = "⮞";
-				});
-				vscode.postMessage({
-					command: "vscodeImageGallery.expandAll"
-				});
-				break;
-			
 		}
 	}, true);
 }());

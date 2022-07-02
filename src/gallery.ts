@@ -72,6 +72,7 @@ function getWebviewContent(
             <button id="${folder}" class="folder">
                 <div id="${folder}-arrow" class="folder-arrow">⮟</div>
                 <div id="${folder}-title" class="folder-title">${folder}</div>
+                <div id="${folder}-items-count" class="folder-items-count">${pathsBySubFolders[folder].length} images found</div>
             </button>
             <div id="${folder}-grid" class="grid grid-${index}">
                 ${pathsBySubFolders[folder].map(img => {
@@ -89,6 +90,7 @@ function getWebviewContent(
 
     const styleHref = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.css'));
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.js'));
+    const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
 
     return (
         `<!DOCTYPE html>
@@ -96,11 +98,19 @@ function getWebviewContent(
 		<head>
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${utils.nonce}'; img-src ${webview.cspSource} https:; style-src ${webview.cspSource};">
+			<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${utils.nonce}'; font-src ${webview.cspSource}; img-src ${webview.cspSource} https:; style-src ${webview.cspSource};">
 			<link href="${styleHref}" rel="stylesheet" />
+			<link href="${codiconsUri}" rel="stylesheet" />
 			<title>Image Gallery</title>
 		</head>
 		<body>
+            <div class="toolbar">
+                ${Object.keys(pathsBySubFolders).length > 1 ?
+            '<button class="codicon codicon-expand-all"></button>' :
+            '<button class="codicon codicon-collapse-all"></button>'
+        }
+                <div class="folder-count">${Object.keys(pathsBySubFolders).length} folders found</div>
+            </div>
             ${Object.keys(pathsBySubFolders).length === 0 ? '<p>No image found in this folder.</p>' : `${imgHtml}`}
 			<script nonce="${utils.nonce}" src="${scriptUri}"></script>
 		</body>
