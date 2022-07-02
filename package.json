@@ -2,7 +2,7 @@
 	"name": "vscode-image-gallery",
 	"displayName": "Image Gallery",
 	"description": "An extension that enhances image browsing experience.",
-	"version": "0.2.6",
+	"version": "0.2.7",
 	"publisher": "GeriYoco",
 	"repository": {
 		"type": "git",
@@ -21,8 +21,6 @@
 	],
 	"activationEvents": [
 		"onCommand:vscodeImageGallery.openGallery",
-		"onCommand:vscodeImageGallery.expandAll",
-		"onCommand:vscodeImageGallery.collapseAll",
 		"onWebviewPanel:gryc.gallery",
 		"onWebviewPanel:gryc.viewer",
 		"onCustomEditor:gryc.editor"
@@ -82,26 +80,6 @@
 				"command": "vscodeImageGallery.openGallery",
 				"title": "Open Image Gallery",
 				"category": "Image Gallery"
-			},
-			{
-				"command": "vscodeImageGallery.expandAll",
-				"title": "Expand All Folders",
-				"icon": "$(expand-all)",
-				"selector": [
-					{
-						"viewType": "gryc.gallery"
-					}
-				]
-			},
-			{
-				"command": "vscodeImageGallery.collapseAll",
-				"title": "Collapse All Folders",
-				"icon": "$(collapse-all)",
-				"selector": [
-					{
-						"viewType": "gryc.gallery"
-					}
-				]
 			}
 		],
 		"menus": {
@@ -110,20 +88,6 @@
 					"command": "vscodeImageGallery.openGallery",
 					"group": "2_grycImageGallery@1",
 					"when": "explorerResourceIsFolder && !virtualWorkspace"
-				}
-			],
-			"editor/title": [
-				{
-					"viewType": "gryc.gallery",
-					"when": "ext.viewType == gryc.gallery && !collapse",
-					"command": "vscodeImageGallery.expandAll",
-					"group": "navigation"
-				},
-				{
-					"viewType": "gryc.gallery",
-					"when": "ext.viewType == gryc.gallery && collapse",
-					"command": "vscodeImageGallery.collapseAll",
-					"group": "navigation"
 				}
 			]
 		}
