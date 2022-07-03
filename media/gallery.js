@@ -1,4 +1,3 @@
-
 (function () {
 	const vscode = acquireVsCodeApi();
 
@@ -88,6 +87,21 @@
 	};
 	document.addEventListener('click', event => clickHandler(event, preview = true), { passive: true });
 	document.addEventListener('dblclick', event => clickHandler(event, preview = false), { passive: true });
+
+	document.addEventListener('mouseover', event => {
+		const node = event && event.target;
+		if (!node.classList.contains('image')) { return; }
+		let imgMetadata = JSON.parse(node.getAttribute('data-meta'));
+		let lastIndex = node.src.lastIndexOf('.');
+		let imgExtension = node.src.slice(lastIndex + 1, );
+		let created = new Date(imgMetadata.ctime).toISOString();
+		let modified = new Date(imgMetadata.mtime).toISOString();
+		let i = Math.floor(Math.log(imgMetadata.size) / Math.log(1024));
+		let imgSize = (imgMetadata.size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'KB', 'MB', 'GB', 'TB'][i];
+		
+		node.previousElementSibling.textContent = `Dimensions: ${node.naturalHeight} x ${node.naturalWidth}\nImage Type: ${imgExtension}\nSize: ${imgSize}\nCreated: ${created }\nModified: ${modified }`;
+		return;
+	});
 
 	window.addEventListener('message', event => {
 		const message = event.data;

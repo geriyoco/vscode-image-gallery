@@ -76,15 +76,19 @@ export function getFilename(imgPath: string) {
 	return filename;
 }
 
-export function getPathsBySubFolders(imgPaths: vscode.Uri[]) {
-	let pathsBySubFolders: { [key: string]: Array<vscode.Uri> } = {};
-	imgPaths.forEach(imgPath => {
-		let key = path.dirname(imgPath.fsPath);
+export async function getPathsBySubFolders(imgPaths: vscode.Uri[]) {
+	let pathsBySubFolders: { [key: string]: Array<{ "imgUri": vscode.Uri, "imgMetadata": vscode.FileStat }> } = {};
+	for (const imgUri of imgPaths) {
+		let key = path.dirname(imgUri.fsPath);
 		key = key[0].toUpperCase() + key.slice(1,);
 		if (!pathsBySubFolders[key]) {
 			pathsBySubFolders[key] = [];
 		}
-		pathsBySubFolders[key].push(imgPath);
-	});
+		let imgMetadata = await vscode.workspace.fs.stat(imgUri);
+		pathsBySubFolders[key].push({
+			"imgUri": imgUri,
+			"imgMetadata": imgMetadata
+		});
+	}
 	return pathsBySubFolders;
 }

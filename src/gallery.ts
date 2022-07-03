@@ -14,8 +14,8 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
     );
 
     const imgPaths = await getImagePaths(galleryFolder);
-    let pathsBySubFolders = utils.getPathsBySubFolders(imgPaths);
-    pathsBySubFolders = sortPathsBySubFolders(pathsBySubFolders);
+    let pathsBySubFolders = await utils.getPathsBySubFolders(imgPaths);
+    // pathsBySubFolders = sortPathsBySubFolders(pathsBySubFolders);
 
     panel.webview.html = getWebviewContent(context, panel.webview, pathsBySubFolders);
 
@@ -30,40 +30,40 @@ async function getImagePaths(galleryFolder?: vscode.Uri) {
     return files;
 }
 
-function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }): { [key: string]: Array<vscode.Uri> } {
-    const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
-    const keys = [
-        'localeMatcher',
-        'sensitivity',
-        'ignorePunctuation',
-        'numeric',
-        'caseFirst',
-        'collation',
-    ];
-    const comparator = (a: string, b: string) => {
-        return a.localeCompare(
-            b,
-            undefined,
-            Object.fromEntries(keys.map(key => [key, config.get(key)]))
-        );
-    };
+// function sortPathsBySubFolders(pathsBySubFolders: { [key: string]: Array<vscode.Uri> }): { [key: string]: Array<vscode.Uri> } {
+//     const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
+//     const keys = [
+//         'localeMatcher',
+//         'sensitivity',
+//         'ignorePunctuation',
+//         'numeric',
+//         'caseFirst',
+//         'collation',
+//     ];
+//     const comparator = (a: string, b: string) => {
+//         return a.localeCompare(
+//             b,
+//             undefined,
+//             Object.fromEntries(keys.map(key => [key, config.get(key)]))
+//         );
+//     };
 
-    const sortedResult: { [key: string]: Array<vscode.Uri> } = {};
-    Object.keys(pathsBySubFolders).sort(comparator).forEach(
-        subfolder => {
-            sortedResult[subfolder] = pathsBySubFolders[subfolder].sort(
-                (path1: vscode.Uri, path2: vscode.Uri) => comparator(path1.path, path2.path)
-            );
-        }
-    );
+//     const sortedResult: { [key: string]: Array<vscode.Uri> } = {};
+//     Object.keys(pathsBySubFolders).sort(comparator).forEach(
+//         subfolder => {
+//             sortedResult[subfolder] = pathsBySubFolders[subfolder].sort(
+//                 (path1: vscode.Uri, path2: vscode.Uri) => comparator(path1.path, path2.path)
+//             );
+//         }
+//     );
 
-    return sortedResult;
-}
+//     return sortedResult;
+// }
 
 function getWebviewContent(
     context: vscode.ExtensionContext,
     webview: vscode.Webview,
-    pathsBySubFolders: { [key: string]: Array<vscode.Uri> },
+    pathsBySubFolders: { [key: string]: Array<{ "imgUri": vscode.Uri, "imgMetadata": vscode.FileStat }> },
 ) {
     const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
     const imgHtml = Object.keys(pathsBySubFolders).map(
@@ -77,9 +77,10 @@ function getWebviewContent(
             <div id="${folder}-grid" class="grid grid-${index}">
                 ${pathsBySubFolders[folder].map(img => {
                 return `
-                    <div class="image-container">
-                        <img id="${img.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img)}" class="image lazy">
-                        <div id="${img.path}-filename" class="filename">${utils.getFilename(img.path)}</div>
+                    <div class="image-container tooltip">
+                        <span id="${img.imgUri.path}-tooltip" class="tooltiptext"></span>
+                        <img id="${img.imgUri.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img.imgUri)}" data-meta='${JSON.stringify(img.imgMetadata)}' class="image lazy">
+                        <div id="${img.imgUri.path}-filename" class="filename">${utils.getFilename(img.imgUri.path)}</div>
                     </div>
                     `;
             }).join('')}
