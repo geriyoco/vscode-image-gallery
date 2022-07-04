@@ -4,8 +4,8 @@ import * as utils from './utils';
 export function galleryFileWatcher(mainPanel: vscode.WebviewPanel, galleryFolder?: vscode.Uri) {
     let globPattern = utils.getGlob();
     const watcher = vscode.workspace.createFileSystemWatcher(galleryFolder ? new vscode.RelativePattern(galleryFolder, globPattern) : globPattern);
-    watcher.onDidChange(uri => {
-        let pathsBySubFolders = utils.getPathsBySubFolders([uri]);
+    watcher.onDidChange(async uri => {
+        let pathsBySubFolders = await utils.getPathsBySubFolders([uri], 'change');
         mainPanel.webview.postMessage({
             command: 'vscodeImageGallery.changeImage',
             imgSrc: mainPanel.webview.asWebviewUri(uri).toString(),
@@ -13,8 +13,8 @@ export function galleryFileWatcher(mainPanel: vscode.WebviewPanel, galleryFolder
             pathsBySubFolders: pathsBySubFolders,
         });
     });
-    watcher.onDidCreate(uri => {
-        let pathsBySubFolders = utils.getPathsBySubFolders([uri]);
+    watcher.onDidCreate(async uri => {
+        let pathsBySubFolders = await utils.getPathsBySubFolders([uri], 'create');
         mainPanel.webview.postMessage({
             command: 'vscodeImageGallery.addImage',
             imgSrc: mainPanel.webview.asWebviewUri(uri).toString(),
@@ -22,8 +22,8 @@ export function galleryFileWatcher(mainPanel: vscode.WebviewPanel, galleryFolder
             pathsBySubFolders: pathsBySubFolders,
         });
     });
-    watcher.onDidDelete(uri => {
-        let pathsBySubFolders = utils.getPathsBySubFolders([uri]);
+    watcher.onDidDelete(async uri => {
+        let pathsBySubFolders = await utils.getPathsBySubFolders([uri], 'delete');
         mainPanel.webview.postMessage({
             command: 'vscodeImageGallery.deleteImage',
             imgSrc: mainPanel.webview.asWebviewUri(uri).toString(),

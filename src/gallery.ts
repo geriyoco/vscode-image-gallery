@@ -63,7 +63,7 @@ async function getImagePaths(galleryFolder?: vscode.Uri) {
 function getWebviewContent(
     context: vscode.ExtensionContext,
     webview: vscode.Webview,
-    pathsBySubFolders: { [key: string]: Array<{ "imgUri": vscode.Uri, "imgMetadata": vscode.FileStat }> },
+    pathsBySubFolders: { [key: string]: Array<{ "imgUri": vscode.Uri, "imgMetadata": vscode.FileStat | null }> },
 ) {
     const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
     const imgHtml = Object.keys(pathsBySubFolders).map(

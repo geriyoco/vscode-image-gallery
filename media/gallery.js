@@ -77,13 +77,21 @@
 			return;
 		}
 
-		if (!node.classList.contains('image')) { return; }
+		if (!node.parentElement.classList.contains('image-container')) { return; }
 
-		vscode.postMessage({
-			command: 'vscodeImageGallery.openViewer',
-			src: node.src,
-			preview: preview,
-		});
+		if (node.parentElement.classList.contains('image-container')) {
+			node.parentElement.childNodes.forEach((childNode) => {
+				if (childNode.nodeName.toLowerCase() === 'img') {
+					vscode.postMessage({
+						command: 'vscodeImageGallery.openViewer',
+						src: childNode.src,
+						preview: preview,
+					});
+				}
+			});
+			return;
+		}
+		return;
 	};
 	document.addEventListener('click', event => clickHandler(event, preview = true), { passive: true });
 	document.addEventListener('dblclick', event => clickHandler(event, preview = false), { passive: true });
@@ -94,6 +102,8 @@
 		let imgMetadata = JSON.parse(node.getAttribute('data-meta'));
 		let lastIndex = node.src.lastIndexOf('.');
 		let imgExtension = node.src.slice(lastIndex + 1, );
+		let firstIndex = imgExtension.indexOf('?');
+		imgExtension = imgExtension.slice(0, firstIndex);
 		let created = new Date(imgMetadata.ctime).toISOString();
 		let modified = new Date(imgMetadata.mtime).toISOString();
 		let i = Math.floor(Math.log(imgMetadata.size) / Math.log(1024));
@@ -109,26 +119,33 @@
 		switch (message.command) {
 			case 'vscodeImageGallery.addImage':
 				let addedTimestamp = new Date().getTime();
+				let folder = Object.keys(message.pathsBySubFolders)[0];
 				let imgNode = document.createElement("img");
 				imgNode.setAttribute("class", "image loaded");
 				imgNode.setAttribute("id", message.imgPath);
 				imgNode.setAttribute("src", `${message.imgSrc}?t=${addedTimestamp}`);
 				imgNode.setAttribute("data-src", `${message.imgSrc}?t=${addedTimestamp}`);
+				imgNode.setAttribute("data-meta", `${JSON.stringify(message.pathsBySubFolders[folder][0].imgMetadata)}`);
 
 				let divNode = document.createElement("div");
 				divNode.setAttribute("class", "filename");
 				divNode.setAttribute("id", message.imgPath + "-filename");
 				divNode.textContent = message.imgPath.split("/").pop();
 
+				let tooltipNode = document.createElement("span");
+				tooltipNode.setAttribute("class", "tooltiptext");
+				tooltipNode.setAttribute("id", message.imgPath + "-tooltip");
+
 				let containerNode = document.createElement("div");
-				containerNode.setAttribute("class", "image-container");
+				containerNode.setAttribute("class", "image-container tooltip");
+				containerNode.appendChild(tooltipNode);
 				containerNode.appendChild(imgNode);
 				containerNode.appendChild(divNode);
-
-				let grid = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-grid`);
+				
+				let grid = document.getElementById(`${folder}-grid`);
 				grid.appendChild(containerNode);
 
-				let folderItemsCountOnAdd = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-items-count`);
+				let folderItemsCountOnAdd = document.getElementById(`${folder}-items-count`);
 				folderItemsCountOnAdd.textContent = folderItemsCountOnAdd.textContent.replace(/\d+/g, (match, _) => parseInt(match) + 1);
 				break;
 			case 'vscodeImageGallery.changeImage':
@@ -136,6 +153,7 @@
 				let changeImage = document.getElementById(message.imgPath);
 				changeImage.setAttribute("src", `${message.imgSrc}?t=${changedTimestamp}`);
 				changeImage.setAttribute("data-src", `${message.imgSrc}?t=${changedTimestamp}`);
+				changeImage.setAttribute("data-meta", `${JSON.stringify(message.pathsBySubFolders[folder][0].imgMetadata)}`);
 
 				let changeFilename = document.getElementById(message.imgPath + "-filename");
 				changeFilename.setAttribute("class", "filename");
