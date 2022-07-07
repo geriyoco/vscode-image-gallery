@@ -2,6 +2,14 @@
 (function () {
 	const vscode = acquireVsCodeApi();
 
+	let gridElements = document.querySelectorAll(".grid");
+	gridElements.forEach((gridElement) => {
+		if (!gridElement.className.includes("grid-0")) {
+			gridElement.style.display = "none";
+			gridElement.previousElementSibling.firstElementChild.textContent = "⮞";
+		}
+	});
+
 	let lazyloadImages = document.querySelectorAll(".lazy");
 	let imageObserver = new IntersectionObserver((entries, observer) => {
 		entries.forEach(entry => {
@@ -23,24 +31,53 @@
 
 	const clickHandler = (event, preview) => {
 		let node = event && event.target;
-		const folderHeader = ['folder','folder-title','folder-arrow'];
+		const folderHeader = ['folder', 'folder-title', 'folder-arrow'];
 		if (folderHeader.some(el => node.classList.contains(el))) {
-			console.log(node);
 			let id = '';
 			if (node.classList.contains('folder')) {
 				id = node.id;
 			} else {
 				let lastIndexToSplit = node.id.lastIndexOf('-');
 				id = node.id.slice(0, lastIndexToSplit);
-
 			}
 
 			let folderGrid = document.getElementById(id + '-grid');
 			let folderArrow = document.getElementById(id + '-arrow');
-			console.log({folderGrid, folderArrow});
-			folderGrid.style.display = folderGrid.style.display === "none" ? "" : "none";
+			folderGrid.style.display = folderGrid.style.display === "none" ? "grid" : "none";
 			folderArrow.textContent = folderArrow.textContent === "⮟" ? "⮞" : "⮟";
+
+			let expandAll = Array.from(gridElements).some(el => el.style.display === "none");
+			if (expandAll) {
+				let collapseAllButton = document.getElementsByClassName("codicon-collapse-all");
+				if (collapseAllButton.length !== 0) {
+					collapseAllButton[0].setAttribute("class", "codicon codicon-expand-all");
+				}
+			} else {
+				let expandAllButton = document.getElementsByClassName("codicon-expand-all");
+				if (expandAllButton.length !== 0) {
+					expandAllButton[0].setAttribute("class", "codicon codicon-collapse-all");
+				}
+			}
+			return;
 		}
+
+		if (node.classList.contains("codicon-expand-all")) {
+			gridElements.forEach((gridElement) => {
+				gridElement.style.display = "grid";
+				gridElement.previousElementSibling.firstElementChild.textContent = "⮟";
+			});
+			node.setAttribute("class", "codicon codicon-collapse-all");
+			return;
+		}
+		if (node.classList.contains("codicon-collapse-all")) {
+			gridElements.forEach((gridElement) => {
+				gridElement.style.display = "none";
+				gridElement.previousElementSibling.firstElementChild.textContent = "⮞";
+			});
+			node.setAttribute("class", "codicon codicon-expand-all");
+			return;
+		}
+
 		if (!node.classList.contains('image')) { return; }
 
 		vscode.postMessage({
@@ -49,8 +86,8 @@
 			preview: preview,
 		});
 	};
-	document.addEventListener('click', event => clickHandler(event, preview=true), true);
-	document.addEventListener('dblclick', event => clickHandler(event, preview=false), true);
+	document.addEventListener('click', event => clickHandler(event, preview = true), { passive: true });
+	document.addEventListener('dblclick', event => clickHandler(event, preview = false), { passive: true });
 
 	window.addEventListener('message', event => {
 		const message = event.data;
@@ -76,6 +113,9 @@
 
 				let grid = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-grid`);
 				grid.appendChild(containerNode);
+
+				let folderItemsCountOnAdd = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-items-count`);
+				folderItemsCountOnAdd.textContent = folderItemsCountOnAdd.textContent.replace(/\d+/g, (match, _) => parseInt(match) + 1);
 				break;
 			case 'vscodeImageGallery.changeImage':
 				let changedTimestamp = new Date().getTime();
@@ -91,6 +131,9 @@
 			case 'vscodeImageGallery.deleteImage':
 				let deleteImage = document.getElementById(message.imgPath);
 				deleteImage.parentElement.remove();
+
+				let folderItemsCountOnDel = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-items-count`);
+				folderItemsCountOnDel.textContent = folderItemsCountOnDel.textContent.replace(/\d+/g, (match, _) => parseInt(match) - 1);
 				break;
 		}
 	}, true);

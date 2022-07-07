@@ -1,3 +1,4 @@
+import path from 'path';
 import * as vscode from 'vscode';
 import * as utils from './utils';
 
@@ -15,13 +16,13 @@ export class ViewerCustomEditor implements vscode.CustomReadonlyEditorProvider {
 		webviewPanel: vscode.WebviewPanel,
 	): Promise<void> {
 		let documentPath = webviewPanel.webview.asWebviewUri(document.uri).toString();
-		let documentDir = document.uri.path.split('/').slice(0, -1).join('/');
+		let documentDir = path.dirname(document.uri.fsPath);
 		webviewPanel.webview.options = {
 			localResourceRoots: [
 				vscode.Uri.joinPath(this.context.extensionUri, 'media'),
 				vscode.Uri.file(utils.getCwd()),
-                vscode.Uri.file(documentDir),
-            ],
+				vscode.Uri.file(documentDir),
+			],
 			enableScripts: true,
 			enableForms: false
 		};

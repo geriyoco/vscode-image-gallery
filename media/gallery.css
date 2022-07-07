@@ -69,12 +69,47 @@ html {
 	border: 0;
 }
 
+.folder:hover {
+	box-shadow: 0 0px 10px hsl(60, 65%, 90%);
+}
+
 .folder-title {
 	padding-left: 10px;
 	text-align: left;
 	flex-grow: 1;
 }
 
-.folder:hover {
-	box-shadow: 0 0 10px hsl(60, 65%, 90%);
+.folder-arrow {
+	margin-top: -2px;
+}
+
+.folder-count {
+	display: flex;
+	flex-grow: 1;
+	justify-content: right;
+	align-items: center;
+	color: white;
+	font-family: arial;
+}
+
+.toolbar {
+	position: sticky;
+	z-index: 1000;
+	top: 0;
+	padding: 15px;
+	display: flex;
+	flex-grow: 1;
+	background-color: hsl(0, 0%, 17%);
+}
+
+.codicon {
+	padding: 3px;
+	background-color: hsl(0, 0%, 17%);
+	border: 0;
+	color: white;
+}
+
+.codicon:hover {
+	background-color: hsl(180, 0%, 21%);
+	border-radius: 5px;
 }

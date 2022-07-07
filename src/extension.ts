@@ -8,18 +8,17 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Welcome! VS Code extension "GeriYoco: Image Gallery" is now active.');
 
 	const viewerEditor = new viewer.ViewerCustomEditor(context);
-	context.subscriptions.push(
-		vscode.window.registerCustomEditorProvider(
-			viewer.ViewerCustomEditor.viewType,
-			viewerEditor,
-			{
-				supportsMultipleEditorsPerDocument: true,
-				webviewOptions: {
-					retainContextWhenHidden: true,
-				}
-			},
-		)
+	const viewerPanel = vscode.window.registerCustomEditorProvider(
+		viewer.ViewerCustomEditor.viewType,
+		viewerEditor,
+		{
+			supportsMultipleEditorsPerDocument: true,
+			webviewOptions: {
+				retainContextWhenHidden: true,
+			}
+		},
 	);
+	context.subscriptions.push(viewerPanel);
 
 	let dispGallery = vscode.commands.registerCommand(
 		'vscodeImageGallery.openGallery',
