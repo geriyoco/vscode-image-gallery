@@ -128,13 +128,13 @@ html {
 }
 
 .codicon {
-	padding-left: 0px;
-	padding-right: 0px;
+	padding: 3px;
 	background-color: hsl(0, 0%, 17%);
 	border: 0;
 	color: white;
 }
 
 .codicon:hover {
-	background-color: hsl(0, 0%, 15%);
+	background-color: hsl(180, 0%, 21%);
+	border-radius: 5px;
 }
