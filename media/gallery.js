@@ -99,17 +99,31 @@
 	document.addEventListener('mouseover', event => {
 		const node = event && event.target;
 		if (!node.classList.contains('image')) { return; }
-		let imgMetadata = JSON.parse(node.getAttribute('data-meta'));
-		let lastIndex = node.src.lastIndexOf('.');
-		let imgExtension = node.src.slice(lastIndex + 1, );
-		let firstIndex = imgExtension.indexOf('?');
-		imgExtension = imgExtension.slice(0, firstIndex);
-		let created = new Date(imgMetadata.ctime).toISOString();
-		let modified = new Date(imgMetadata.mtime).toISOString();
+
+		const lastDotIndex = node.src.lastIndexOf('.');
+		const imgExtension = node.src.slice(lastDotIndex + 1, ).toUpperCase();
+		const dateOptions = {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit',
+		};
+
+		const imgMetadata = JSON.parse(node.getAttribute('data-meta'));
+		const createdDate = new Date(imgMetadata.ctime).toLocaleDateString('en-US', dateOptions);
+		const modifiedDate = new Date(imgMetadata.mtime).toLocaleTimeString('en-US', dateOptions);
 		let i = Math.floor(Math.log(imgMetadata.size) / Math.log(1024));
-		let imgSize = (imgMetadata.size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'KB', 'MB', 'GB', 'TB'][i];
+		let imgSize = (imgMetadata.size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['bytes', 'KB', 'MB', 'GB', 'TB'][i];
 		
-		node.previousElementSibling.textContent = `Dimensions: ${node.naturalHeight} x ${node.naturalWidth}\nImage Type: ${imgExtension}\nSize: ${imgSize}\nCreated: ${created }\nModified: ${modified }`;
+		node.previousElementSibling.textContent = (
+		`Dimensions: ${node.naturalHeight} x ${node.naturalWidth}
+		Type: ${imgExtension}
+		Size: ${imgSize}
+		Created: ${createdDate}
+		Modified: ${modifiedDate}`
+		).replace(/^		+/gm, '');
 		return;
 	});
 
