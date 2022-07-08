@@ -29,6 +29,31 @@ html {
 	-webkit-backface-visibility: hidden;
 }
 
+.tooltip {
+	position: relative;
+}
+
+.tooltiptext {
+	position: absolute;
+	z-index: 1;
+	visibility: hidden;
+	opacity: 0;
+	transition: 0s opacity;
+	width: 100%;
+	background-color: black;
+	color: #fff;
+	text-align: left;
+	padding: 10px;
+	border-radius: 6px;
+	white-space: pre;
+}
+
+.tooltip:hover .tooltiptext {
+	opacity: 0.8;
+	visibility: visible;
+	transition-delay: 1s;
+}
+
 .image-container:hover {
 	box-shadow: 0 0 10px white;
 }

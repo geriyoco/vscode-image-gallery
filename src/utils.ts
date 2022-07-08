@@ -76,15 +76,31 @@ export function getFilename(imgPath: string) {
 	return filename;
 }
 
-export function getPathsBySubFolders(imgPaths: vscode.Uri[]) {
-	let pathsBySubFolders: { [key: string]: Array<vscode.Uri> } = {};
-	imgPaths.forEach(imgPath => {
-		let key = path.dirname(imgPath.fsPath);
+export type TypeOfImagesInSubFolders = {
+	imgUri: vscode.Uri,
+	imgMetadata: vscode.FileStat | null,
+};
+
+export type TypeOfImagesBySubFolders = {
+	[key: string]: Array<TypeOfImagesInSubFolders>,
+};
+
+export async function getImagesBySubFolders(imgPaths: vscode.Uri[], action: string = 'create') {
+	let imagesBySubFolders: TypeOfImagesBySubFolders = {};
+	let imgMetadata = null;
+	for (const imgUri of imgPaths) {
+		let key = path.dirname(imgUri.fsPath);
 		key = key[0].toUpperCase() + key.slice(1,);
-		if (!pathsBySubFolders[key]) {
-			pathsBySubFolders[key] = [];
+		if (!imagesBySubFolders[key]) {
+			imagesBySubFolders[key] = [];
 		}
-		pathsBySubFolders[key].push(imgPath);
-	});
-	return pathsBySubFolders;
+		if (action !== 'delete') {
+			imgMetadata = await vscode.workspace.fs.stat(imgUri);
+		}
+		imagesBySubFolders[key].push({
+			"imgUri": imgUri,
+			"imgMetadata": imgMetadata
+		});
+	}
+	return imagesBySubFolders;
 }

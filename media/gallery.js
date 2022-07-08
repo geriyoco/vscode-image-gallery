@@ -1,4 +1,3 @@
-
 (function () {
 	const vscode = acquireVsCodeApi();
 
@@ -78,16 +77,55 @@
 			return;
 		}
 
-		if (!node.classList.contains('image')) { return; }
+		if (!node.parentElement.classList.contains('image-container')) { return; }
 
-		vscode.postMessage({
-			command: 'vscodeImageGallery.openViewer',
-			src: node.src,
-			preview: preview,
-		});
+		if (node.parentElement.classList.contains('image-container')) {
+			node.parentElement.childNodes.forEach((childNode) => {
+				if (childNode.nodeName.toLowerCase() === 'img') {
+					vscode.postMessage({
+						command: 'vscodeImageGallery.openViewer',
+						src: childNode.src,
+						preview: preview,
+					});
+				}
+			});
+			return;
+		}
+		return;
 	};
 	document.addEventListener('click', event => clickHandler(event, preview = true), { passive: true });
 	document.addEventListener('dblclick', event => clickHandler(event, preview = false), { passive: true });
+
+	document.addEventListener('mouseover', event => {
+		const node = event && event.target;
+		if (!node.classList.contains('image')) { return; }
+
+		const lastDotIndex = node.src.lastIndexOf('.');
+		const imgExtension = node.src.slice(lastDotIndex + 1, ).toUpperCase();
+		const dateOptions = {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit',
+		};
+
+		const imgMetadata = JSON.parse(node.getAttribute('data-meta'));
+		const createdDate = new Date(imgMetadata.ctime).toLocaleDateString('en-US', dateOptions);
+		const modifiedDate = new Date(imgMetadata.mtime).toLocaleTimeString('en-US', dateOptions);
+		let i = Math.floor(Math.log(imgMetadata.size) / Math.log(1024));
+		let imgSize = (imgMetadata.size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['bytes', 'KB', 'MB', 'GB', 'TB'][i];
+		
+		node.previousElementSibling.textContent = (
+		`Dimensions: ${node.naturalHeight} x ${node.naturalWidth}
+		Type: ${imgExtension}
+		Size: ${imgSize}
+		Created: ${createdDate}
+		Modified: ${modifiedDate}`
+		).replace(/^		+/gm, '');
+		return;
+	});
 
 	window.addEventListener('message', event => {
 		const message = event.data;
@@ -95,26 +133,33 @@
 		switch (message.command) {
 			case 'vscodeImageGallery.addImage':
 				let addedTimestamp = new Date().getTime();
+				let folder = Object.keys(message.pathsBySubFolders)[0];
 				let imgNode = document.createElement("img");
 				imgNode.setAttribute("class", "image loaded");
 				imgNode.setAttribute("id", message.imgPath);
 				imgNode.setAttribute("src", `${message.imgSrc}?t=${addedTimestamp}`);
 				imgNode.setAttribute("data-src", `${message.imgSrc}?t=${addedTimestamp}`);
+				imgNode.setAttribute("data-meta", `${JSON.stringify(message.pathsBySubFolders[folder][0].imgMetadata)}`);
 
 				let divNode = document.createElement("div");
 				divNode.setAttribute("class", "filename");
 				divNode.setAttribute("id", message.imgPath + "-filename");
 				divNode.textContent = message.imgPath.split("/").pop();
 
+				let tooltipNode = document.createElement("span");
+				tooltipNode.setAttribute("class", "tooltiptext");
+				tooltipNode.setAttribute("id", message.imgPath + "-tooltip");
+
 				let containerNode = document.createElement("div");
-				containerNode.setAttribute("class", "image-container");
+				containerNode.setAttribute("class", "image-container tooltip");
+				containerNode.appendChild(tooltipNode);
 				containerNode.appendChild(imgNode);
 				containerNode.appendChild(divNode);
-
-				let grid = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-grid`);
+				
+				let grid = document.getElementById(`${folder}-grid`);
 				grid.appendChild(containerNode);
 
-				let folderItemsCountOnAdd = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-items-count`);
+				let folderItemsCountOnAdd = document.getElementById(`${folder}-items-count`);
 				folderItemsCountOnAdd.textContent = folderItemsCountOnAdd.textContent.replace(/\d+/g, (match, _) => parseInt(match) + 1);
 				break;
 			case 'vscodeImageGallery.changeImage':
@@ -122,6 +167,7 @@
 				let changeImage = document.getElementById(message.imgPath);
 				changeImage.setAttribute("src", `${message.imgSrc}?t=${changedTimestamp}`);
 				changeImage.setAttribute("data-src", `${message.imgSrc}?t=${changedTimestamp}`);
+				changeImage.setAttribute("data-meta", `${JSON.stringify(message.pathsBySubFolders[folder][0].imgMetadata)}`);
 
 				let changeFilename = document.getElementById(message.imgPath + "-filename");
 				changeFilename.setAttribute("class", "filename");
