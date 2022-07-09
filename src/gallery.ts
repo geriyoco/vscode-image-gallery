@@ -63,10 +63,10 @@ function sortImagesBySubFolders(
             case 'size':
                 comparedValue = img1.size - img2.size;
                 break;
-            case 'ctime':
+            case 'created':
                 comparedValue = img1.ctime - img2.ctime;
                 break;
-            case 'mtime':
+            case 'modified':
                 comparedValue = img1.mtime - img2.mtime;
                 break;
         };
@@ -183,6 +183,11 @@ export async function getMessageListener(
                 panel.webview, 
                 { mode: message.mode, ascending: message.ascending },
             );
+
+            panel.webview.postMessage({
+                command: 'vscodeImageGallery.restoreCollapseStates',
+                folderCollapseStates: message.folderCollapseStates,
+            });
             break;
     }
 }

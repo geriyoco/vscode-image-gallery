@@ -30,6 +30,8 @@
 
 	const clickHandler = (event, preview) => {
 		let node = event && event.target;
+		if (node.parentElement === null) { return; }
+
 		const folderHeader = ['folder', 'folder-title', 'folder-arrow'];
 		if (folderHeader.some(el => node.classList.contains(el))) {
 			let id = '';
@@ -129,11 +131,21 @@
 
 	const sortOrder = document.getElementsByClassName('sort-order')[0];
 	const sortMode = document.getElementById('dropdown-sort');
+	const getFolderCollapseStates = () => {
+		const states = {};
+		const folders = document.getElementsByClassName('grid');
+		for (const folder of folders) {
+			const folderName = folder.id.substring(0, folder.id.lastIndexOf('-grid'));
+			states[folderName] = (folder.style.display === "none") ? "collapsed" : "expanded";
+		}
+		return states;
+	};
 	sortOrder.addEventListener('click', event => {
 		vscode.postMessage({
 			command: 'vscodeImageGallery.sortImages',
 			mode: sortMode.value,
 			ascending: sortOrder.classList.contains('codicon-arrow-down'), // to flip current sort order
+			folderCollapseStates: getFolderCollapseStates(),
 		});
 	});
 	sortMode.addEventListener('change', event => {
@@ -141,6 +153,7 @@
 			command: 'vscodeImageGallery.sortImages',
 			mode: sortMode.value,
 			ascending: sortOrder.classList.contains('codicon-arrow-up'), // to preserve current sort order
+			folderCollapseStates: getFolderCollapseStates(),
 		});
 	});
 
@@ -197,6 +210,28 @@
 
 				let folderItemsCountOnDel = document.getElementById(`${Object.keys(message.imagesBySubFolders)[0]}-items-count`);
 				folderItemsCountOnDel.textContent = folderItemsCountOnDel.textContent.replace(/\d+/g, (match, _) => parseInt(match) - 1);
+				break;
+			case 'vscodeImageGallery.restoreCollapseStates':
+				let allExpanded = true;
+				for (const [folder, state] of Object.entries(message.folderCollapseStates)) {
+					const folderGrid = document.getElementById(`${folder}-grid`);
+					const folderArrow = document.getElementById(`${folder}-arrow`);
+					const isExpanded = (state === "expanded");
+					folderGrid.style.display = isExpanded ? "grid" : "none";
+					folderArrow.textContent = isExpanded ? "⮟" : "⮞";
+					if (!isExpanded) { allExpanded = false; }
+				}
+				if (!allExpanded) {
+					let collapseAllButton = document.getElementsByClassName("codicon-collapse-all");
+					if (collapseAllButton.length !== 0) {
+						collapseAllButton[0].setAttribute("class", "codicon codicon-expand-all");
+					}
+				} else {
+					let expandAllButton = document.getElementsByClassName("codicon-expand-all");
+					if (expandAllButton.length !== 0) {
+						expandAllButton[0].setAttribute("class", "codicon codicon-collapse-all");
+					}
+				}
 				break;
 		}
 	}, true);
