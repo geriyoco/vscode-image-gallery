@@ -1,16 +1,27 @@
 # Change Log
 
+## [0.4.0] - 2022-07-10
+### Added
+- Buttons to expand/collapse all sub-folders in the gallery view
+- Tooltip containing metadata appears with a delay when hovering over an image in the gallery view
+- Gallery images are sortable by image attributes including file type, file size, date created, and date modified
+- Gallery images are sortable in both ascending and descending orders
+
+### Changed
+- Clicking (both single and double) an image on the gallery will focus the image on the Explorer side bar (see [here](https://github.com/geriyoco/vscode-image-gallery/pull/75#issue-1284403392)); a separate viewer will still be opened up
+
 ## [0.2.7] - 2022-06-26
 ### Changed
 - Single clicking an image in Gallery view opens up the image in Preview Mode
 - Double clicking an image in Gallery view opens up the image (not in Preview Mode)
+
 ### Fixed
-- Files within subfolders were not being sorted correctly
+- Files within sub-folders were not being sorted correctly
 
 ## [0.2.6] - 2022-06-23
 ### Added
-- Gallery supports collapsible subfolders
-- Sort subfolders and files by alphanumeric order
+- Gallery supports collapsible sub-folders
+- Sort sub-folders and files by alphanumeric order
 
 ## [0.2.5] - 2022-05-14
 ### Added
