@@ -4,7 +4,7 @@ import * as utils from './utils';
 export async function createPanel(
     context: vscode.ExtensionContext,
     galleryFolder?: vscode.Uri,
-    sortAscending: boolean = true,
+    sortOptions = { mode: 'name', ascending: true },
 ) {
     vscode.commands.executeCommand('setContext', 'ext.viewType', 'gryc.gallery');
     const panel = vscode.window.createWebviewPanel(
@@ -16,7 +16,7 @@ export async function createPanel(
             retainContextWhenHidden: true,
         }
     );
-    panel.webview.html = await getWebviewContent(context, galleryFolder, panel.webview, sortAscending);
+    panel.webview.html = await getWebviewContent(context, galleryFolder, panel.webview, sortOptions);
     return panel;
 }
 
@@ -42,7 +42,7 @@ function sortImagesBySubFolders(
         'caseFirst',
         'collation',
     ];
-    const comparator = (a: string, b: string) => {
+    const stringComparator = (a: string, b: string) => {
         return a.localeCompare(
             b,
             undefined,
@@ -50,17 +50,35 @@ function sortImagesBySubFolders(
         );
     };
 
-    const sortedResult: utils.TypeOfImagesBySubFolders = {};
     const sign = ascending ? +1 : -1;
-    type Image = utils.TypeOfImagesInSubFolders; // alias
-    Object.keys(imagesBySubFolders).sort(comparator).forEach(
+    const imagesComparator = (img1: utils.TypeOfImagesInSubFolders, img2: utils.TypeOfImagesInSubFolders) => {
+        let comparedValue = 0;
+        switch (mode) {
+            case 'name':
+                comparedValue = stringComparator(img1.uri.path, img2.uri.path);
+                break;
+            case 'type':
+                comparedValue = stringComparator(img1.extension, img2.extension);
+                break;
+            case 'size':
+                comparedValue = img1.size - img2.size;
+                break;
+            case 'ctime':
+                comparedValue = img1.ctime - img2.ctime;
+                break;
+            case 'mtime':
+                comparedValue = img1.mtime - img2.mtime;
+                break;
+        };
+        return sign * comparedValue;
+    };
+
+    const sortedResult: utils.TypeOfImagesBySubFolders = {};
+    Object.keys(imagesBySubFolders).sort(stringComparator).forEach(
         subfolder => {
-            sortedResult[subfolder] = imagesBySubFolders[subfolder].sort(
-                (img1: Image, img2: Image) => sign * comparator(img1.imgUri.path, img2.imgUri.path)
-            );
+            sortedResult[subfolder] = imagesBySubFolders[subfolder].sort(imagesComparator);
         }
     );
-
     return sortedResult;
 }
 
@@ -68,12 +86,12 @@ async function getWebviewContent(
     context: vscode.ExtensionContext,
     galleryFolder: vscode.Uri | undefined,
     webview: vscode.Webview,
-    sortAscending: boolean,
+    sortOptions: { mode: string, ascending: boolean },
 ) {
     const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
     const imgPaths = await getImagePaths(galleryFolder);
     let imagesBySubFolders = await utils.getImagesBySubFolders(imgPaths);
-    imagesBySubFolders = sortImagesBySubFolders(imagesBySubFolders, '', sortAscending);
+    imagesBySubFolders = sortImagesBySubFolders(imagesBySubFolders, sortOptions.mode, sortOptions.ascending);
 
     const imgHtml = Object.keys(imagesBySubFolders).map(
         (folder, index) => {
@@ -87,9 +105,9 @@ async function getWebviewContent(
                 ${imagesBySubFolders[folder].map(img => {
                 return `
                     <div class="image-container tooltip">
-                        <span id="${img.imgUri.path}-tooltip" class="tooltiptext"></span>
-                        <img id="${img.imgUri.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img.imgUri)}" data-meta='${JSON.stringify(img.imgMetadata)}' class="image lazy">
-                        <div id="${img.imgUri.path}-filename" class="filename">${utils.getFilename(img.imgUri.path)}</div>
+                        <span id="${img.uri.path}-tooltip" class="tooltiptext"></span>
+                        <img id="${img.uri.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img.uri)}" data-meta='${JSON.stringify(img)}' class="image lazy">
+                        <div id="${img.uri.path}-filename" class="filename">${utils.getFilename(img.uri.path)}</div>
                     </div>
                     `;
             }).join('')}
@@ -121,14 +139,13 @@ async function getWebviewContent(
             }
                 <button class="codicon codicon-sort-precedence"></button>
                 <select id="dropdown-sort" class="dropdown">
-                    <option value="name">Name</option>
-                    <option value="dimensions">Dimensions</option>
-                    <option value="type">File type</option>
-                    <option value="size">File size</option>
-                    <option value="created">Created date</option>
-                    <option value="modified">Modified date</option>
+                    <option value="name" ${sortOptions.mode === 'name' ? 'selected' : ''}>Name</option>
+                    <option value="type" ${sortOptions.mode === 'type' ? 'selected' : ''}>File type</option>
+                    <option value="size" ${sortOptions.mode === 'size' ? 'selected' : ''}>File size</option>
+                    <option value="created" ${sortOptions.mode === 'created' ? 'selected' : ''}>Created date</option>
+                    <option value="modified" ${sortOptions.mode === 'modified' ? 'selected' : ''}>Modified date</option>
                 </select>
-            ${sortAscending ?
+            ${sortOptions.ascending ?
                 '<button class="sort-order codicon codicon-arrow-up"></button>' :
                 '<button class="sort-order codicon codicon-arrow-down"></button>'
             }
@@ -159,8 +176,13 @@ export async function getMessageListener(
                 },
             );
             break;
-        case 'vscodeImageGallery.sortOrder':
-            panel.webview.html = await getWebviewContent(context, galleryFolder, panel.webview, message.ascending);
+        case 'vscodeImageGallery.sortImages':
+            panel.webview.html = await getWebviewContent(
+                context,
+                galleryFolder,
+                panel.webview, 
+                { mode: message.mode, ascending: message.ascending },
+            );
             break;
     }
 }

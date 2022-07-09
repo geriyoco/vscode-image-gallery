@@ -128,10 +128,19 @@
 	});
 
 	const sortOrder = document.getElementsByClassName('sort-order')[0];
+	const sortMode = document.getElementById('dropdown-sort');
 	sortOrder.addEventListener('click', event => {
 		vscode.postMessage({
-			command: 'vscodeImageGallery.sortOrder',
-			ascending: sortOrder.classList.contains('codicon-arrow-down'),
+			command: 'vscodeImageGallery.sortImages',
+			mode: sortMode.value,
+			ascending: sortOrder.classList.contains('codicon-arrow-down'), // to flip current sort order
+		});
+	});
+	sortMode.addEventListener('change', event => {
+		vscode.postMessage({
+			command: 'vscodeImageGallery.sortImages',
+			mode: sortMode.value,
+			ascending: sortOrder.classList.contains('codicon-arrow-up'), // to preserve current sort order
 		});
 	});
 
