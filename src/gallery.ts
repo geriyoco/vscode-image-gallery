@@ -119,6 +119,7 @@ async function getWebviewContent(
     const styleHref = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.css'));
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.js'));
     const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
+    const getSelected = (value: string) => sortOptions.mode === value ? 'selected' : '';
 
     return (
         `<!DOCTYPE html>
@@ -133,22 +134,28 @@ async function getWebviewContent(
 		</head>
 		<body>
             <div class="toolbar">
-            ${Object.keys(imagesBySubFolders).length > 1 ?
-                '<button class="codicon codicon-expand-all"></button>' :
-                '<button class="codicon codicon-collapse-all"></button>'
-            }
-                <button class="codicon codicon-sort-precedence"></button>
-                <select id="dropdown-sort" class="dropdown">
-                    <option value="name" ${sortOptions.mode === 'name' ? 'selected' : ''}>Name</option>
-                    <option value="type" ${sortOptions.mode === 'type' ? 'selected' : ''}>File type</option>
-                    <option value="size" ${sortOptions.mode === 'size' ? 'selected' : ''}>File size</option>
-                    <option value="created" ${sortOptions.mode === 'created' ? 'selected' : ''}>Created date</option>
-                    <option value="modified" ${sortOptions.mode === 'modified' ? 'selected' : ''}>Modified date</option>
-                </select>
-            ${sortOptions.ascending ?
-                '<button class="sort-order codicon codicon-arrow-up"></button>' :
-                '<button class="sort-order codicon codicon-arrow-down"></button>'
-            }
+                <div class="toolbar-item tooltip">
+                ${Object.keys(imagesBySubFolders).length > 1 ?
+                    '<button class="codicon codicon-expand-all"></button><span class="tooltiptext">Expand/Collapse all</span>' : 
+                    '<button class="codicon codicon-collapse-all"></button><span class="tooltiptext">Expand/Collapse all</span>'
+                }
+                </div>
+                <div class="sort-options">
+                    <span class="codicon codicon-filter"></span>
+                    <select id="dropdown-sort" class="dropdown">
+                        <option value="name" ${getSelected('name')}>Name</option>
+                        <option value="type" ${getSelected('type')}>File type</option>
+                        <option value="size" ${getSelected('size')}>File size</option>
+                        <option value="created" ${getSelected('created')}>Created date</option>
+                        <option value="modified" ${getSelected('modified')}>Modified date</option>
+                    </select>
+                    <div class="toolbar-item tooltip">
+                    ${sortOptions.ascending ?
+                        '<button class="sort-order codicon codicon-arrow-up"></button><span class="tooltiptext">Ascending/Descending</span>' :
+                        '<button class="sort-order codicon codicon-arrow-down"></button><span class="tooltiptext">Ascending/Descending</span>'
+                    }
+                    </div>
+                </div>
                 <div class="folder-count">${Object.keys(imagesBySubFolders).length} folders found</div>
             </div>
             ${Object.keys(imagesBySubFolders).length === 0 ? '<p>No image found in this folder.</p>' : `${imgHtml}`}
