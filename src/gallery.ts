@@ -16,13 +16,7 @@ export async function createPanel(
             retainContextWhenHidden: true,
         }
     );
-
-    const imgPaths = await getImagePaths(galleryFolder);
-    let imagesBySubFolders = await utils.getImagesBySubFolders(imgPaths);
-    imagesBySubFolders = sortImagesBySubFolders(imagesBySubFolders, '', sortAscending);
-
-    panel.webview.html = getWebviewContent(context, panel.webview, imagesBySubFolders, sortAscending);
-
+    panel.webview.html = await getWebviewContent(context, galleryFolder, panel.webview, sortAscending);
     return panel;
 }
 
@@ -57,31 +51,30 @@ function sortImagesBySubFolders(
     };
 
     const sortedResult: utils.TypeOfImagesBySubFolders = {};
+    const sign = ascending ? +1 : -1;
     type Image = utils.TypeOfImagesInSubFolders; // alias
     Object.keys(imagesBySubFolders).sort(comparator).forEach(
         subfolder => {
             sortedResult[subfolder] = imagesBySubFolders[subfolder].sort(
-                (img1: Image, img2: Image) => comparator(img1.imgUri.path, img2.imgUri.path)
+                (img1: Image, img2: Image) => sign * comparator(img1.imgUri.path, img2.imgUri.path)
             );
         }
     );
 
-    if (ascending === false) {
-        for (const subfolder in sortedResult) {
-            sortedResult[subfolder].reverse();
-        }
-    }
-
     return sortedResult;
 }
 
-function getWebviewContent(
+async function getWebviewContent(
     context: vscode.ExtensionContext,
+    galleryFolder: vscode.Uri | undefined,
     webview: vscode.Webview,
-    imagesBySubFolders: utils.TypeOfImagesBySubFolders,
     sortAscending: boolean,
 ) {
     const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
+    const imgPaths = await getImagePaths(galleryFolder);
+    let imagesBySubFolders = await utils.getImagesBySubFolders(imgPaths);
+    imagesBySubFolders = sortImagesBySubFolders(imagesBySubFolders, '', sortAscending);
+
     const imgHtml = Object.keys(imagesBySubFolders).map(
         (folder, index) => {
             return `
@@ -136,8 +129,8 @@ function getWebviewContent(
                     <option value="modified">Modified date</option>
                 </select>
             ${sortAscending ?
-                '<button class="codicon codicon-arrow-up"></button>' :
-                '<button class="codicon codicon-arrow-down"></button>'
+                '<button class="sort-order codicon codicon-arrow-up"></button>' :
+                '<button class="sort-order codicon codicon-arrow-down"></button>'
             }
                 <div class="folder-count">${Object.keys(imagesBySubFolders).length} folders found</div>
             </div>
@@ -148,7 +141,12 @@ function getWebviewContent(
     );
 }
 
-export function getMessageListener(message: any) {
+export async function getMessageListener(
+    context: vscode.ExtensionContext,
+    galleryFolder: vscode.Uri | undefined,
+    panel: vscode.WebviewPanel,
+    message: any,
+) {
     switch (message.command) {
         case 'vscodeImageGallery.openViewer':
             vscode.commands.executeCommand(
@@ -160,6 +158,9 @@ export function getMessageListener(message: any) {
                     viewColumn: vscode.ViewColumn.Two,
                 },
             );
+            break;
+        case 'vscodeImageGallery.sortOrder':
+            panel.webview.html = await getWebviewContent(context, galleryFolder, panel.webview, message.ascending);
             break;
     }
 }

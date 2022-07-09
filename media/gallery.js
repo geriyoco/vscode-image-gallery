@@ -127,11 +127,11 @@
 		return;
 	});
 
-	const dropdownSort = document.getElementsById('dropdown-sort');
-	dropdownSort.addEventListener('change', event => {
+	const sortOrder = document.getElementsByClassName('sort-order')[0];
+	sortOrder.addEventListener('click', event => {
 		vscode.postMessage({
-			command: 'vscodeImageGallery.sort',
-			value: event.target.value,
+			command: 'vscodeImageGallery.sortOrder',
+			ascending: sortOrder.classList.contains('codicon-arrow-down'),
 		});
 	});
 
