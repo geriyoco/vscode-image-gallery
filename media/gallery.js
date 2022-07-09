@@ -141,13 +141,13 @@
 		switch (message.command) {
 			case 'vscodeImageGallery.addImage':
 				let addedTimestamp = new Date().getTime();
-				let folder = Object.keys(message.pathsBySubFolders)[0];
+				let folder = Object.keys(message.imagesBySubFolders)[0];
 				let imgNode = document.createElement("img");
 				imgNode.setAttribute("class", "image loaded");
 				imgNode.setAttribute("id", message.imgPath);
 				imgNode.setAttribute("src", `${message.imgSrc}?t=${addedTimestamp}`);
 				imgNode.setAttribute("data-src", `${message.imgSrc}?t=${addedTimestamp}`);
-				imgNode.setAttribute("data-meta", `${JSON.stringify(message.pathsBySubFolders[folder][0].imgMetadata)}`);
+				imgNode.setAttribute("data-meta", `${JSON.stringify(message.imagesBySubFolders[folder][0].imgMetadata)}`);
 
 				let divNode = document.createElement("div");
 				divNode.setAttribute("class", "filename");
@@ -175,7 +175,7 @@
 				let changeImage = document.getElementById(message.imgPath);
 				changeImage.setAttribute("src", `${message.imgSrc}?t=${changedTimestamp}`);
 				changeImage.setAttribute("data-src", `${message.imgSrc}?t=${changedTimestamp}`);
-				changeImage.setAttribute("data-meta", `${JSON.stringify(message.pathsBySubFolders[folder][0].imgMetadata)}`);
+				changeImage.setAttribute("data-meta", `${JSON.stringify(message.imagesBySubFolders[folder][0].imgMetadata)}`);
 
 				let changeFilename = document.getElementById(message.imgPath + "-filename");
 				changeFilename.setAttribute("class", "filename");
@@ -186,7 +186,7 @@
 				let deleteImage = document.getElementById(message.imgPath);
 				deleteImage.parentElement.remove();
 
-				let folderItemsCountOnDel = document.getElementById(`${Object.keys(message.pathsBySubFolders)[0]}-items-count`);
+				let folderItemsCountOnDel = document.getElementById(`${Object.keys(message.imagesBySubFolders)[0]}-items-count`);
 				folderItemsCountOnDel.textContent = folderItemsCountOnDel.textContent.replace(/\d+/g, (match, _) => parseInt(match) - 1);
 				break;
 		}
