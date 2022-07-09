@@ -127,6 +127,14 @@
 		return;
 	});
 
+	const dropdownSort = document.getElementsById('dropdown-sort');
+	dropdownSort.addEventListener('change', event => {
+		vscode.postMessage({
+			command: 'vscodeImageGallery.sort',
+			value: event.target.value,
+		});
+	});
+
 	window.addEventListener('message', event => {
 		const message = event.data;
 

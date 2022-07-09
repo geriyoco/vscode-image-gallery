@@ -1,7 +1,11 @@
 import * as vscode from 'vscode';
 import * as utils from './utils';
 
-export async function createPanel(context: vscode.ExtensionContext, galleryFolder?: vscode.Uri) {
+export async function createPanel(
+    context: vscode.ExtensionContext,
+    galleryFolder?: vscode.Uri,
+    sortAscending: boolean = true,
+) {
     vscode.commands.executeCommand('setContext', 'ext.viewType', 'gryc.gallery');
     const panel = vscode.window.createWebviewPanel(
         'gryc.gallery',
@@ -15,9 +19,9 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
 
     const imgPaths = await getImagePaths(galleryFolder);
     let imagesBySubFolders = await utils.getImagesBySubFolders(imgPaths);
-    imagesBySubFolders = sortImagesBySubFolders(imagesBySubFolders);
+    imagesBySubFolders = sortImagesBySubFolders(imagesBySubFolders, '', sortAscending);
 
-    panel.webview.html = getWebviewContent(context, panel.webview, imagesBySubFolders);
+    panel.webview.html = getWebviewContent(context, panel.webview, imagesBySubFolders, sortAscending);
 
     return panel;
 }
@@ -30,7 +34,11 @@ async function getImagePaths(galleryFolder?: vscode.Uri) {
     return files;
 }
 
-function sortImagesBySubFolders(imagesBySubFolders: utils.TypeOfImagesBySubFolders) {
+function sortImagesBySubFolders(
+    imagesBySubFolders: utils.TypeOfImagesBySubFolders,
+    mode: string = 'name',
+    ascending: boolean = true,
+) {
     const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
     const keys = [
         'localeMatcher',
@@ -58,6 +66,12 @@ function sortImagesBySubFolders(imagesBySubFolders: utils.TypeOfImagesBySubFolde
         }
     );
 
+    if (ascending === false) {
+        for (const subfolder in sortedResult) {
+            sortedResult[subfolder].reverse();
+        }
+    }
+
     return sortedResult;
 }
 
@@ -65,6 +79,7 @@ function getWebviewContent(
     context: vscode.ExtensionContext,
     webview: vscode.Webview,
     imagesBySubFolders: utils.TypeOfImagesBySubFolders,
+    sortAscending: boolean,
 ) {
     const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
     const imgHtml = Object.keys(imagesBySubFolders).map(
@@ -107,10 +122,23 @@ function getWebviewContent(
 		</head>
 		<body>
             <div class="toolbar">
-                ${Object.keys(imagesBySubFolders).length > 1 ?
-            '<button class="codicon codicon-expand-all"></button>' :
-            '<button class="codicon codicon-collapse-all"></button>'
-        }
+            ${Object.keys(imagesBySubFolders).length > 1 ?
+                '<button class="codicon codicon-expand-all"></button>' :
+                '<button class="codicon codicon-collapse-all"></button>'
+            }
+                <button class="codicon codicon-sort-precedence"></button>
+                <select id="dropdown-sort" class="dropdown">
+                    <option value="name">Name</option>
+                    <option value="dimensions">Dimensions</option>
+                    <option value="type">File type</option>
+                    <option value="size">File size</option>
+                    <option value="created">Created date</option>
+                    <option value="modified">Modified date</option>
+                </select>
+            ${sortAscending ?
+                '<button class="codicon codicon-arrow-up"></button>' :
+                '<button class="codicon codicon-arrow-down"></button>'
+            }
                 <div class="folder-count">${Object.keys(imagesBySubFolders).length} folders found</div>
             </div>
             ${Object.keys(imagesBySubFolders).length === 0 ? '<p>No image found in this folder.</p>' : `${imgHtml}`}
