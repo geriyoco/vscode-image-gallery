@@ -1,7 +1,11 @@
 import * as vscode from 'vscode';
 import * as utils from './utils';
 
-export async function createPanel(context: vscode.ExtensionContext, galleryFolder?: vscode.Uri) {
+export async function createPanel(
+    context: vscode.ExtensionContext,
+    galleryFolder?: vscode.Uri,
+    sortOptions = { mode: 'name', ascending: true },
+) {
     vscode.commands.executeCommand('setContext', 'ext.viewType', 'gryc.gallery');
     const panel = vscode.window.createWebviewPanel(
         'gryc.gallery',
@@ -12,13 +16,7 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
             retainContextWhenHidden: true,
         }
     );
-
-    const imgPaths = await getImagePaths(galleryFolder);
-    let imagesBySubFolders = await utils.getImagesBySubFolders(imgPaths);
-    imagesBySubFolders = sortImagesBySubFolders(imagesBySubFolders);
-
-    panel.webview.html = getWebviewContent(context, panel.webview, imagesBySubFolders);
-
+    panel.webview.html = await getWebviewContent(context, galleryFolder, panel.webview, sortOptions);
     return panel;
 }
 
@@ -30,7 +28,11 @@ async function getImagePaths(galleryFolder?: vscode.Uri) {
     return files;
 }
 
-function sortImagesBySubFolders(imagesBySubFolders: utils.TypeOfImagesBySubFolders) {
+function sortImagesBySubFolders(
+    imagesBySubFolders: utils.TypeOfImagesBySubFolders,
+    mode: string = 'name',
+    ascending: boolean = true,
+) {
     const config = vscode.workspace.getConfiguration('sorting.byPathOptions');
     const keys = [
         'localeMatcher',
@@ -40,7 +42,7 @@ function sortImagesBySubFolders(imagesBySubFolders: utils.TypeOfImagesBySubFolde
         'caseFirst',
         'collation',
     ];
-    const comparator = (a: string, b: string) => {
+    const stringComparator = (a: string, b: string) => {
         return a.localeCompare(
             b,
             undefined,
@@ -48,25 +50,49 @@ function sortImagesBySubFolders(imagesBySubFolders: utils.TypeOfImagesBySubFolde
         );
     };
 
+    const sign = ascending ? +1 : -1;
+    const imagesComparator = (img1: utils.TypeOfImagesInSubFolders, img2: utils.TypeOfImagesInSubFolders) => {
+        let comparedValue = 0;
+        switch (mode) {
+            case 'name':
+                comparedValue = stringComparator(img1.uri.path, img2.uri.path);
+                break;
+            case 'type':
+                comparedValue = stringComparator(img1.extension, img2.extension);
+                break;
+            case 'size':
+                comparedValue = img1.size - img2.size;
+                break;
+            case 'created':
+                comparedValue = img1.ctime - img2.ctime;
+                break;
+            case 'modified':
+                comparedValue = img1.mtime - img2.mtime;
+                break;
+        };
+        return sign * comparedValue;
+    };
+
     const sortedResult: utils.TypeOfImagesBySubFolders = {};
-    type Image = utils.TypeOfImagesInSubFolders; // alias
-    Object.keys(imagesBySubFolders).sort(comparator).forEach(
+    Object.keys(imagesBySubFolders).sort(stringComparator).forEach(
         subfolder => {
-            sortedResult[subfolder] = imagesBySubFolders[subfolder].sort(
-                (img1: Image, img2: Image) => comparator(img1.imgUri.path, img2.imgUri.path)
-            );
+            sortedResult[subfolder] = imagesBySubFolders[subfolder].sort(imagesComparator);
         }
     );
-
     return sortedResult;
 }
 
-function getWebviewContent(
+async function getWebviewContent(
     context: vscode.ExtensionContext,
+    galleryFolder: vscode.Uri | undefined,
     webview: vscode.Webview,
-    imagesBySubFolders: utils.TypeOfImagesBySubFolders,
+    sortOptions: { mode: string, ascending: boolean },
 ) {
     const placeholderUrl = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'placeholder.jpg'));
+    const imgPaths = await getImagePaths(galleryFolder);
+    let imagesBySubFolders = await utils.getImagesBySubFolders(imgPaths);
+    imagesBySubFolders = sortImagesBySubFolders(imagesBySubFolders, sortOptions.mode, sortOptions.ascending);
+
     const imgHtml = Object.keys(imagesBySubFolders).map(
         (folder, index) => {
             return `
@@ -79,9 +105,9 @@ function getWebviewContent(
                 ${imagesBySubFolders[folder].map(img => {
                 return `
                     <div class="image-container tooltip">
-                        <span id="${img.imgUri.path}-tooltip" class="tooltiptext"></span>
-                        <img id="${img.imgUri.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img.imgUri)}" data-meta='${JSON.stringify(img.imgMetadata)}' class="image lazy">
-                        <div id="${img.imgUri.path}-filename" class="filename">${utils.getFilename(img.imgUri.path)}</div>
+                        <span id="${img.uri.path}-tooltip" class="tooltiptext"></span>
+                        <img id="${img.uri.path}" src="${placeholderUrl}" data-src="${webview.asWebviewUri(img.uri)}" data-meta='${JSON.stringify(img)}' class="image lazy">
+                        <div id="${img.uri.path}-filename" class="filename">${utils.getFilename(img.uri.path)}</div>
                     </div>
                     `;
             }).join('')}
@@ -93,6 +119,7 @@ function getWebviewContent(
     const styleHref = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.css'));
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'gallery.js'));
     const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
+    const getSelected = (value: string) => sortOptions.mode === value ? 'selected' : '';
 
     return (
         `<!DOCTYPE html>
@@ -107,10 +134,28 @@ function getWebviewContent(
 		</head>
 		<body>
             <div class="toolbar">
+                <div class="toolbar-item tooltip">
                 ${Object.keys(imagesBySubFolders).length > 1 ?
-            '<button class="codicon codicon-expand-all"></button>' :
-            '<button class="codicon codicon-collapse-all"></button>'
-        }
+                    '<button class="codicon codicon-expand-all"></button><span class="tooltiptext">Expand/Collapse all</span>' : 
+                    '<button class="codicon codicon-collapse-all"></button><span class="tooltiptext">Expand/Collapse all</span>'
+                }
+                </div>
+                <div class="sort-options">
+                    <span class="codicon codicon-filter"></span>
+                    <select id="dropdown-sort" class="dropdown">
+                        <option value="name" ${getSelected('name')}>Name</option>
+                        <option value="type" ${getSelected('type')}>File type</option>
+                        <option value="size" ${getSelected('size')}>File size</option>
+                        <option value="created" ${getSelected('created')}>Created date</option>
+                        <option value="modified" ${getSelected('modified')}>Modified date</option>
+                    </select>
+                    <div class="toolbar-item tooltip">
+                    ${sortOptions.ascending ?
+                        '<button class="sort-order codicon codicon-arrow-up"></button><span class="tooltiptext">Ascending/Descending</span>' :
+                        '<button class="sort-order codicon codicon-arrow-down"></button><span class="tooltiptext">Ascending/Descending</span>'
+                    }
+                    </div>
+                </div>
                 <div class="folder-count">${Object.keys(imagesBySubFolders).length} folders found</div>
             </div>
             ${Object.keys(imagesBySubFolders).length === 0 ? '<p>No image found in this folder.</p>' : `${imgHtml}`}
@@ -120,7 +165,12 @@ function getWebviewContent(
     );
 }
 
-export function getMessageListener(message: any) {
+export async function getMessageListener(
+    context: vscode.ExtensionContext,
+    galleryFolder: vscode.Uri | undefined,
+    panel: vscode.WebviewPanel,
+    message: any,
+) {
     switch (message.command) {
         case 'vscodeImageGallery.openViewer':
             vscode.commands.executeCommand(
@@ -132,6 +182,19 @@ export function getMessageListener(message: any) {
                     viewColumn: vscode.ViewColumn.Two,
                 },
             );
+            break;
+        case 'vscodeImageGallery.sortImages':
+            panel.webview.html = await getWebviewContent(
+                context,
+                galleryFolder,
+                panel.webview, 
+                { mode: message.mode, ascending: message.ascending },
+            );
+
+            panel.webview.postMessage({
+                command: 'vscodeImageGallery.restoreCollapseStates',
+                folderCollapseStates: message.folderCollapseStates,
+            });
             break;
     }
 }

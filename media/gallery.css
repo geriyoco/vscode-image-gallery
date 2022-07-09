@@ -54,6 +54,15 @@ html {
 	transition-delay: 1s;
 }
 
+button.codicon + .tooltiptext {
+	width: auto;
+	transform: translate(5rem, 1.8rem);
+	background-color: hsl(240, 1%, 14%);
+	padding: 6px;
+	border-radius: 0px;
+	border: 2px solid white;
+}
+
 .image-container:hover {
 	box-shadow: 0 0 10px white;
 }
@@ -127,6 +136,12 @@ html {
 	background-color: hsl(0, 0%, 17%);
 }
 
+.toolbar-item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 .codicon {
 	padding: 3px;
 	background-color: hsl(0, 0%, 17%);
@@ -137,4 +152,28 @@ html {
 .codicon:hover {
 	background-color: hsl(180, 0%, 21%);
 	border-radius: 5px;
+}
+
+.sort-options {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 20px;
+}
+
+.dropdown {
+	padding: 6px;
+	background-color: hsl(0, 0%, 23%);
+	color: white;
+	border-width: 0px;
+}
+
+.dropdown:checked {
+	border-width: 0px;
+}
+
+select option {
+	background-color: hsl(0, 0%, 23%);
+	color: white;
+	border-radius: 0px;
 }
