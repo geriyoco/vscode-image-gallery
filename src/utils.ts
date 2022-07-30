@@ -1,3 +1,4 @@
+import path from 'path';
 import * as vscode from 'vscode';
 
 export function getCwd() {
@@ -75,24 +76,31 @@ export function getFilename(imgPath: string) {
 	return filename;
 }
 
-export function getPathsBySubFolders(imgPaths: vscode.Uri[]) {
-	let pathsBySubFolders: { [key: string]: Array<vscode.Uri> } = {};
-	if (vscode.workspace.workspaceFolders) {
-		vscode.workspace.workspaceFolders?.forEach(workspaceFolder => {
-			imgPaths.forEach(imgPath => {
-				if (imgPath.toString().includes(workspaceFolder.uri.toString())) {
-					let fsPath = imgPath.toString().replace(`${workspaceFolder.uri.toString()}/`, '');
-					let pathElements = fsPath.split('/');
-					pathElements.pop();
-					let folderElements = pathElements.join('/');
-					let key = `${workspaceFolder.uri.path}/${folderElements}`;
-					if (!pathsBySubFolders[key]) {
-						pathsBySubFolders[key] = [];
-					}
-					pathsBySubFolders[key].push(imgPath);
-				}
-			});
+export type TypeOfImagesInSubFolders = {
+	imgUri: vscode.Uri,
+	imgMetadata: vscode.FileStat | null,
+};
+
+export type TypeOfImagesBySubFolders = {
+	[key: string]: Array<TypeOfImagesInSubFolders>,
+};
+
+export async function getImagesBySubFolders(imgPaths: vscode.Uri[], action: string = 'create') {
+	let imagesBySubFolders: TypeOfImagesBySubFolders = {};
+	let imgMetadata = null;
+	for (const imgUri of imgPaths) {
+		let key = path.dirname(imgUri.fsPath);
+		key = key[0].toUpperCase() + key.slice(1,);
+		if (!imagesBySubFolders[key]) {
+			imagesBySubFolders[key] = [];
+		}
+		if (action !== 'delete') {
+			imgMetadata = await vscode.workspace.fs.stat(imgUri);
+		}
+		imagesBySubFolders[key].push({
+			"imgUri": imgUri,
+			"imgMetadata": imgMetadata
 		});
 	}
-	return pathsBySubFolders;
+	return imagesBySubFolders;
 }

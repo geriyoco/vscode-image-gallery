@@ -8,18 +8,17 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Welcome! VS Code extension "GeriYoco: Image Gallery" is now active.');
 
 	const viewerEditor = new viewer.ViewerCustomEditor(context);
-	context.subscriptions.push(
-		vscode.window.registerCustomEditorProvider(
-			viewer.ViewerCustomEditor.viewType,
-			viewerEditor,
-			{
-				supportsMultipleEditorsPerDocument: true,
-				webviewOptions: {
-					retainContextWhenHidden: true,
-				}
-			},
-		)
+	const viewerPanel = vscode.window.registerCustomEditorProvider(
+		viewer.ViewerCustomEditor.viewType,
+		viewerEditor,
+		{
+			supportsMultipleEditorsPerDocument: true,
+			webviewOptions: {
+				retainContextWhenHidden: true,
+			}
+		},
 	);
+	context.subscriptions.push(viewerPanel);
 
 	let dispGallery = vscode.commands.registerCommand(
 		'vscodeImageGallery.openGallery',
@@ -29,30 +28,12 @@ export function activate(context: vscode.ExtensionContext) {
 			context.subscriptions.push(galleryFileWatcher);
 
 			mainPanel.webview.onDidReceiveMessage(
-				async message => {
-					switch (message.command) {
-						case 'vscodeImageGallery.openViewer':
-							const resource = vscode.Uri.file(vscode.Uri.parse(message.src).path);
-							await vscode.commands.executeCommand(
-								'vscode.open',
-								resource,
-								{
-									preserveFocus: true,
-									preview: message.preview,
-									viewColumn: vscode.ViewColumn.Two,
-								},
-							);
-							return;
-					}
-				},
+				(message) => gallery.getMessageListener(message),
 				undefined,
-				context.subscriptions,
+				context.subscriptions
 			);
-
 			mainPanel.onDidDispose(
-				() => {
-					galleryFileWatcher.dispose();
-				},
+				() => galleryFileWatcher.dispose(),
 				undefined,
 				context.subscriptions
 			);

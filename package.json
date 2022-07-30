@@ -2,7 +2,7 @@
 	"name": "vscode-image-gallery",
 	"displayName": "Image Gallery",
 	"description": "An extension that enhances image browsing experience.",
-	"version": "0.2.7",
+	"version": "0.4.0",
 	"publisher": "GeriYoco",
 	"repository": {
 		"type": "git",
@@ -78,7 +78,8 @@
 		"commands": [
 			{
 				"command": "vscodeImageGallery.openGallery",
-				"title": "Open Image Gallery"
+				"title": "Open Image Gallery",
+				"category": "Image Gallery"
 			}
 		],
 		"menus": {
@@ -123,6 +124,7 @@
 		"webpack-cli": "^4.9.2"
 	},
 	"dependencies": {
+		"@vscode/codicons": "^0.0.31",
 		"panzoom": "^9.4.2"
 	}
 }
