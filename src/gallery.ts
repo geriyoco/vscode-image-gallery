@@ -108,8 +108,8 @@ function getWebviewContent(
 		<body>
             <div class="toolbar">
                 ${Object.keys(imagesBySubFolders).length > 1 ?
-            '<button class="codicon codicon-expand-all"></button>' :
-            '<button class="codicon codicon-collapse-all"></button>'
+            '<button class="codicon temp-expand-all">+</button>' :
+            '<button class="codicon temp-collapse-all">-</button>'
         }
                 <div class="folder-count">${Object.keys(imagesBySubFolders).length} folders found</div>
             </div>
