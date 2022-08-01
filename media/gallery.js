@@ -47,33 +47,37 @@
 
 			let expandAll = Array.from(gridElements).some(el => el.style.display === "none");
 			if (expandAll) {
-				let collapseAllButton = document.getElementsByClassName("codicon-collapse-all");
+				let collapseAllButton = document.getElementsByClassName("temp-collapse-all");
 				if (collapseAllButton.length !== 0) {
-					collapseAllButton[0].setAttribute("class", "codicon codicon-expand-all");
+					collapseAllButton[0].setAttribute("class", "codicon temp-expand-all");
+					collapseAllButton[0].textContent = "+";
 				}
 			} else {
-				let expandAllButton = document.getElementsByClassName("codicon-expand-all");
+				let expandAllButton = document.getElementsByClassName("temp-expand-all");
 				if (expandAllButton.length !== 0) {
-					expandAllButton[0].setAttribute("class", "codicon codicon-collapse-all");
+					expandAllButton[0].setAttribute("class", "codicon temp-collapse-all");
+					collapseAllButton[0].textContent = "−";
 				}
 			}
 			return;
 		}
 
-		if (node.classList.contains("codicon-expand-all")) {
+		if (node.classList.contains("temp-expand-all")) {
 			gridElements.forEach((gridElement) => {
 				gridElement.style.display = "grid";
 				gridElement.previousElementSibling.firstElementChild.textContent = "⮟";
 			});
-			node.setAttribute("class", "codicon codicon-collapse-all");
+			node.setAttribute("class", "codicon temp-collapse-all");
+			node.textContent = "−";
 			return;
 		}
-		if (node.classList.contains("codicon-collapse-all")) {
+		if (node.classList.contains("temp-collapse-all")) {
 			gridElements.forEach((gridElement) => {
 				gridElement.style.display = "none";
 				gridElement.previousElementSibling.firstElementChild.textContent = "⮞";
 			});
-			node.setAttribute("class", "codicon codicon-expand-all");
+			node.setAttribute("class", "codicon temp-expand-all");
+			node.textContent = "+";
 			return;
 		}
 
