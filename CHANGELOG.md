@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.4.1] - 2022-08-01
+### Fixed
+- Buttons to expand/collapse all sub-folders were not showing up (temporary fix without using [@vscode/codicons](https://github.com/microsoft/vscode-codicons))
+
 ## [0.4.0] - 2022-07-30
 ### Added
 - Buttons to expand/collapse all sub-folders in the gallery view
