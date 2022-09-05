@@ -1,5 +1,5 @@
 const vscode = acquireVsCodeApi();
-let gDoms = {}; // a global holder for all content DOMs to preserve attributes
+let gFolders = {}; // a global holder for all content DOMs to preserve attributes
 // {
 //		folderId: {
 //			bar: domObject,
@@ -60,9 +60,9 @@ class DOMManager {
 	static updateGlobalDoms(response) {
 		const content = JSON.parse(response.content);
 		for (const [folderId, folder] of Object.entries(content)) {
-			if (gDoms.hasOwnProperty(folderId)) {
-				content[folderId].bar = gDoms[folderId].bar;
-				content[folderId].grid = gDoms[folderId].grid;
+			if (gFolders.hasOwnProperty(folderId)) {
+				content[folderId].bar = gFolders[folderId].bar;
+				content[folderId].grid = gFolders[folderId].grid;
 			} else {
 				content[folderId].bar = DOMManager.htmlToDOM(folder.barHtml);
 				content[folderId].grid = DOMManager.htmlToDOM(folder.gridHtml);
@@ -71,22 +71,21 @@ class DOMManager {
 			}
 
 			for (const [imageId, imageHtml] of Object.entries(folder.images)) {
-				if (gDoms.hasOwnProperty(folderId) && gDoms[folderId].images.hasOwnProperty(imageId)) {
-					content[folderId].images[imageId] = gDoms[folderId].images[imageId];
+				if (gFolders.hasOwnProperty(folderId) && gFolders[folderId].images.hasOwnProperty(imageId)) {
+					content[folderId].images[imageId] = gFolders[folderId].images[imageId];
 				} else {
 					content[folderId].images[imageId] = DOMManager.htmlToDOM(imageHtml);
 					EventListener.addToImageContainer(content[folderId].images[imageId]);
 				}
 			}
 		}
-		gDoms = content;
-		return content;
+		gFolders = content;
 	}
 
 	static updateGalleryContent() {
 		const content = document.querySelector(".gallery-content");
 		content.innerHTML = "";
-		for (const folder of Object.values(gDoms)) {
+		for (const folder of Object.values(gFolders)) {
 			content.appendChild(folder.bar);
 			content.appendChild(folder.grid);
 			for (const imageDom of Object.values(folder.images)) {
@@ -254,14 +253,6 @@ class EventListener {
 			valueName: dropdownDOM.value,
 			ascending: sortOrderDOM.classList.contains("codicon-arrow-up") ? true : false,
 		});
-	}
-
-	static applySortResponse(sortResponse) {
-		for (const [folderId, html] of Object.entries(sortResponse)) {
-			const gridDOM = document.getElementById(`${folderId}-grid`);
-			gridDOM.innerHTML = html;
-		}
-		init();
 	}
 }
 
