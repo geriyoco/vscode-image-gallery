@@ -144,11 +144,8 @@ button.codicon + .tooltip-text {
 
 .codicon {
 	padding: 3px;
-	width: 20px;
-	height: 20px;
+	border: 0;
 	background-color: hsl(0, 0%, 17%);
-	border-color: white;
-	border-width: 1px;
 	color: white;
 }
 
