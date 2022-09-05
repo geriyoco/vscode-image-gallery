@@ -20,26 +20,26 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	context.subscriptions.push(viewerPanel);
 
-	let dispGallery = vscode.commands.registerCommand(
+	const disposableGallery = vscode.commands.registerCommand(
 		'vscodeImageGallery.openGallery',
 		async (galleryFolder?: vscode.Uri) => {
-			const mainPanel = await gallery.createPanel(context, galleryFolder);
-			const galleryFileWatcher = file_watcher.galleryFileWatcher(mainPanel, galleryFolder);
+			const galleryPanel = await gallery.createPanel(context, galleryFolder);
+			const galleryFileWatcher = file_watcher.galleryFileWatcher(galleryPanel, galleryFolder);
 			context.subscriptions.push(galleryFileWatcher);
 
-			mainPanel.webview.onDidReceiveMessage(
-				message => gallery.getMessageListener(context, galleryFolder, mainPanel, message),
+			galleryPanel.webview.onDidReceiveMessage(
+				message => gallery.messageListener(message, context, galleryPanel.webview),
 				undefined,
 				context.subscriptions
 			);
-			mainPanel.onDidDispose(
+			galleryPanel.onDidDispose(
 				() => galleryFileWatcher.dispose(),
 				undefined,
 				context.subscriptions
 			);
 		}
 	);
-	context.subscriptions.push(dispGallery);
+	context.subscriptions.push(disposableGallery);
 }
 
 export function deactivate() { }

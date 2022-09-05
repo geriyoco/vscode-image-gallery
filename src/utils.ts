@@ -1,5 +1,7 @@
-import path from 'path';
+import * as path from 'path';
 import * as vscode from 'vscode';
+import { TFolder } from '.';
+import crypto from 'crypto';
 
 export function getCwd() {
 	if (!vscode.workspace.workspaceFolders) {
@@ -11,15 +13,14 @@ export function getCwd() {
 	return cwd;
 }
 
-export function getNonce() {
+function getNonce() {
 	let text = '';
 	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	for (let i = 0; i < 32; i++) {
+	for (let i = 0; i < 16; i++) {
 		text += possible.charAt(Math.floor(Math.random() * possible.length));
 	}
 	return text;
 }
-
 export const nonce = getNonce();
 
 export function getGlob() {
@@ -68,45 +69,43 @@ export function getGlob() {
 }
 
 export function getFilename(imgPath: string) {
-	let filename = decodeURI(imgPath).split("/").pop();
-
+	const filename = decodeURI(imgPath).split("/").pop();
 	if (filename) {
 		return filename.split("?").shift();
 	}
 	return filename;
 }
 
-export type TypeOfImagesInSubFolders = {
-	uri: vscode.Uri,
-	size: number,
-	mtime: number,
-	ctime: number,
-	extension: string,
-};
+export function hash256(str: string, truncate=16) {
+	return crypto.createHash('sha256').update(str).digest('hex').substring(0, truncate);
+}
 
-export type TypeOfImagesBySubFolders = {
-	[key: string]: Array<TypeOfImagesInSubFolders>,
-};
+export async function getFolders(imgUris: vscode.Uri[], action: "create" | "change" | "delete" = "create") {
+	let folders: Record<string, TFolder> = {};
+	for (const imgUri of imgUris) {
+		const folderPath = path.dirname(imgUri.path);
+		const key = hash256(folderPath);
 
-export async function getImagesBySubFolders(imgPaths: vscode.Uri[], action: string = 'create') {
-	let imagesBySubFolders: TypeOfImagesBySubFolders = {};
-	for (const imgUri of imgPaths) {
-		let key = path.dirname(imgUri.fsPath);
-		key = key[0].toUpperCase() + key.slice(1,);
-		if (!imagesBySubFolders[key]) {
-			imagesBySubFolders[key] = [];
+		if (!folders[key]) { // first image of the folder
+			folders[key] = {
+				id: key,
+				path: folderPath,
+				images: [],
+			};
 		}
+
 		if (action !== 'delete') {
 			const fileStat = await vscode.workspace.fs.stat(imgUri);
 			const dotIndex = imgUri.fsPath.lastIndexOf('.');
-			imagesBySubFolders[key].push({
+			folders[key]["images"].push({
+				id: hash256(imgUri.path),
 				uri: imgUri,
+				ext: imgUri.fsPath.slice(dotIndex + 1).toUpperCase(),
 				size: fileStat.size,
 				mtime: fileStat.mtime,
 				ctime: fileStat.ctime,
-				extension: imgUri.fsPath.slice(dotIndex + 1).toUpperCase(),
 			});
 		}
 	}
-	return imagesBySubFolders;
+	return folders;
 }
