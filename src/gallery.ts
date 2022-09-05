@@ -281,6 +281,8 @@ class HTMLProvider {
 	}
 
 	folderBarHTML(folder: TFolder, collapsed: boolean = false) {
+		let fsPath = this.webview.asWebviewUri(vscode.Uri.parse(folder.path)).fsPath;
+		fsPath = fsPath[0].toUpperCase() + fsPath.slice(1);
 		return `
 		<button
 			id="${folder.id}"
@@ -292,8 +294,8 @@ class HTMLProvider {
 				id="${folder.id}-arrow"
 				class="folder-arrow codicon ${collapsed ? 'codicon-chevron-right' : 'codicon-chevron-down'}"
 			></div>
-			<div id="${folder.id}-title" class="folder-title">${folder.path}</div>
-			<div id="${folder.id}-items-count" class="folder-items-count">${folder.images.length} images found</div>
+			<div id="${folder.id}-title" class="folder-title">${fsPath}</div>
+			<div id="${folder.id}-items-count" class="folder-items-count">${Object.keys(folder.images).length} images found</div>
 		</button>
 		`.trim();
 	}
