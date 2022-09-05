@@ -84,27 +84,28 @@ export async function getFolders(imgUris: vscode.Uri[], action: "create" | "chan
 	let folders: Record<string, TFolder> = {};
 	for (const imgUri of imgUris) {
 		const folderPath = path.dirname(imgUri.path);
-		const key = hash256(folderPath);
+		const folderId = hash256(folderPath);
 
-		if (!folders[key]) { // first image of the folder
-			folders[key] = {
-				id: key,
+		if (!folders[folderId]) { // first image of the folder
+			folders[folderId] = {
+				id: folderId,
 				path: folderPath,
-				images: [],
+				images: {},
 			};
 		}
 
 		if (action !== 'delete') {
 			const fileStat = await vscode.workspace.fs.stat(imgUri);
 			const dotIndex = imgUri.fsPath.lastIndexOf('.');
-			folders[key]["images"].push({
-				id: hash256(imgUri.path),
+			const imageId = hash256(imgUri.path);
+			folders[folderId].images[imageId] = {
+				id: imageId,
 				uri: imgUri,
 				ext: imgUri.fsPath.slice(dotIndex + 1).toUpperCase(),
 				size: fileStat.size,
 				mtime: fileStat.mtime,
 				ctime: fileStat.ctime,
-			});
+			};
 		}
 	}
 	return folders;

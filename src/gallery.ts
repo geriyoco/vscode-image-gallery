@@ -25,6 +25,50 @@ export async function createPanel(context: vscode.ExtensionContext, galleryFolde
 	return panel;
 }
 
+export function createFileWatcher(context: vscode.ExtensionContext, webview: vscode.Webview, galleryFolder?: vscode.Uri) {
+	const globPattern = utils.getGlob();
+	const watcher = vscode.workspace.createFileSystemWatcher(
+		galleryFolder ?
+		new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
+	);
+	watcher.onDidCreate(async uri => {
+		const folder = Object.values(await utils.getFolders([uri], "create"))[0];
+		const image = Object.values(folder.images)[0];
+		if (gFolders.hasOwnProperty(folder.id)) {
+			if (!gFolders[folder.id].images.hasOwnProperty(image.id)) {
+				gFolders[folder.id].images[image.id] = image;
+			}
+		} else {
+			gFolders[folder.id] = folder;
+		}
+		messageListener({command: "POST.gallery.requestSort"}, context, webview);
+	});
+	watcher.onDidDelete(async uri => {
+		const folder = Object.values(await utils.getFolders([uri], "delete"))[0];
+		const imageId = utils.hash256(webview.asWebviewUri(uri).path);
+		if (gFolders.hasOwnProperty(folder.id)) {
+			if (gFolders[folder.id].images.hasOwnProperty(imageId)) {
+				delete gFolders[folder.id].images[imageId];
+			}
+			if (Object.keys(gFolders[folder.id].images).length === 0) {
+				delete gFolders[folder.id];
+			}
+		}
+		messageListener({command: "POST.gallery.requestSort"}, context, webview);
+	});
+	watcher.onDidChange(async uri => {
+		// rename is NOT handled here; it's handled automatically by Delete & Create
+		// hence we can assume the same imageId and folderId
+		const folder = Object.values(await utils.getFolders([uri], "change"))[0];
+		const image = Object.values(folder.images)[0];
+		if (gFolders.hasOwnProperty(folder.id) && gFolders[folder.id].images.hasOwnProperty(image.id)) {
+			gFolders[folder.id].images[image.id] = image;
+		}
+		messageListener({command: "POST.gallery.requestSort"}, context, webview);
+	});
+	return watcher;
+}
+
 export function messageListener(message: Record<string, any>, context: vscode.ExtensionContext, webview: vscode.Webview) {
 	switch (message.command) {
 		case "POST.gallery.openImageViewer":
@@ -111,7 +155,10 @@ class CustomSorter {
 	sort(folders: Record<string, TFolder>, valueName: string = "path", ascending: boolean = true) {
 		const sortedFolders = this.getSortedFolders(folders);
 		for (const [name, folder] of Object.entries(sortedFolders)) {
-			sortedFolders[name].images = this.getSortedImages(folder.images, valueName, ascending);
+			sortedFolders[name].images = Object.fromEntries(
+				this.getSortedImages(Object.values(folder.images), valueName, ascending)
+				.map(image => [image.id, image])
+			);
 		}
 		return sortedFolders;
 	}
@@ -276,7 +323,7 @@ class HTMLProvider {
 
 	imageGridHTML(folder: TFolder, emptyContent: boolean = false) {
 		const content = emptyContent ?
-			"" : folder.images.map(image => this.singleImageHTML(image)).join('\n');
+			"" : Object.values(folder.images).map(image => this.singleImageHTML(image)).join('\n');
 		return `
 		<div id="${folder.id}-grid" class="grid">${content}</div>
 		`.trim();

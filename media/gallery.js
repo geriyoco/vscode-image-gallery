@@ -1,12 +1,11 @@
 const vscode = acquireVsCodeApi();
 let gFolders = {}; // a global holder for all content DOMs to preserve attributes
-// {
-//		folderId: {
-//			bar: domObject,
-//			grid: domObject,
-//			images: { imageId: domObject, ... },
-//		}, ...
-// }
+/** {folderId: {
+ * 		bar: domObject,
+ *		grid: domObject,
+ *		images: { imageId: domObject, ... },
+ *	}, ... }
+ **/
 
 function init() {
 	initMessageListeners();
@@ -59,6 +58,26 @@ class DOMManager {
 
 	static updateGlobalDoms(response) {
 		const content = JSON.parse(response.content);
+
+		// remove deleted images and folders
+		for (const folderId of Object.keys(gFolders)) {
+			if (!content.hasOwnProperty(folderId)) {
+				gFolders[folderId].bar.remove();
+				gFolders[folderId].grid.remove();
+				delete gFolders[folderId];
+				continue;
+			}
+
+			for (const imageId of Object.keys(gFolders[folderId].images)) {
+				if (!content[folderId].images.hasOwnProperty(imageId)) {
+					gFolders[folderId].images[imageId].remove();
+					delete gFolders[folderId].images[imageId];
+				}
+			}
+		}
+
+		// synchronize the images and folders
+		// convert all new html to DOMs
 		for (const [folderId, folder] of Object.entries(content)) {
 			if (gFolders.hasOwnProperty(folderId)) {
 				content[folderId].bar = gFolders[folderId].bar;
@@ -66,7 +85,8 @@ class DOMManager {
 			} else {
 				content[folderId].bar = DOMManager.htmlToDOM(folder.barHtml);
 				content[folderId].grid = DOMManager.htmlToDOM(folder.gridHtml);
-
+				delete content[folderId].barHtml;
+				delete content[folderId].gridHtml;
 				EventListener.addToFolderBar(content[folderId].bar);
 			}
 
@@ -75,6 +95,7 @@ class DOMManager {
 					content[folderId].images[imageId] = gFolders[folderId].images[imageId];
 				} else {
 					content[folderId].images[imageId] = DOMManager.htmlToDOM(imageHtml);
+					delete content[folderId].images[imageId].imageHtml;
 					EventListener.addToImageContainer(content[folderId].images[imageId]);
 				}
 			}

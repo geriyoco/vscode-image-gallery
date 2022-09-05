@@ -12,5 +12,7 @@ export type TImage = {
 export type TFolder = {
 	id: string, // hash256(folderUri.path), e.g. hash256("/c:/Users")
 	path: string, // folderUri.path, e.g. "/c:/Users"
-	images: TImage[],
+	images: {
+		[imageId: string]: TImage,
+	},
 };
