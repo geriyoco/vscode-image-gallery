@@ -33,7 +33,7 @@ html {
 	position: relative;
 }
 
-.tooltiptext {
+.tooltip-text {
 	position: absolute;
 	z-index: 1;
 	visibility: hidden;
@@ -48,10 +48,19 @@ html {
 	white-space: pre;
 }
 
-.tooltip:hover .tooltiptext {
+.tooltip:hover .tooltip-text {
 	opacity: 0.8;
 	visibility: visible;
 	transition-delay: 1s;
+}
+
+button.codicon + .tooltip-text {
+	width: auto;
+	transform: translate(5rem, 1.8rem);
+	background-color: hsl(240, 1%, 14%);
+	padding: 6px;
+	border-radius: 0px;
+	border: 2px solid white;
 }
 
 .image-container:hover {
@@ -127,17 +136,52 @@ html {
 	background-color: hsl(0, 0%, 17%);
 }
 
+.toolbar-item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 .codicon {
 	padding: 3px;
-	width: 20px;
-	height: 20px;
+	border: 0;
 	background-color: hsl(0, 0%, 17%);
-	border-color: white;
-	border-width: 1px;
 	color: white;
 }
 
 .codicon:hover {
 	background-color: hsl(180, 0%, 21%);
-	border-radius: 3px;
+	border-radius: 5px;
+}
+
+.sort-options {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 30px;
+}
+
+.sort-options span {
+	font-size: 15px;
+	margin-left: 10px;
+	margin-right: 10px;
+	align-items: center;
+	justify-content: center;
+}
+
+.dropdown {
+	padding: 6px;
+	background-color: hsl(0, 0%, 23%);
+	color: white;
+	border-width: 0px;
+}
+
+.dropdown:checked {
+	border-width: 0px;
+}
+
+select option {
+	background-color: hsl(0, 0%, 23%);
+	color: white;
+	border-radius: 0px;
 }
