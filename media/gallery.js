@@ -1,10 +1,16 @@
 const vscode = acquireVsCodeApi();
 let gFolders = {}; // a global holder for all content DOMs to preserve attributes
 /** {folderId: {
- * 		bar: domObject,
- *		grid: domObject,
- *		images: { imageId: domObject, ... },
- *	}, ... }
+ * 		status: "",
+ * 		bar: domBarButton,
+ *		grid: domGridDiv,
+ *		images: {
+			imageId: {
+				status: "" | "refresh",
+				container: domContainerDiv,
+			}, ...
+		},
+ *	}, ...}
  **/
 
 function init() {
@@ -34,10 +40,7 @@ const imageObserver = new IntersectionObserver(
 				const image = entry.target;
 				imageObserver.unobserve(image);
 				image.src = image.dataset.src;
-				image.onload = () => {
-					image.classList.remove("unloaded");
-					image.classList.add("loaded");
-				};
+				image.onload = () => image.classList.replace("unloaded", "loaded");
 			}
 		});
 	}
@@ -61,28 +64,28 @@ class DOMManager {
 
 		// remove deleted images and folders
 		for (const folderId of Object.keys(gFolders)) {
+			for (const imageId of Object.keys(gFolders[folderId].images)) {
+				if (content.hasOwnProperty(folderId) && !content[folderId].images.hasOwnProperty(imageId)) {
+					gFolders[folderId].images[imageId].container.remove();
+					delete gFolders[folderId].images[imageId];
+				}
+			}
+
 			if (!content.hasOwnProperty(folderId)) {
 				gFolders[folderId].bar.remove();
 				gFolders[folderId].grid.remove();
 				delete gFolders[folderId];
-				continue;
-			}
-
-			for (const imageId of Object.keys(gFolders[folderId].images)) {
-				if (!content[folderId].images.hasOwnProperty(imageId)) {
-					gFolders[folderId].images[imageId].remove();
-					delete gFolders[folderId].images[imageId];
-				}
 			}
 		}
 
 		// synchronize the images and folders
 		// convert all new html to DOMs
 		for (const [folderId, folder] of Object.entries(content)) {
-			if (gFolders.hasOwnProperty(folderId)) {
+			if (gFolders.hasOwnProperty(folderId)) { // old folder
 				content[folderId].bar = gFolders[folderId].bar;
 				content[folderId].grid = gFolders[folderId].grid;
-			} else {
+			}
+			else { // new folder
 				content[folderId].bar = DOMManager.htmlToDOM(folder.barHtml);
 				content[folderId].grid = DOMManager.htmlToDOM(folder.gridHtml);
 				delete content[folderId].barHtml;
@@ -90,14 +93,30 @@ class DOMManager {
 				EventListener.addToFolderBar(content[folderId].bar);
 			}
 
-			for (const [imageId, imageHtml] of Object.entries(folder.images)) {
-				if (gFolders.hasOwnProperty(folderId) && gFolders[folderId].images.hasOwnProperty(imageId)) {
-					content[folderId].images[imageId] = gFolders[folderId].images[imageId];
-				} else {
-					content[folderId].images[imageId] = DOMManager.htmlToDOM(imageHtml);
-					delete content[folderId].images[imageId].imageHtml;
-					EventListener.addToImageContainer(content[folderId].images[imageId]);
+			for (const [imageId, image] of Object.entries(folder.images)) {
+				const hasFolder = gFolders.hasOwnProperty(folderId);
+				const hasImage = hasFolder && gFolders[folderId].images.hasOwnProperty(imageId);
+
+				if (hasFolder && hasImage && image.status !== "refresh") { // old image
+					content[folderId].images[imageId].container = gFolders[folderId].images[imageId].container;
+				} 
+				else if (hasFolder && hasImage && image.status === "refresh") { // image demands refresh
+					gFolders[folderId].images[imageId].container.remove();
+					content[folderId].images[imageId].container = DOMManager.htmlToDOM(image.containerHtml);
+					delete content[folderId].images[imageId].containerHtml;
+					EventListener.addToImageContainer(content[folderId].images[imageId].container);
+
+					const imageDom = content[folderId].images[imageId].container.querySelector("#" + imageId);
+					imageDom.src += "?t=" + Date.now();
+					imageDom.dataset.src += "?t=" + Date.now();
 				}
+				else { // new image
+					content[folderId].images[imageId].container = DOMManager.htmlToDOM(image.containerHtml);
+					delete content[folderId].images[imageId].containerHtml;
+					EventListener.addToImageContainer(content[folderId].images[imageId].container);
+				}
+				content[folderId].images[imageId].status = "";
+
 			}
 		}
 		gFolders = content;
@@ -105,15 +124,15 @@ class DOMManager {
 
 	static updateGalleryContent() {
 		const content = document.querySelector(".gallery-content");
-		content.innerHTML = "";
-		for (const folder of Object.values(gFolders)) {
-			content.appendChild(folder.bar);
-			content.appendChild(folder.grid);
-			for (const imageDom of Object.values(folder.images)) {
-				folder.grid.appendChild(imageDom);
-			}
-		}
-		if (content.innerHTML === "") {
+		content.replaceChildren(
+			...Object.values(gFolders).flatMap(folder => {
+				folder.grid.replaceChildren(
+					...Object.values(folder.images).map(image => image.container)
+				);
+				return [folder.bar, folder.grid];
+			})
+		);
+		if (content.childElementCount === 0) {
 			content.innerHTML = "<p>No image found in this folder.</p>";
 		}
 	}

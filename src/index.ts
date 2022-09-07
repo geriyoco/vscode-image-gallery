@@ -7,6 +7,7 @@ export type TImage = {
 	size: number,
 	mtime: number,
 	ctime: number,
+	status: "" | "refresh",
 };
 
 export type TFolder = {

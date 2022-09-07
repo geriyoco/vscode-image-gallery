@@ -58,13 +58,15 @@ export function createFileWatcher(context: vscode.ExtensionContext, webview: vsc
 	});
 	watcher.onDidChange(async uri => {
 		// rename is NOT handled here; it's handled automatically by Delete & Create
-		// hence we can assume the same imageId and folderId
+		// hence we can assume imageId and folderId to be the same
 		const folder = Object.values(await utils.getFolders([uri], "change"))[0];
 		const image = Object.values(folder.images)[0];
 		if (gFolders.hasOwnProperty(folder.id) && gFolders[folder.id].images.hasOwnProperty(image.id)) {
+			image.status = "refresh";
 			gFolders[folder.id].images[image.id] = image;
+			messageListener({command: "POST.gallery.requestSort"}, context, webview);
+			gFolders[folder.id].images[image.id].status = "";
 		}
-		messageListener({command: "POST.gallery.requestSort"}, context, webview);
 	});
 	return watcher;
 }
@@ -87,21 +89,25 @@ export function messageListener(message: Record<string, any>, context: vscode.Ex
 			// DO NOT BREAK HERE; FALL THROUGH TO UPDATE DOMS
 		case "POST.gallery.requestContentDOMs":
 			const htmlProvider = new HTMLProvider(context, webview);
-			const domStrings: Record<string, any> = {};
+			const response: Record<string, any> = {};
 			for (const [idx, folder] of Object.values(gFolders).entries()) {
-				domStrings[folder.id] = {
+				response[folder.id] = {
+					status: "",
 					barHtml: htmlProvider.folderBarHTML(folder),
 					gridHtml: htmlProvider.imageGridHTML(folder, true),
 					images: Object.fromEntries(
 						Object.values(folder.images).map(
-							image => [image.id, htmlProvider.singleImageHTML(image)]
+							image => [image.id, {
+								status: image.status,
+								containerHtml: htmlProvider.singleImageHTML(image),
+							}]
 						)
 					),
 				};
 			}
 			webview.postMessage({
 				command: "POST.gallery.responseContentDOMs",
-				content: JSON.stringify(domStrings),
+				content: JSON.stringify(response),
 			});
 			break;
 	}
@@ -168,11 +174,11 @@ class CustomSorter {
 		 * Sort the folders by path in ascending order.
 		 * "sorting.byPathOptions" has no effect on this.
 		 */
-		const sortedFolders: Record<string, TFolder> = {};
-		for (const name of Object.keys(folders).sort(this.comparator)) {
-			sortedFolders[name] = folders[name];
-		}
-		return sortedFolders;
+		return Object.fromEntries(
+			Object.entries(folders).sort(
+				([, folder1], [, folder2]) => folder1.path.localeCompare(folder2.path)
+			)
+		);
 	}
 
 	getSortedImages(images: TImage[], valueName: string, ascending: boolean) {

@@ -77,7 +77,7 @@ export function getFilename(imgPath: string) {
 }
 
 export function hash256(str: string, truncate=16) {
-	return crypto.createHash('sha256').update(str).digest('hex').substring(0, truncate);
+	return 'H' + crypto.createHash('sha256').update(str).digest('hex').substring(0, truncate);
 }
 
 export async function getFolders(imgUris: vscode.Uri[], action: "create" | "change" | "delete" = "create") {
@@ -105,6 +105,7 @@ export async function getFolders(imgUris: vscode.Uri[], action: "create" | "chan
 				size: fileStat.size,
 				mtime: fileStat.mtime,
 				ctime: fileStat.ctime,
+				status: "",
 			};
 		}
 	}
