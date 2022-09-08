@@ -103,6 +103,7 @@
 	},
 	"scripts": {
 		"deploy": "vsce publish",
+		"local-deploy": "vsce package",
 		"open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
 		"vscode:prepublish": "npm run package",
 		"compile": "webpack",
@@ -123,17 +124,17 @@
 		"@typescript-eslint/parser": "^5.16.0",
 		"@vscode/test-electron": "^2.1.3",
 		"@vscode/test-web": "^0.0.24",
+		"@vscode/codicons": "^0.0.31",
 		"eslint": "^8.11.0",
 		"glob": "^7.2.0",
 		"mocha": "^9.2.2",
 		"ts-loader": "^9.2.8",
 		"typescript": "^4.5.5",
-		"vsce": "^2.7.0",
+		"vsce": "^2.11.0",
 		"webpack": "^5.70.0",
 		"webpack-cli": "^4.9.2"
 	},
 	"dependencies": {
-		"@vscode/codicons": "^0.0.31",
 		"panzoom": "^9.4.2"
 	}
 }

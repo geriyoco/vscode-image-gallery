@@ -54,7 +54,7 @@ html {
 	transition-delay: 1s;
 }
 
-button.codicon + .tooltip-text {
+button.codicon+.tooltip-text {
 	width: auto;
 	transform: translate(5rem, 1.8rem);
 	background-color: hsl(240, 1%, 14%);

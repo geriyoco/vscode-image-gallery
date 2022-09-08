@@ -29,7 +29,7 @@ export function createFileWatcher(context: vscode.ExtensionContext, webview: vsc
 	const globPattern = utils.getGlob();
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		galleryFolder ?
-		new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
+			new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
 	);
 	watcher.onDidCreate(async uri => {
 		const folder = Object.values(await utils.getFolders([uri], "create"))[0];
@@ -41,7 +41,7 @@ export function createFileWatcher(context: vscode.ExtensionContext, webview: vsc
 		} else {
 			gFolders[folder.id] = folder;
 		}
-		messageListener({command: "POST.gallery.requestSort"}, context, webview);
+		messageListener({ command: "POST.gallery.requestSort" }, context, webview);
 	});
 	watcher.onDidDelete(async uri => {
 		const folder = Object.values(await utils.getFolders([uri], "delete"))[0];
@@ -54,7 +54,7 @@ export function createFileWatcher(context: vscode.ExtensionContext, webview: vsc
 				delete gFolders[folder.id];
 			}
 		}
-		messageListener({command: "POST.gallery.requestSort"}, context, webview);
+		messageListener({ command: "POST.gallery.requestSort" }, context, webview);
 	});
 	watcher.onDidChange(async uri => {
 		// rename is NOT handled here; it's handled automatically by Delete & Create
@@ -64,7 +64,7 @@ export function createFileWatcher(context: vscode.ExtensionContext, webview: vsc
 		if (gFolders.hasOwnProperty(folder.id) && gFolders[folder.id].images.hasOwnProperty(image.id)) {
 			image.status = "refresh";
 			gFolders[folder.id].images[image.id] = image;
-			messageListener({command: "POST.gallery.requestSort"}, context, webview);
+			messageListener({ command: "POST.gallery.requestSort" }, context, webview);
 			gFolders[folder.id].images[image.id].status = "";
 		}
 	});
@@ -86,7 +86,7 @@ export function messageListener(message: Record<string, any>, context: vscode.Ex
 			break;
 		case "POST.gallery.requestSort":
 			gFolders = new CustomSorter().sort(gFolders, message.valueName, message.ascending);
-			// DO NOT BREAK HERE; FALL THROUGH TO UPDATE DOMS
+		// DO NOT BREAK HERE; FALL THROUGH TO UPDATE DOMS
 		case "POST.gallery.requestContentDOMs":
 			const htmlProvider = new HTMLProvider(context, webview);
 			const response: Record<string, any> = {};
@@ -111,7 +111,7 @@ export function messageListener(message: Record<string, any>, context: vscode.Ex
 			});
 			break;
 	}
-}	
+}
 
 async function getImageUris(galleryFolder?: vscode.Uri) {
 	/**
@@ -163,7 +163,7 @@ class CustomSorter {
 		for (const [name, folder] of Object.entries(sortedFolders)) {
 			sortedFolders[name].images = Object.fromEntries(
 				this.getSortedImages(Object.values(folder.images), valueName, ascending)
-				.map(image => [image.id, image])
+					.map(image => [image.id, image])
 			);
 		}
 		return sortedFolders;
@@ -208,6 +208,7 @@ class HTMLProvider {
 	context: vscode.ExtensionContext;
 	webview: vscode.Webview;
 	placeholderUri: vscode.Uri;
+	codicons: Record<string, vscode.Uri>;
 	jsFileUri: vscode.Uri;
 	cssFileUri: vscode.Uri;
 	codiconUri: vscode.Uri;
@@ -220,6 +221,14 @@ class HTMLProvider {
 			vscode.Uri.joinPath(this.context.extensionUri, ...args)
 		);
 		this.placeholderUri = asWebviewUri("media", "placeholder.jpg");
+		this.codicons = {
+			"expandAll": asWebviewUri("media", "expand-all.svg"),
+			"collapseAll": asWebviewUri("media", "collapse-all.svg"),
+			"arrowUp": asWebviewUri("media", "arrow-up.svg"),
+			"arrowDown": asWebviewUri("media", "arrow-down.svg"),
+			"chevronRight": asWebviewUri("media", "chevron-right.svg"),
+			"chevronDown": asWebviewUri("media", "chevron-down.svg"),
+		}
 		this.jsFileUri = asWebviewUri("media", "gallery.js");
 		this.cssFileUri = asWebviewUri("media", "gallery.css");
 		this.codiconUri = asWebviewUri("node_modules", "@vscode/codicons", "dist", "codicon.css");
@@ -255,7 +264,7 @@ class HTMLProvider {
 
 	bodyHTML(folders: Record<string, TFolder>) {
 		const nFolders = Object.keys(folders).length;
-		let htmlContents : Array<string> = [];
+		let htmlContents: Array<string> = [];
 		htmlContents.push(this.toolbarHTML(nFolders));
 		htmlContents.push(`<div class="gallery-content"></div>`);
 		return htmlContents.join('\n').trim();
@@ -265,8 +274,12 @@ class HTMLProvider {
 		return `
 		<div class="toolbar">
 			<div>
-				<button class="codicon codicon-expand-all expand-all"></button>
-				<button class="codicon codicon-collapse-all collapse-all"></button>
+				<button class="codicon expand-all">
+					<img src="${this.codicons["expandAll"]}" alt="Expand All" />
+				</button>
+				<button class="codicon collapse-all">
+					<img src="${this.codicons["collapseAll"]}" alt="Collapse All"/>
+				</button>
 			</div>
 			<div class="sort-options">
 				<span>Sort by</span>
@@ -278,7 +291,15 @@ class HTMLProvider {
 					<option value="mtime">Modified date</option>
 				</select>
 				<div class="sort-order">
-					<button class="sort-order-arrow codicon codicon-arrow-up"></button>
+					<button class="sort-order-arrow codicon">
+						<img
+							class="sort-order-arrow-img"
+							src="${this.codicons["arrowUp"]}" 
+							data-arrow-up="${this.codicons["arrowUp"]}" 
+							data-arrow-down="${this.codicons["arrowDown"]}" 
+							alt="Sort Order"
+						/>
+					</button>
 				</div>
 			</div>
 			<div class="folder-count">${nFolders} folders found</div>
@@ -298,8 +319,16 @@ class HTMLProvider {
 		>
 			<div
 				id="${folder.id}-arrow"
-				class="folder-arrow codicon ${collapsed ? 'codicon-chevron-right' : 'codicon-chevron-down'}"
-			></div>
+				class="folder-arrow codicon"
+			>
+				<img 
+					id="${folder.id}-arrow-img" 
+					src="${collapsed ? this.codicons["chevronRight"] : this.codicons["chevronDown"]}" 
+					data-chevron-right=${this.codicons["chevronRight"]} 
+					data-chevron-down=${this.codicons["chevronDown"]} 
+					alt="Sort Order"
+				/>
+			</div>
 			<div id="${folder.id}-title" class="folder-title">${fsPath}</div>
 			<div id="${folder.id}-items-count" class="folder-items-count">${Object.keys(folder.images).length} images found</div>
 		</button>
