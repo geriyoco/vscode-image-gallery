@@ -208,6 +208,8 @@ class HTMLProvider {
 	context: vscode.ExtensionContext;
 	webview: vscode.Webview;
 	placeholderUri: vscode.Uri;
+	expandAll: vscode.Uri;
+	collapseAll: vscode.Uri;
 	jsFileUri: vscode.Uri;
 	cssFileUri: vscode.Uri;
 	codiconUri: vscode.Uri;
@@ -220,6 +222,8 @@ class HTMLProvider {
 			vscode.Uri.joinPath(this.context.extensionUri, ...args)
 		);
 		this.placeholderUri = asWebviewUri("media", "placeholder.jpg");
+		this.expandAll = asWebviewUri("media", "expand-all.svg");
+		this.collapseAll = asWebviewUri("media", "collapse-all.svg");
 		this.jsFileUri = asWebviewUri("media", "gallery.js");
 		this.cssFileUri = asWebviewUri("media", "gallery.css");
 		this.codiconUri = asWebviewUri("node_modules", "@vscode/codicons", "dist", "codicon.css");
@@ -265,8 +269,12 @@ class HTMLProvider {
 		return `
 		<div class="toolbar">
 			<div>
-				<button class="codicon"><i class="codicon codicon-expand-all"></i></button>
-				<button class="codicon"><i class="codicon codicon-collapse-all"></i></button>
+				<button class="codicon expand-all">
+					<img src="${this.expandAll}" alt="Expand All" />
+				</button>
+				<button class="codicon collapse-all">
+					<img src="${this.collapseAll}" alt="Collapse All"/>
+				</button>
 			</div>
 			<div class="sort-options">
 				<span>Sort by</span>
