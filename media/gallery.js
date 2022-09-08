@@ -231,6 +231,7 @@ class EventListener {
 	static getFolderAssociatedElements(folderDOM) {
 		return {
 			arrow: document.getElementById(`${folderDOM.id}-arrow`),
+			arrowImg: document.getElementById(`${folderDOM.id}-arrow-img`),
 			grid: document.getElementById(`${folderDOM.id}-grid`),
 		};
 	}
@@ -248,9 +249,8 @@ class EventListener {
 
 	static expandFolderBar(folderDOM) {
 		const elements = EventListener.getFolderAssociatedElements(folderDOM);
-		if (elements.arrow.classList.contains("codicon-chevron-right")) {
-			elements.arrow.classList.remove("codicon-chevron-right");
-			elements.arrow.classList.add("codicon-chevron-down");
+		if (elements.arrowImg.src.includes("chevron-right.svg")) {
+			elements.arrowImg.src = elements.arrowImg.dataset.chevronDown;
 		}
 		elements.grid.style.display = "grid";
 		folderDOM.dataset.state = "expanded";
@@ -258,9 +258,8 @@ class EventListener {
 
 	static collapseFolderBar(folderDOM) {
 		const elements = EventListener.getFolderAssociatedElements(folderDOM);
-		if (elements.arrow.classList.contains("codicon-chevron-down")) {
-			elements.arrow.classList.remove("codicon-chevron-down");
-			elements.arrow.classList.add("codicon-chevron-right");
+		if (elements.arrowImg.src.includes("chevron-down.svg")) {
+			elements.arrowImg.src = elements.arrowImg.dataset.chevronRight;
 		}
 		elements.grid.style.display = "none";
 		folderDOM.dataset.state = "collapsed";
@@ -277,21 +276,24 @@ class EventListener {
 	}
 
 	static toggleSortOrder() {
-		const dom = document.querySelector(".toolbar .sort-order-arrow");
-		if (dom.classList.contains("codicon-arrow-up")) {
-			dom.setAttribute("class", "sort-order-arrow codicon codicon-arrow-down");
-		} else if (dom.classList.contains("codicon-arrow-down")) {
-			dom.setAttribute("class", "sort-order-arrow codicon codicon-arrow-up");
+		const sortArrowImg = document.querySelector(".toolbar .sort-order-arrow-img");
+		if (sortArrowImg.src.includes("arrow-up.svg")) {
+			sortArrowImg.src = sortArrowImg.dataset.arrowDown;
+			return;
+		}
+		if (sortArrowImg.src.includes("arrow-down.svg")) {
+			sortArrowImg.src = sortArrowImg.dataset.arrowUp;
+			return;
 		}
 	}
 
 	static sortRequest() {
 		const dropdownDOM = document.querySelector(".toolbar .dropdown");
-		const sortOrderDOM = document.querySelector(".toolbar .sort-order-arrow");
+		const sortOrderDOM = document.querySelector(".toolbar .sort-order-arrow-img");
 		vscode.postMessage({
 			command: "POST.gallery.requestSort",
 			valueName: dropdownDOM.value,
-			ascending: sortOrderDOM.classList.contains("codicon-arrow-up") ? true : false,
+			ascending: sortOrderDOM.src.includes("arrow-up.svg") ? true : false,
 		});
 	}
 }

@@ -208,8 +208,7 @@ class HTMLProvider {
 	context: vscode.ExtensionContext;
 	webview: vscode.Webview;
 	placeholderUri: vscode.Uri;
-	expandAll: vscode.Uri;
-	collapseAll: vscode.Uri;
+	codicons: Record<string, vscode.Uri>;
 	jsFileUri: vscode.Uri;
 	cssFileUri: vscode.Uri;
 	codiconUri: vscode.Uri;
@@ -222,8 +221,14 @@ class HTMLProvider {
 			vscode.Uri.joinPath(this.context.extensionUri, ...args)
 		);
 		this.placeholderUri = asWebviewUri("media", "placeholder.jpg");
-		this.expandAll = asWebviewUri("media", "expand-all.svg");
-		this.collapseAll = asWebviewUri("media", "collapse-all.svg");
+		this.codicons = {
+			"expandAll": asWebviewUri("media", "expand-all.svg"),
+			"collapseAll": asWebviewUri("media", "collapse-all.svg"),
+			"arrowUp": asWebviewUri("media", "arrow-up.svg"),
+			"arrowDown": asWebviewUri("media", "arrow-down.svg"),
+			"chevronRight": asWebviewUri("media", "chevron-right.svg"),
+			"chevronDown": asWebviewUri("media", "chevron-down.svg"),
+		}
 		this.jsFileUri = asWebviewUri("media", "gallery.js");
 		this.cssFileUri = asWebviewUri("media", "gallery.css");
 		this.codiconUri = asWebviewUri("node_modules", "@vscode/codicons", "dist", "codicon.css");
@@ -270,10 +275,10 @@ class HTMLProvider {
 		<div class="toolbar">
 			<div>
 				<button class="codicon expand-all">
-					<img src="${this.expandAll}" alt="Expand All" />
+					<img src="${this.codicons["expandAll"]}" alt="Expand All" />
 				</button>
 				<button class="codicon collapse-all">
-					<img src="${this.collapseAll}" alt="Collapse All"/>
+					<img src="${this.codicons["collapseAll"]}" alt="Collapse All"/>
 				</button>
 			</div>
 			<div class="sort-options">
@@ -286,7 +291,15 @@ class HTMLProvider {
 					<option value="mtime">Modified date</option>
 				</select>
 				<div class="sort-order">
-					<button class="sort-order-arrow codicon codicon-arrow-up"></button>
+					<button class="sort-order-arrow codicon">
+						<img
+							class="sort-order-arrow-img"
+							src="${this.codicons["arrowUp"]}" 
+							data-arrow-up="${this.codicons["arrowUp"]}" 
+							data-arrow-down="${this.codicons["arrowDown"]}" 
+							alt="Sort Order"
+						/>
+					</button>
 				</div>
 			</div>
 			<div class="folder-count">${nFolders} folders found</div>
@@ -306,8 +319,16 @@ class HTMLProvider {
 		>
 			<div
 				id="${folder.id}-arrow"
-				class="folder-arrow codicon ${collapsed ? 'codicon-chevron-right' : 'codicon-chevron-down'}"
-			></div>
+				class="folder-arrow codicon"
+			>
+				<img 
+					id="${folder.id}-arrow-img" 
+					src="${collapsed ? this.codicons["chevronRight"] : this.codicons["chevronDown"]}" 
+					data-chevron-right=${this.codicons["chevronRight"]} 
+					data-chevron-down=${this.codicons["chevronDown"]} 
+					alt="Sort Order"
+				/>
+			</div>
 			<div id="${folder.id}-title" class="folder-title">${fsPath}</div>
 			<div id="${folder.id}-items-count" class="folder-items-count">${Object.keys(folder.images).length} images found</div>
 		</button>
