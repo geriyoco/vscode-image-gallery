@@ -29,7 +29,7 @@ export function createFileWatcher(context: vscode.ExtensionContext, webview: vsc
 	const globPattern = utils.getGlob();
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		galleryFolder ?
-		new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
+			new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
 	);
 	watcher.onDidCreate(async uri => {
 		const folder = Object.values(await utils.getFolders([uri], "create"))[0];
@@ -41,7 +41,7 @@ export function createFileWatcher(context: vscode.ExtensionContext, webview: vsc
 		} else {
 			gFolders[folder.id] = folder;
 		}
-		messageListener({command: "POST.gallery.requestSort"}, context, webview);
+		messageListener({ command: "POST.gallery.requestSort" }, context, webview);
 	});
 	watcher.onDidDelete(async uri => {
 		const folder = Object.values(await utils.getFolders([uri], "delete"))[0];
@@ -54,7 +54,7 @@ export function createFileWatcher(context: vscode.ExtensionContext, webview: vsc
 				delete gFolders[folder.id];
 			}
 		}
-		messageListener({command: "POST.gallery.requestSort"}, context, webview);
+		messageListener({ command: "POST.gallery.requestSort" }, context, webview);
 	});
 	watcher.onDidChange(async uri => {
 		// rename is NOT handled here; it's handled automatically by Delete & Create
@@ -64,7 +64,7 @@ export function createFileWatcher(context: vscode.ExtensionContext, webview: vsc
 		if (gFolders.hasOwnProperty(folder.id) && gFolders[folder.id].images.hasOwnProperty(image.id)) {
 			image.status = "refresh";
 			gFolders[folder.id].images[image.id] = image;
-			messageListener({command: "POST.gallery.requestSort"}, context, webview);
+			messageListener({ command: "POST.gallery.requestSort" }, context, webview);
 			gFolders[folder.id].images[image.id].status = "";
 		}
 	});
@@ -86,7 +86,7 @@ export function messageListener(message: Record<string, any>, context: vscode.Ex
 			break;
 		case "POST.gallery.requestSort":
 			gFolders = new CustomSorter().sort(gFolders, message.valueName, message.ascending);
-			// DO NOT BREAK HERE; FALL THROUGH TO UPDATE DOMS
+		// DO NOT BREAK HERE; FALL THROUGH TO UPDATE DOMS
 		case "POST.gallery.requestContentDOMs":
 			const htmlProvider = new HTMLProvider(context, webview);
 			const response: Record<string, any> = {};
@@ -111,7 +111,7 @@ export function messageListener(message: Record<string, any>, context: vscode.Ex
 			});
 			break;
 	}
-}	
+}
 
 async function getImageUris(galleryFolder?: vscode.Uri) {
 	/**
@@ -163,7 +163,7 @@ class CustomSorter {
 		for (const [name, folder] of Object.entries(sortedFolders)) {
 			sortedFolders[name].images = Object.fromEntries(
 				this.getSortedImages(Object.values(folder.images), valueName, ascending)
-				.map(image => [image.id, image])
+					.map(image => [image.id, image])
 			);
 		}
 		return sortedFolders;
@@ -255,7 +255,7 @@ class HTMLProvider {
 
 	bodyHTML(folders: Record<string, TFolder>) {
 		const nFolders = Object.keys(folders).length;
-		let htmlContents : Array<string> = [];
+		let htmlContents: Array<string> = [];
 		htmlContents.push(this.toolbarHTML(nFolders));
 		htmlContents.push(`<div class="gallery-content"></div>`);
 		return htmlContents.join('\n').trim();
@@ -265,8 +265,8 @@ class HTMLProvider {
 		return `
 		<div class="toolbar">
 			<div>
-				<button class="codicon codicon-expand-all expand-all"></button>
-				<button class="codicon codicon-collapse-all collapse-all"></button>
+				<button class="codicon"><i class="codicon codicon-expand-all"></i></button>
+				<button class="codicon"><i class="codicon codicon-collapse-all"></i></button>
 			</div>
 			<div class="sort-options">
 				<span>Sort by</span>
