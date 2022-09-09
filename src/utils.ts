@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { TFolder } from '.';
 import crypto from 'crypto';
+import fileSystem from 'fs';
 
 export function getCwd() {
 	if (!vscode.workspace.workspaceFolders) {
@@ -76,12 +77,30 @@ export function getFilename(imgPath: string) {
 	return filename;
 }
 
-export function hash256(str: string, truncate=16) {
+export function hash256(str: string, truncate = 16) {
 	return 'H' + crypto.createHash('sha256').update(str).digest('hex').substring(0, truncate);
+}
+
+export async function getFileStats(imgUris: vscode.Uri[]) {
+	const result = await Promise.all(imgUris.map(async (imgUri: { fsPath: any; }) => {
+		var path = imgUri.fsPath;
+		var stat = await fileSystem.promises.stat(path);
+		return [path, stat];
+	}));
+
+	const resultObj = result.reduce((obj, item) => {
+		return {
+			...obj,
+			[item[0]]: item[1],
+		};
+	}, {});
+
+	return resultObj;
 }
 
 export async function getFolders(imgUris: vscode.Uri[], action: "create" | "change" | "delete" = "create") {
 	let folders: Record<string, TFolder> = {};
+	const fileStats = await getFileStats(imgUris);
 	for (const imgUri of imgUris) {
 		const folderPath = path.dirname(imgUri.path);
 		const folderId = hash256(folderPath);
@@ -95,16 +114,16 @@ export async function getFolders(imgUris: vscode.Uri[], action: "create" | "chan
 		}
 
 		if (action !== 'delete') {
-			const fileStat = await vscode.workspace.fs.stat(imgUri);
+			const fileStat = fileStats[imgUri.fsPath as keyof typeof fileStats];
 			const dotIndex = imgUri.fsPath.lastIndexOf('.');
 			const imageId = hash256(imgUri.path);
 			folders[folderId].images[imageId] = {
 				id: imageId,
 				uri: imgUri,
 				ext: imgUri.fsPath.slice(dotIndex + 1).toUpperCase(),
-				size: fileStat.size,
-				mtime: fileStat.mtime,
-				ctime: fileStat.ctime,
+				size: fileStat['size'],
+				mtime: fileStat['mtime'],
+				ctime: fileStat['ctime'],
 				status: "",
 			};
 		}
