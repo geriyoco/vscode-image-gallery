@@ -118,7 +118,15 @@ class DOMManager {
 				content[folderId].images[imageId].status = "";
 
 			}
+
+			// update counts
+			const countText = (object, count) => `${count} ${object}${count === 1 ? "" : "s"} found`;
+			const nImages = Object.keys(content[folderId].images).length;
+			content[folderId].bar.querySelector(`#${folderId}-items-count`).textContent = countText("image", nImages);
+			const nFolders = Object.keys(content).length;
+			document.querySelector('.toolbar .folder-count').textContent = countText("folder", nFolders);
 		}
+
 		gFolders = content;
 	}
 

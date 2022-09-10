@@ -263,14 +263,13 @@ class HTMLProvider {
 	}
 
 	bodyHTML(folders: Record<string, TFolder>) {
-		const nFolders = Object.keys(folders).length;
 		let htmlContents: Array<string> = [];
-		htmlContents.push(this.toolbarHTML(nFolders));
+		htmlContents.push(this.toolbarHTML());
 		htmlContents.push(`<div class="gallery-content"></div>`);
 		return htmlContents.join('\n').trim();
 	}
 
-	toolbarHTML(nFolders: number) {
+	toolbarHTML() {
 		return `
 		<div class="toolbar">
 			<div>
@@ -302,7 +301,7 @@ class HTMLProvider {
 					</button>
 				</div>
 			</div>
-			<div class="folder-count">${nFolders} folders found</div>
+			<div class="folder-count"></div>
 		</div>
 		`.trim();
 	}
@@ -330,7 +329,7 @@ class HTMLProvider {
 				/>
 			</div>
 			<div id="${folder.id}-title" class="folder-title">${fsPath}</div>
-			<div id="${folder.id}-items-count" class="folder-items-count">${Object.keys(folder.images).length} images found</div>
+			<div id="${folder.id}-items-count" class="folder-items-count"></div>
 		</button>
 		`.trim();
 	}
