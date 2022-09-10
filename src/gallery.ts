@@ -271,6 +271,7 @@ class HTMLProvider {
 	}
 
 	toolbarHTML(nFolders: number) {
+		const countText = (nFolders === 1) ? "1 folder found" : `${nFolders} folders found`;
 		return `
 		<div class="toolbar">
 			<div>
@@ -302,7 +303,7 @@ class HTMLProvider {
 					</button>
 				</div>
 			</div>
-			<div class="folder-count">${nFolders} folders found</div>
+			<div class="folder-count">${countText}</div>
 		</div>
 		`.trim();
 	}

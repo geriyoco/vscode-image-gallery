@@ -119,10 +119,14 @@ class DOMManager {
 
 			}
 
-			// update image count
+			// update counts
 			const nImages = Object.keys(content[folderId].images).length;
-			const countText = (nImages === 1) ? "1 image found" : `${nImages} images found`;
-			content[folderId].bar.querySelector(`#${folderId}-items-count`).textContent = countText;
+			const countTextImg = (nImages === 1) ? "1 image found" : `${nImages} images found`;
+			content[folderId].bar.querySelector(`#${folderId}-items-count`).textContent = countTextImg;
+
+			const nFolders = Object.keys(content).length;
+			const countTextFolder = (nFolders === 1) ? "1 folder found" : `${nFolders} folders found`;
+			document.querySelector('.toolbar .folder-count').textContent = countTextFolder;
 		}
 
 		gFolders = content;
