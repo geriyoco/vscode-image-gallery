@@ -100,7 +100,11 @@ export async function getFileStats(imgUris: vscode.Uri[]) {
 
 export async function getFolders(imgUris: vscode.Uri[], action: "create" | "change" | "delete" = "create") {
 	let folders: Record<string, TFolder> = {};
-	const fileStats = await getFileStats(imgUris);
+
+	let fileStats;
+	if (action !== "delete") {
+		fileStats = await getFileStats(imgUris);
+	}
 	for (const imgUri of imgUris) {
 		const folderPath = path.dirname(imgUri.path);
 		const folderId = hash256(folderPath);
@@ -113,7 +117,7 @@ export async function getFolders(imgUris: vscode.Uri[], action: "create" | "chan
 			};
 		}
 
-		if (action !== 'delete') {
+		if (action !== 'delete' && fileStats !== undefined) {
 			const fileStat = fileStats[imgUri.fsPath as keyof typeof fileStats];
 			const dotIndex = imgUri.fsPath.lastIndexOf('.');
 			const imageId = hash256(imgUri.path);
