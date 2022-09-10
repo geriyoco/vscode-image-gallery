@@ -310,6 +310,8 @@ class HTMLProvider {
 	folderBarHTML(folder: TFolder, collapsed: boolean = false) {
 		let fsPath = this.webview.asWebviewUri(vscode.Uri.parse(folder.path)).fsPath;
 		fsPath = fsPath[0].toUpperCase() + fsPath.slice(1);
+		const nImages = Object.keys(folder.images).length;
+		const countText = (nImages === 1) ? `1 image found` : `${nImages} images found`;
 		return `
 		<button
 			id="${folder.id}"
@@ -330,7 +332,7 @@ class HTMLProvider {
 				/>
 			</div>
 			<div id="${folder.id}-title" class="folder-title">${fsPath}</div>
-			<div id="${folder.id}-items-count" class="folder-items-count">${Object.keys(folder.images).length} images found</div>
+			<div id="${folder.id}-items-count" class="folder-items-count">${countText}</div>
 		</button>
 		`.trim();
 	}

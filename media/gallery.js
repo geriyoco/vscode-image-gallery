@@ -118,7 +118,13 @@ class DOMManager {
 				content[folderId].images[imageId].status = "";
 
 			}
+
+			// update image count
+			const nImages = Object.keys(content[folderId].images).length;
+			const countText = (nImages === 1) ? "1 image found" : `${nImages} images found`;
+			content[folderId].bar.querySelector(`#${folderId}-items-count`).textContent = countText;
 		}
+
 		gFolders = content;
 	}
 
