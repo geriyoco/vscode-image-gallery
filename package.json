@@ -2,7 +2,7 @@
 	"name": "vscode-image-gallery",
 	"displayName": "Image Gallery",
 	"description": "Improve image browsing experience, especially for remote development.",
-	"version": "0.4.1",
+	"version": "1.0.0",
 	"publisher": "GeriYoco",
 	"repository": {
 		"type": "git",
@@ -35,7 +35,6 @@
 		"onCustomEditor:gryc.editor"
 	],
 	"main": "./dist/extension.js",
-	"browser": "./dist/extension.js",
 	"contributes": {
 		"configuration": {
 			"title": "Image Gallery",
@@ -75,7 +74,6 @@
 		"customEditors": [
 			{
 				"viewType": "gryc.editor",
-				"displayName": "GRYC: Image Viewer",
 				"priority": "default",
 				"selector": [
 					{
@@ -87,7 +85,7 @@
 		"commands": [
 			{
 				"command": "vscodeImageGallery.openGallery",
-				"title": "Open Image Gallery",
+				"title": "Open Image Gallery (GeriYoco) 🖼️",
 				"category": "Image Gallery"
 			}
 		],
