@@ -1,190 +1,311 @@
-(function () {
-	const vscode = acquireVsCodeApi();
+const vscode = acquireVsCodeApi();
+let gFolders = {}; // a global holder for all content DOMs to preserve attributes
+/** {folderId: {
+ * 		status: "",
+ * 		bar: domBarButton,
+ *		grid: domGridDiv,
+ *		images: {
+			imageId: {
+				status: "" | "refresh",
+				container: domContainerDiv,
+			}, ...
+		},
+ *	}, ...}
+ **/
 
-	let gridElements = document.querySelectorAll(".grid");
-	gridElements.forEach((gridElement) => {
-		if (!gridElement.className.includes("grid-0")) {
-			gridElement.style.display = "none";
-			gridElement.previousElementSibling.firstElementChild.textContent = "⮞";
+function init() {
+	initMessageListeners();
+	DOMManager.requestContentDOMs();
+	EventListener.addAllToToolbar();
+}
+
+function initMessageListeners() {
+	window.addEventListener("message", event => {
+		const message = event.data;
+		const command = message.command;
+		delete message.command;
+		switch (command) {
+			case "POST.gallery.responseContentDOMs":
+				DOMManager.updateGlobalDoms(message);
+				DOMManager.updateGalleryContent();
+				break;
 		}
 	});
+}
 
-	let lazyloadImages = document.querySelectorAll(".lazy");
-	let imageObserver = new IntersectionObserver((entries, observer) => {
+const imageObserver = new IntersectionObserver(
+	(entries, _observer) => {
 		entries.forEach(entry => {
 			if (entry.isIntersecting) {
-				var image = entry.target;
+				const image = entry.target;
 				imageObserver.unobserve(image);
 				image.src = image.dataset.src;
-				image.onload = () => {
-					image.classList.remove("lazy");
-					image.classList.add("loaded");
-				};
+				image.onload = () => image.classList.replace("unloaded", "loaded");
 			}
 		});
-	});
+	}
+);
 
-	lazyloadImages.forEach((image) => {
-		imageObserver.observe(image);
-	});
+class DOMManager {
+	static htmlToDOM(html) {
+		const template = document.createElement("template");
+		template.innerHTML = html.trim();
+		return template.content.firstChild;
+	}
 
-	const clickHandler = (event, preview) => {
-		let node = event && event.target;
-		const folderHeader = ['folder', 'folder-title', 'folder-arrow'];
-		if (folderHeader.some(el => node.classList.contains(el))) {
-			let id = '';
-			if (node.classList.contains('folder')) {
-				id = node.id;
-			} else {
-				let lastIndexToSplit = node.id.lastIndexOf('-');
-				id = node.id.slice(0, lastIndexToSplit);
-			}
+	static requestContentDOMs() {
+		vscode.postMessage({
+			command: "POST.gallery.requestContentDOMs",
+		});
+	}
 
-			let folderGrid = document.getElementById(id + '-grid');
-			let folderArrow = document.getElementById(id + '-arrow');
-			folderGrid.style.display = folderGrid.style.display === "none" ? "grid" : "none";
-			folderArrow.textContent = folderArrow.textContent === "⮟" ? "⮞" : "⮟";
+	static updateGlobalDoms(response) {
+		const content = JSON.parse(response.content);
 
-			let expandAll = Array.from(gridElements).some(el => el.style.display === "none");
-			if (expandAll) {
-				let collapseAllButton = document.getElementsByClassName("temp-collapse-all");
-				if (collapseAllButton.length !== 0) {
-					collapseAllButton[0].setAttribute("class", "codicon temp-expand-all");
-					collapseAllButton[0].textContent = "+";
-				}
-			} else {
-				let expandAllButton = document.getElementsByClassName("temp-expand-all");
-				if (expandAllButton.length !== 0) {
-					expandAllButton[0].setAttribute("class", "codicon temp-collapse-all");
-					collapseAllButton[0].textContent = "−";
+		// remove deleted images and folders
+		for (const folderId of Object.keys(gFolders)) {
+			for (const imageId of Object.keys(gFolders[folderId].images)) {
+				if (content.hasOwnProperty(folderId) && !content[folderId].images.hasOwnProperty(imageId)) {
+					gFolders[folderId].images[imageId].container.remove();
+					delete gFolders[folderId].images[imageId];
 				}
 			}
-			return;
+
+			if (!content.hasOwnProperty(folderId)) {
+				gFolders[folderId].bar.remove();
+				gFolders[folderId].grid.remove();
+				delete gFolders[folderId];
+			}
 		}
 
-		if (node.classList.contains("temp-expand-all")) {
-			gridElements.forEach((gridElement) => {
-				gridElement.style.display = "grid";
-				gridElement.previousElementSibling.firstElementChild.textContent = "⮟";
-			});
-			node.setAttribute("class", "codicon temp-collapse-all");
-			node.textContent = "−";
-			return;
-		}
-		if (node.classList.contains("temp-collapse-all")) {
-			gridElements.forEach((gridElement) => {
-				gridElement.style.display = "none";
-				gridElement.previousElementSibling.firstElementChild.textContent = "⮞";
-			});
-			node.setAttribute("class", "codicon temp-expand-all");
-			node.textContent = "+";
-			return;
-		}
+		// synchronize the images and folders
+		// convert all new html to DOMs
+		for (const [folderId, folder] of Object.entries(content)) {
+			if (gFolders.hasOwnProperty(folderId)) { // old folder
+				content[folderId].bar = gFolders[folderId].bar;
+				content[folderId].grid = gFolders[folderId].grid;
+			}
+			else { // new folder
+				content[folderId].bar = DOMManager.htmlToDOM(folder.barHtml);
+				content[folderId].grid = DOMManager.htmlToDOM(folder.gridHtml);
+				delete content[folderId].barHtml;
+				delete content[folderId].gridHtml;
+				EventListener.addToFolderBar(content[folderId].bar);
+			}
 
-		if (!node.parentElement.classList.contains('image-container')) { return; }
+			for (const [imageId, image] of Object.entries(folder.images)) {
+				const hasFolder = gFolders.hasOwnProperty(folderId);
+				const hasImage = hasFolder && gFolders[folderId].images.hasOwnProperty(imageId);
 
-		if (node.parentElement.classList.contains('image-container')) {
-			node.parentElement.childNodes.forEach((childNode) => {
-				if (childNode.nodeName.toLowerCase() === 'img') {
-					vscode.postMessage({
-						command: 'vscodeImageGallery.openViewer',
-						src: childNode.src,
-						preview: preview,
-					});
+				if (hasFolder && hasImage && image.status !== "refresh") { // old image
+					content[folderId].images[imageId].container = gFolders[folderId].images[imageId].container;
+				} 
+				else if (hasFolder && hasImage && image.status === "refresh") { // image demands refresh
+					gFolders[folderId].images[imageId].container.remove();
+					content[folderId].images[imageId].container = DOMManager.htmlToDOM(image.containerHtml);
+					delete content[folderId].images[imageId].containerHtml;
+					EventListener.addToImageContainer(content[folderId].images[imageId].container);
+
+					const imageDom = content[folderId].images[imageId].container.querySelector("#" + imageId);
+					imageDom.src += "?t=" + Date.now();
+					imageDom.dataset.src += "?t=" + Date.now();
 				}
-			});
-			return;
+				else { // new image
+					content[folderId].images[imageId].container = DOMManager.htmlToDOM(image.containerHtml);
+					delete content[folderId].images[imageId].containerHtml;
+					EventListener.addToImageContainer(content[folderId].images[imageId].container);
+				}
+				content[folderId].images[imageId].status = "";
+
+			}
+
+			// update counts
+			const countText = (object, count) => `${count} ${object}${count === 1 ? "" : "s"} found`;
+			const nImages = Object.keys(content[folderId].images).length;
+			content[folderId].bar.querySelector(`#${folderId}-items-count`).textContent = countText("image", nImages);
+			const nFolders = Object.keys(content).length;
+			document.querySelector('.toolbar .folder-count').textContent = countText("folder", nFolders);
 		}
-		return;
-	};
-	document.addEventListener('click', event => clickHandler(event, preview = true), { passive: true });
-	document.addEventListener('dblclick', event => clickHandler(event, preview = false), { passive: true });
 
-	document.addEventListener('mouseover', event => {
-		const node = event && event.target;
-		if (!node.classList.contains('image')) { return; }
+		gFolders = content;
+	}
 
-		const lastDotIndex = node.src.lastIndexOf('.');
-		const imgExtension = node.src.slice(lastDotIndex + 1, ).toUpperCase();
+	static updateGalleryContent() {
+		const content = document.querySelector(".gallery-content");
+		content.replaceChildren(
+			...Object.values(gFolders).flatMap(folder => {
+				folder.grid.replaceChildren(
+					...Object.values(folder.images).map(image => image.container)
+				);
+				return [folder.bar, folder.grid];
+			})
+		);
+		if (content.childElementCount === 0) {
+			content.innerHTML = "<p>No image found in this folder.</p>";
+		}
+	}
+}
+
+class EventListener {
+	static addAllToToolbar() {
+		document.querySelector(".toolbar .collapse-all").addEventListener(
+			"click", () => EventListener.collapseAllFolderBars()
+		);
+		document.querySelector(".toolbar .expand-all").addEventListener(
+			"click", () => EventListener.expandAllFolderBars()
+		);
+		document.querySelector(".toolbar .dropdown").addEventListener(
+			"change", () => EventListener.sortRequest()
+		);
+		document.querySelector(".toolbar .sort-order-arrow").addEventListener(
+			"click", () => {
+				EventListener.toggleSortOrder();
+				EventListener.sortRequest();
+			}
+		);
+	}
+
+	static addToFolderBar(folderBar) {
+		folderBar.addEventListener("click", () => {
+			EventListener.toggleFolderBar(folderBar);
+		});
+	}
+
+	static addToImageContainer(imageContainer) {
+		for (const child of imageContainer.childNodes) {
+			if (child.nodeName !== "IMG") { continue; }
+			const image = child;
+
+			imageContainer.addEventListener("click", () => {
+				EventListener.openImageViewer(image.dataset.path, true);
+			});
+			imageContainer.addEventListener("dblclick", () => {
+				EventListener.openImageViewer(image.dataset.path, false);
+			});
+			imageContainer.addEventListener("mouseover", () => {
+				const tooltip = image.previousElementSibling;
+				if (!tooltip.classList.contains("tooltip")) {
+					throw new Error("DOM element is not of class tooltip");
+				}
+				EventListener.showImageMetadata(tooltip, image.dataset.meta);
+			});
+			imageContainer.addEventListener("mouseout", () => {
+				image.previousElementSibling.textContent = "";
+			});
+
+			if (image.classList.contains("unloaded")) {
+				imageObserver.observe(image);
+			}
+		}
+	}
+
+	static openImageViewer(path, preview) {
+		vscode.postMessage({
+			command: "POST.gallery.openImageViewer",
+			path: path,
+			preview: preview,
+		});
+	}
+
+	static showImageMetadata(tooltipDOM, metadata) {
+		const image = tooltipDOM.nextElementSibling;
+
+		const data = JSON.parse(metadata);
+
+		const pow = Math.floor(Math.log(data.size) / Math.log(1024));
+		const unit = ["bytes", "kB", "MB", "GB", "TB", "PB"][pow];
+		const sizeStr = (data.size / Math.pow(1024, pow)).toFixed(2) + " " + unit;
+
 		const dateOptions = {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit',
-			second: '2-digit',
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
 		};
+		const ctimeStr = new Date(data.ctime).toLocaleString("en-US", dateOptions);
+		const mtimeStr = new Date(data.mtime).toLocaleString("en-US", dateOptions);
 
-		const imgMetadata = JSON.parse(node.getAttribute('data-meta'));
-		const createdDate = new Date(imgMetadata.ctime).toLocaleDateString('en-US', dateOptions);
-		const modifiedDate = new Date(imgMetadata.mtime).toLocaleTimeString('en-US', dateOptions);
-		let i = Math.floor(Math.log(imgMetadata.size) / Math.log(1024));
-		let imgSize = (imgMetadata.size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['bytes', 'KB', 'MB', 'GB', 'TB'][i];
-		
-		node.previousElementSibling.textContent = (
-		`Dimensions: ${node.naturalHeight} x ${node.naturalWidth}
-		Type: ${imgExtension}
-		Size: ${imgSize}
-		Created: ${createdDate}
-		Modified: ${modifiedDate}`
-		).replace(/^		+/gm, '');
-		return;
-	});
+		tooltipDOM.textContent = [
+			`Dimensions: ${image.naturalWidth} x ${image.naturalHeight}`,
+			`Type: ${data.ext}`,
+			`Size: ${sizeStr}`,
+			`Modified: ${mtimeStr}`,
+			`Created: ${ctimeStr}`,
+		].join("\n");
+	}
 
-	window.addEventListener('message', event => {
-		const message = event.data;
+	static getFolderAssociatedElements(folderDOM) {
+		return {
+			arrow: document.getElementById(`${folderDOM.id}-arrow`),
+			arrowImg: document.getElementById(`${folderDOM.id}-arrow-img`),
+			grid: document.getElementById(`${folderDOM.id}-grid`),
+		};
+	}
 
-		switch (message.command) {
-			case 'vscodeImageGallery.addImage':
-				let addedTimestamp = new Date().getTime();
-				let folder = Object.keys(message.imagesBySubFolders)[0];
-				let imgNode = document.createElement("img");
-				imgNode.setAttribute("class", "image loaded");
-				imgNode.setAttribute("id", message.imgPath);
-				imgNode.setAttribute("src", `${message.imgSrc}?t=${addedTimestamp}`);
-				imgNode.setAttribute("data-src", `${message.imgSrc}?t=${addedTimestamp}`);
-				imgNode.setAttribute("data-meta", `${JSON.stringify(message.imagesBySubFolders[folder][0].imgMetadata)}`);
-
-				let divNode = document.createElement("div");
-				divNode.setAttribute("class", "filename");
-				divNode.setAttribute("id", message.imgPath + "-filename");
-				divNode.textContent = message.imgPath.split("/").pop();
-
-				let tooltipNode = document.createElement("span");
-				tooltipNode.setAttribute("class", "tooltiptext");
-				tooltipNode.setAttribute("id", message.imgPath + "-tooltip");
-
-				let containerNode = document.createElement("div");
-				containerNode.setAttribute("class", "image-container tooltip");
-				containerNode.appendChild(tooltipNode);
-				containerNode.appendChild(imgNode);
-				containerNode.appendChild(divNode);
-				
-				let grid = document.getElementById(`${folder}-grid`);
-				grid.appendChild(containerNode);
-
-				let folderItemsCountOnAdd = document.getElementById(`${folder}-items-count`);
-				folderItemsCountOnAdd.textContent = folderItemsCountOnAdd.textContent.replace(/\d+/g, (match, _) => parseInt(match) + 1);
+	static toggleFolderBar(folderDOM) {
+		switch (folderDOM.dataset.state) {
+			case "collapsed":
+				EventListener.expandFolderBar(folderDOM);
 				break;
-			case 'vscodeImageGallery.changeImage':
-				let changedTimestamp = new Date().getTime();
-				let changeImage = document.getElementById(message.imgPath);
-				changeImage.setAttribute("src", `${message.imgSrc}?t=${changedTimestamp}`);
-				changeImage.setAttribute("data-src", `${message.imgSrc}?t=${changedTimestamp}`);
-				changeImage.setAttribute("data-meta", `${JSON.stringify(message.imagesBySubFolders[folder][0].imgMetadata)}`);
-
-				let changeFilename = document.getElementById(message.imgPath + "-filename");
-				changeFilename.setAttribute("class", "filename");
-				changeFilename.setAttribute("id", message.imgPath + "-filename");
-				changeFilename.textContent = message.imgPath.split("/").pop();
-				break;
-			case 'vscodeImageGallery.deleteImage':
-				let deleteImage = document.getElementById(message.imgPath);
-				deleteImage.parentElement.remove();
-
-				let folderItemsCountOnDel = document.getElementById(`${Object.keys(message.imagesBySubFolders)[0]}-items-count`);
-				folderItemsCountOnDel.textContent = folderItemsCountOnDel.textContent.replace(/\d+/g, (match, _) => parseInt(match) - 1);
+			case "expanded":
+				EventListener.collapseFolderBar(folderDOM);
 				break;
 		}
-	}, true);
+	}
+
+	static expandFolderBar(folderDOM) {
+		const elements = EventListener.getFolderAssociatedElements(folderDOM);
+		if (elements.arrowImg.src.includes("chevron-right.svg")) {
+			elements.arrowImg.src = elements.arrowImg.dataset.chevronDown;
+		}
+		elements.grid.style.display = "grid";
+		folderDOM.dataset.state = "expanded";
+	}
+
+	static collapseFolderBar(folderDOM) {
+		const elements = EventListener.getFolderAssociatedElements(folderDOM);
+		if (elements.arrowImg.src.includes("chevron-down.svg")) {
+			elements.arrowImg.src = elements.arrowImg.dataset.chevronRight;
+		}
+		elements.grid.style.display = "none";
+		folderDOM.dataset.state = "collapsed";
+	}
+
+	static expandAllFolderBars() {
+		const folders = document.querySelectorAll(".folder");
+		folders.forEach(folder => EventListener.expandFolderBar(folder));
+	}
+
+	static collapseAllFolderBars() {
+		const folders = document.querySelectorAll(".folder");
+		folders.forEach(folder => EventListener.collapseFolderBar(folder));
+	}
+
+	static toggleSortOrder() {
+		const sortArrowImg = document.querySelector(".toolbar .sort-order-arrow-img");
+		if (sortArrowImg.src.includes("arrow-up.svg")) {
+			sortArrowImg.src = sortArrowImg.dataset.arrowDown;
+			return;
+		}
+		if (sortArrowImg.src.includes("arrow-down.svg")) {
+			sortArrowImg.src = sortArrowImg.dataset.arrowUp;
+			return;
+		}
+	}
+
+	static sortRequest() {
+		const dropdownDOM = document.querySelector(".toolbar .dropdown");
+		const sortOrderDOM = document.querySelector(".toolbar .sort-order-arrow-img");
+		vscode.postMessage({
+			command: "POST.gallery.requestSort",
+			valueName: dropdownDOM.value,
+			ascending: sortOrderDOM.src.includes("arrow-up.svg") ? true : false,
+		});
+	}
+}
+
+(function () {
+	init();
 }());

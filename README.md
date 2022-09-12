@@ -1,20 +1,17 @@
 # Image Gallery
 [![.github/workflows/vsce_publish.yml](https://github.com/geriyoco/vscode-image-gallery/actions/workflows/vsce_publish.yml/badge.svg?branch=production)](https://github.com/geriyoco/vscode-image-gallery/actions/workflows/vsce_publish.yml)
 
-A light-weighted extension that brings you the best image browsing experience in VS Code.
+A light-weighted extension that brings you the best image browsing experience in VS Code, especially for remote / cloud development.
 
 ## Highlights
-- Excellent for image browsing on a remote server (e.g. via [SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh))
-- Gallery view of all images in the selected folder, including its sub-folders.
-- Smooth panning and zooming when viewing individual images.
-- Auto-refresh when images are modified, added, or deleted
-- Extension size less than 1 MB
+- **Remote**: Excellent for browsing images on a cloud (e.g. via [SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh))
+- **Gallery**: Collapsible grid view of all images in the selected folder, including its sub-folders
+- **Performance**: Lazy loading of images (tested on 10k images with a start-up time of 1.5s)
+- **Refresh**: Automatically update view as images are modified, added, or deleted
+- **Light**: Extension size less than 500 kB, installation time is typically negligible
 
-### Gallery view
-![demo-gallery](docs/demo-gallery.gif)
-
-### Panning and zooming
-![demo-editor](docs/demo-editor.gif)
+## Usage
+![demo](docs/demo-v1.0.0.gif)
 
 See [here](docs/photo_credits.md) for the photo credits.
 

@@ -1,5 +1,19 @@
 # Change Log
 
+## [1.0.0] - 2022-09-12
+### Added
+- Support sorting by name, type, size, created time, and modified time
+- Support supporting in both ascending order and descending order
+- Folders are only sorted by name in ascending order
+
+### Changed
+- Separated the "collapse all" and "expand all" buttons
+- Dropped support for web extension to improve performance (web support will be added back in the future)
+
+### Fixed
+- Icons are now consistent with the VS Code's codicons.
+- Gallery view is automatically updated when an image is added, modified, or deleted. However, when changes are made to the folder structure, the user needs to manually refresh the view by reopening the gallery.
+
 ## [0.4.1] - 2022-08-01
 ### Fixed
 - Buttons to expand/collapse all sub-folders were not showing up (temporary fix without using [@vscode/codicons](https://github.com/microsoft/vscode-codicons))
