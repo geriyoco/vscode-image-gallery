@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import * as utils from './utils';
-import { TImage, TFolder } from '.';
+import * as utils from '../utils';
+import { TImage, TFolder } from '../index';
 
 // global variables
 let gFolders: Record<string, TFolder> = {};
@@ -211,7 +211,6 @@ class HTMLProvider {
 	codicons: Record<string, vscode.Uri>;
 	jsFileUri: vscode.Uri;
 	cssFileUri: vscode.Uri;
-	codiconUri: vscode.Uri;
 
 	constructor(context: vscode.ExtensionContext, webview: vscode.Webview) {
 		this.context = context;
@@ -220,18 +219,17 @@ class HTMLProvider {
 		const asWebviewUri = (...args: string[]) => webview.asWebviewUri(
 			vscode.Uri.joinPath(this.context.extensionUri, ...args)
 		);
-		this.placeholderUri = asWebviewUri("media", "placeholder.jpg");
+		this.placeholderUri = asWebviewUri("assets", "placeholder.jpg");
 		this.codicons = {
-			"expandAll": asWebviewUri("media", "expand-all.svg"),
-			"collapseAll": asWebviewUri("media", "collapse-all.svg"),
-			"arrowUp": asWebviewUri("media", "arrow-up.svg"),
-			"arrowDown": asWebviewUri("media", "arrow-down.svg"),
-			"chevronRight": asWebviewUri("media", "chevron-right.svg"),
-			"chevronDown": asWebviewUri("media", "chevron-down.svg"),
+			"expandAll": asWebviewUri("assets", "expand-all.svg"),
+			"collapseAll": asWebviewUri("assets", "collapse-all.svg"),
+			"arrowUp": asWebviewUri("assets", "arrow-up.svg"),
+			"arrowDown": asWebviewUri("assets", "arrow-down.svg"),
+			"chevronRight": asWebviewUri("assets", "chevron-right.svg"),
+			"chevronDown": asWebviewUri("assets", "chevron-down.svg"),
 		}
-		this.jsFileUri = asWebviewUri("media", "gallery.js");
-		this.cssFileUri = asWebviewUri("media", "gallery.css");
-		this.codiconUri = asWebviewUri("node_modules", "@vscode/codicons", "dist", "codicon.css");
+		this.jsFileUri = asWebviewUri("src", "gallery", "script.js");
+		this.cssFileUri = asWebviewUri("src", "gallery", "style.css");
 	}
 
 	fullHTML(folders: Record<string, TFolder>) {
@@ -257,7 +255,6 @@ class HTMLProvider {
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta http-equiv="Content-Security-Policy" content="${securityPolicyContent}">
 		<link href="${this.cssFileUri}" rel="stylesheet" />
-		<link href="${this.codiconUri}" rel="stylesheet" />
 		<script defer nonce="${utils.nonce}" src="${this.jsFileUri}"></script>
 		`.trim();
 	}

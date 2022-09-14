@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import * as gallery from './gallery';
-import * as viewer from './viewer';
+import * as gallery from './gallery/gallery';
+import * as viewer from './viewer/viewer';
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Welcome! VS Code extension "GeriYoco: Image Gallery" is now active.');
