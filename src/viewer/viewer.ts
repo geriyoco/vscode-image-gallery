@@ -1,4 +1,3 @@
-import path from 'path';
 import * as vscode from 'vscode';
 import * as utils from '../utils';
 
@@ -16,7 +15,6 @@ export class ViewerCustomEditor implements vscode.CustomReadonlyEditorProvider {
 		webviewPanel: vscode.WebviewPanel,
 	): Promise<void> {
 		let documentPath = webviewPanel.webview.asWebviewUri(document.uri).toString();
-		// let documentDir = path.dirname(document.uri.fsPath);
 		webviewPanel.webview.options = {
 			enableScripts: true,
 			enableForms: false
