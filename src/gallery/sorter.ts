@@ -2,12 +2,19 @@ import * as vscode from 'vscode';
 import { TImage, TFolder } from 'custom_typings';
 
 export default class CustomSorter {
-    keys: Array<string>;
-    options: Intl.CollatorOptions;
+    sortType: Array<string>;
     comparator: (a: string, b: string) => number;
 
+    private initComparator(configName: string = "sorting.byPathOptions") {
+        const config = vscode.workspace.getConfiguration(configName);
+        const options = Object.fromEntries(this.sortType.map(key => [key, config.get(key)]));
+        return (a: string, b: string) => {
+            return a.localeCompare(b, undefined, options);
+        };
+    }
+
     constructor() {
-        this.keys = [
+        this.sortType = [
             "localeMatcher",
             "sensitivity",
             "ignorePunctuation",
@@ -15,24 +22,11 @@ export default class CustomSorter {
             "caseFirst",
             "collation",
         ];
-        this.options = this.updateOptions();
-        this.comparator = this.updateComparator(this.options);
+        this.comparator = this.initComparator();
     }
 
-    updateOptions(configName: string = "sorting.byPathOptions") {
-        const config = vscode.workspace.getConfiguration(configName);
-        this.options = Object.fromEntries(this.keys.map(key => [key, config.get(key)]));
-        return this.options;
-    }
 
-    updateComparator(options: Intl.CollatorOptions) {
-        this.comparator = (a: string, b: string) => {
-            return a.localeCompare(b, undefined, options);
-        };
-        return this.comparator;
-    }
-
-    sort(folders: Record<string, TFolder>, valueName: string = "path", ascending: boolean = true) {
+    public sort(folders: Record<string, TFolder>, valueName: string = "path", ascending: boolean = true) {
         const sortedFolders = this.getSortedFolders(folders);
         for (const [name, folder] of Object.entries(sortedFolders)) {
             sortedFolders[name].images = Object.fromEntries(
@@ -43,7 +37,7 @@ export default class CustomSorter {
         return sortedFolders;
     }
 
-    getSortedFolders(folders: Record<string, TFolder>) {
+    private getSortedFolders(folders: Record<string, TFolder>) {
         /**
          * Sort the folders by path in ascending order.
          * "sorting.byPathOptions" has no effect on this.
@@ -55,7 +49,7 @@ export default class CustomSorter {
         );
     }
 
-    getSortedImages(images: TImage[], valueName: string, ascending: boolean) {
+    private getSortedImages(images: TImage[], valueName: string, ascending: boolean) {
         const sign = ascending ? +1 : -1;
         let comparator: (a: TImage, b: TImage) => number;
         switch (valueName) {

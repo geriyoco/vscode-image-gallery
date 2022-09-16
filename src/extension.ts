@@ -1,14 +1,14 @@
 import * as vscode from 'vscode';
-import * as viewer from './viewer/viewer';
+import { ViewerWebview } from './viewer/viewer';
 import { GalleryWebview } from './gallery/gallery';
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Welcome! VS Code extension "GeriYoco: Image Gallery" is now active.');
 
-	const viewerEditor = new viewer.ViewerCustomEditor(context);
+	const viewer = new ViewerWebview(context);
 	const viewerPanel = vscode.window.registerCustomEditorProvider(
-		viewer.ViewerCustomEditor.viewType,
-		viewerEditor,
+		ViewerWebview.viewType,
+		viewer,
 		{
 			supportsMultipleEditorsPerDocument: true,
 			webviewOptions: {
@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const gallery = new GalleryWebview(context);
 	const disposableGallery = vscode.commands.registerCommand(
-		'vscodeImageGallery.openGallery',
+		'gryc.openGallery',
 		async (galleryFolder?: vscode.Uri) => {
 			const panel = await gallery.createPanel(galleryFolder);
 			panel.webview.onDidReceiveMessage(

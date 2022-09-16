@@ -29,10 +29,9 @@
 		"visualization"
 	],
 	"activationEvents": [
-		"onCommand:vscodeImageGallery.openGallery",
+		"onCommand:gryc.openGallery",
 		"onWebviewPanel:gryc.gallery",
-		"onWebviewPanel:gryc.viewer",
-		"onCustomEditor:gryc.editor"
+		"onCustomEditor:gryc.viewer"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
@@ -73,7 +72,7 @@
 		},
 		"customEditors": [
 			{
-				"viewType": "gryc.editor",
+				"viewType": "gryc.viewer",
 				"priority": "default",
 				"selector": [
 					{
@@ -84,7 +83,7 @@
 		],
 		"commands": [
 			{
-				"command": "vscodeImageGallery.openGallery",
+				"command": "gryc.openGallery",
 				"title": "Open Image Gallery (GeriYoco) 🖼️",
 				"category": "Image Gallery"
 			}
@@ -92,7 +91,7 @@
 		"menus": {
 			"explorer/context": [
 				{
-					"command": "vscodeImageGallery.openGallery",
+					"command": "gryc.openGallery",
 					"group": "2_grycImageGallery@1",
 					"when": "explorerResourceIsFolder && !virtualWorkspace"
 				}

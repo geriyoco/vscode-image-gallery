@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import * as utils from '../utils';
 
-export class ViewerCustomEditor implements vscode.CustomReadonlyEditorProvider {
-	public static readonly viewType = 'gryc.editor';
+export class ViewerWebview implements vscode.CustomReadonlyEditorProvider {
+	public static readonly viewType = 'gryc.viewer';
 
 	constructor(private readonly context: vscode.ExtensionContext) { }
 

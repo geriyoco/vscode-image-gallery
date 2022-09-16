@@ -6,7 +6,23 @@ import HTMLProvider from '../html_provider';
 
 export class GalleryWebview {
 	private gFolders: Record<string, TFolder> = {};
+	private customSorter: CustomSorter = new CustomSorter();
+
 	constructor(private readonly context: vscode.ExtensionContext) { }
+
+	private async getImageUris(galleryFolder?: vscode.Uri | string) {
+		/**
+		 * Recursively get the URIs of all the images within the folder.
+		 * 
+		 * @param galleryFolder The folder to search. If not provided, the
+		 * workspace folder will be used.
+		 */
+		let globPattern = utils.getGlob();
+		let imgUris = await vscode.workspace.findFiles(
+			galleryFolder ? new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
+		);
+		return imgUris;
+	}
 
 	public async createPanel(galleryFolder?: vscode.Uri) {
 		vscode.commands.executeCommand('setContext', 'ext.viewType', 'gryc.gallery');
@@ -23,7 +39,7 @@ export class GalleryWebview {
 		const htmlProvider = new HTMLProvider(this.context, panel.webview);
 		const imageUris = await this.getImageUris(galleryFolder);
 		this.gFolders = await utils.getFolders(imageUris);
-		this.gFolders = new CustomSorter().sort(this.gFolders);
+		this.gFolders = this.customSorter.sort(this.gFolders);
 		panel.webview.html = htmlProvider.fullHTML(this.gFolders);
 		return panel;
 	}
@@ -42,7 +58,7 @@ export class GalleryWebview {
 				);
 				break;
 			case "POST.gallery.requestSort":
-				this.gFolders = new CustomSorter().sort(this.gFolders, message.valueName, message.ascending);
+				this.gFolders = this.customSorter.sort(this.gFolders, message.valueName, message.ascending);
 			// DO NOT BREAK HERE; FALL THROUGH TO UPDATE DOMS
 			case "POST.gallery.requestContentDOMs":
 				const htmlProvider = new HTMLProvider(this.context, webview);
@@ -68,20 +84,6 @@ export class GalleryWebview {
 				});
 				break;
 		}
-	}
-
-	private async getImageUris(galleryFolder?: vscode.Uri) {
-		/**
-		 * Recursively get the URIs of all the images within the folder.
-		 * 
-		 * @param galleryFolder The folder to search. If not provided, the
-		 * workspace folder will be used.
-		 */
-		let globPattern = utils.getGlob();
-		let imgUris = await vscode.workspace.findFiles(
-			galleryFolder ? new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
-		);
-		return imgUris;
 	}
 
 	public createFileWatcher(webview: vscode.Webview, galleryFolder?: vscode.Uri) {
