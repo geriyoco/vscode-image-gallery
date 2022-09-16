@@ -1,8 +1,9 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { TFolder } from '.';
+import { TFolder } from 'custom_typings';
 import crypto from 'crypto';
 import fileSystem from 'fs';
+import { imgExtensions } from './img_extensions';
 
 export function getCwd() {
 	if (!vscode.workspace.workspaceFolders) {
@@ -25,45 +26,6 @@ function getNonce() {
 export const nonce = getNonce();
 
 export function getGlob() {
-	const imgExtensions = [
-		'ai',
-		'avif',
-		'bmp',
-		'dib',
-		'gif',
-		'heif',
-		'heic',
-		'eps',
-		'ico',
-		'ind',
-		'indd',
-		'indt',
-		'jp2',
-		'j2k',
-		'jpf',
-		'jpx',
-		'jpm',
-		'mj2',
-		'jpg',
-		'jpe',
-		'jpeg',
-		'jpg_orig',
-		'jif',
-		'jfif',
-		'jfi',
-		'tif',
-		'tiff',
-		'psd',
-		'png',
-		'raw',
-		'arw',
-		'cr2',
-		'nrw',
-		'k25',
-		'webp',
-		'svg',
-		'svgz',
-	];
 	let upperCaseImg = imgExtensions.map(ext => ext.toUpperCase());
 	const globPattern = `**/*.{${[...imgExtensions, ...upperCaseImg].join(',')}}`;
 	return globPattern;

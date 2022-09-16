@@ -1,9 +1,8 @@
-import path from 'path';
 import * as vscode from 'vscode';
-import * as utils from './utils';
+import * as utils from '../utils';
 
-export class ViewerCustomEditor implements vscode.CustomReadonlyEditorProvider {
-	public static readonly viewType = 'gryc.editor';
+export class ViewerWebview implements vscode.CustomReadonlyEditorProvider {
+	public static readonly viewType = 'gryc.viewer';
 
 	constructor(private readonly context: vscode.ExtensionContext) { }
 
@@ -16,13 +15,7 @@ export class ViewerCustomEditor implements vscode.CustomReadonlyEditorProvider {
 		webviewPanel: vscode.WebviewPanel,
 	): Promise<void> {
 		let documentPath = webviewPanel.webview.asWebviewUri(document.uri).toString();
-		let documentDir = path.dirname(document.uri.fsPath);
 		webviewPanel.webview.options = {
-			localResourceRoots: [
-				vscode.Uri.joinPath(this.context.extensionUri, 'media'),
-				vscode.Uri.file(utils.getCwd()),
-				vscode.Uri.file(documentDir),
-			],
 			enableScripts: true,
 			enableForms: false
 		};
@@ -35,8 +28,8 @@ export function getWebviewContent(
 	webview: vscode.Webview,
 	imgSrc: string,
 ) {
-	const styleHref = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'viewer.css'));
-	const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'viewer.js'));
+	const styleHref = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, "src", 'viewer', 'style.css'));
+	const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, "src", 'viewer', 'script.js'));
 
 	return (
 		`<!DOCTYPE html>
