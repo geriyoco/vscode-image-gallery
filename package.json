@@ -67,6 +67,12 @@
 					"type": "string",
 					"default": null,
 					"markdownDescription": "Variant collations for certain locales. Possible values include:\n- \"`compat`\" - Arabic\n- \"`dict`\" - Sinhala\n- \"`emoji`\" - root\n- \"`eor`\" - root\n- \"`phonebk`\" - German\n- \"`phonetic`\" - Lingala\n- \"`pinyin`\" - Chinese\n- \"`reformed`\" - Swedish\n- \"`stroke`\" - Chinese\n- \"`trad`\"\n- \"`zhuyin`\" - Chinese"
+				},
+
+				"telemetry.geriyocoImageGallery.isTelemetryEnabled": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Enable / disable telemetry of this extension. If any of the global telemetry settings, including `telemetryLevel`, `isTelemetryEnabled`, `onDidChangeTelemetryEnabled`, rejects telemetry, this setting will be treated as `false`, i.e. this extension will not send any telemetry."
 				}
 			}
 		},
