@@ -26,7 +26,7 @@ export default class CustomSorter {
     }
 
 
-    public sort(folders: Record<string, TFolder>, valueName: string = "path", ascending: boolean = true) {
+    public sort(folders: Record<string, TFolder>, valueName: string = "name", ascending: boolean = true) {
         const sortedFolders = this.getSortedFolders(folders);
         for (const [name, folder] of Object.entries(sortedFolders)) {
             sortedFolders[name].images = Object.fromEntries(
@@ -65,7 +65,7 @@ export default class CustomSorter {
             case "mtime":
                 comparator = (a: TImage, b: TImage) => sign * (a.mtime - b.mtime);
                 break;
-            default: // "path"
+            default: // "name"
                 comparator = (a: TImage, b: TImage) => sign * this.comparator(a.uri.path, b.uri.path);
         }
         return images.sort(comparator);

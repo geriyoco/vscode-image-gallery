@@ -89,11 +89,16 @@ export class GalleryWebview {
 						viewColumn: vscode.ViewColumn.Two,
 					},
 				);
-				reporter.sendTelemetryEvent('gallery.openImageViewer', { preview: message.preview });
+				reporter.sendTelemetryEvent('gallery.openImageViewer', {
+					'preview': message.preview.toString(),
+				});
 				break;
 			case "POST.gallery.requestSort":
 				this.gFolders = this.customSorter.sort(this.gFolders, message.valueName, message.ascending);
-				reporter.sendTelemetryEvent('gallery.requestSort', { valueName: message.valueName, ascending: message.ascending });
+				reporter.sendTelemetryEvent('gallery.requestSort', {
+					'valueName': message.valueName,
+					'ascending': message.ascending.toString(),
+				});
 			// DO NOT BREAK HERE; FALL THROUGH TO UPDATE DOMS
 			case "POST.gallery.requestContentDOMs":
 				const htmlProvider = new HTMLProvider(this.context, webview);
