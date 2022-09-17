@@ -17,9 +17,9 @@
 		"vscode": "^1.65.0"
 	},
 	"categories": [
+		"Visualization",
 		"Data Science",
-		"Machine Learning",
-		"Visualization"
+		"Machine Learning"
 	],
 	"keywords": [
 		"image",
@@ -72,6 +72,7 @@
 		},
 		"customEditors": [
 			{
+				"displayName": "Image Viewer",
 				"viewType": "gryc.viewer",
 				"priority": "default",
 				"selector": [
@@ -132,6 +133,7 @@
 		"webpack-cli": "^4.9.2"
 	},
 	"dependencies": {
+		"@vscode/extension-telemetry": "^0.6.2",
 		"panzoom": "^9.4.2"
 	}
 }
