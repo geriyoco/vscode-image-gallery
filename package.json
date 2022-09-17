@@ -72,7 +72,7 @@
 		},
 		"customEditors": [
 			{
-				"displayName": "Image Viewer",
+				"displayName": "Viewer (GeriYoco Image Gallery)",
 				"viewType": "gryc.viewer",
 				"priority": "default",
 				"selector": [
