@@ -8,8 +8,6 @@ import { reporter } from '../telemetry';
 export let disposable: vscode.Disposable;
 
 export function activate(context: vscode.ExtensionContext) {
-	reporter.sendTelemetryEvent('gallery.activate');
-
 	const gallery = new GalleryWebview(context);
 	const callback = async (galleryFolder?: vscode.Uri) => {
 		const panel = await gallery.createPanel(galleryFolder);
@@ -27,8 +25,9 @@ export function activate(context: vscode.ExtensionContext) {
 			context.subscriptions,
 		);
 	};
-	disposable = vscode.commands.registerCommand('gryc.openGallery', callback);
+	disposable = vscode.commands.registerCommand("gryc.openGallery", callback);
 	context.subscriptions.push(disposable);
+	reporter.sendTelemetryEvent("gallery.activate");
 }
 
 export function deactivate() {
@@ -37,7 +36,7 @@ export function deactivate() {
 	reporter.sendTelemetryEvent('gallery.deactivate');
 }
 
-export class GalleryWebview {
+class GalleryWebview {
 	private gFolders: Record<string, TFolder> = {};
 	private customSorter: CustomSorter = new CustomSorter();
 
@@ -58,6 +57,7 @@ export class GalleryWebview {
 	}
 
 	public async createPanel(galleryFolder?: vscode.Uri) {
+		const startTime = Date.now();
 		vscode.commands.executeCommand('setContext', 'ext.viewType', 'gryc.gallery');
 		const panel = vscode.window.createWebviewPanel(
 			'gryc.gallery',
@@ -74,10 +74,21 @@ export class GalleryWebview {
 		this.gFolders = await utils.getFolders(imageUris);
 		this.gFolders = this.customSorter.sort(this.gFolders);
 		panel.webview.html = htmlProvider.fullHTML();
+
+		const imageSizeStat = utils.getImageSizeStat(this.gFolders);
+		reporter.sendTelemetryEvent('gallery.createPanel', {}, {
+			"duration": Date.now() - startTime,
+			"folderCount": Object.keys(this.gFolders).length,
+			"imageCount": imageSizeStat.count,
+			"imageSizeMean": imageSizeStat.mean,
+			"imageSizeStd": imageSizeStat.std,
+		});
+
 		return panel;
 	}
 
 	public messageListener(message: Record<string, any>, webview: vscode.Webview) {
+		const telemetryPrefix = "gallery.messageListener";
 		switch (message.command) {
 			case "POST.gallery.openImageViewer":
 				vscode.commands.executeCommand(
@@ -89,17 +100,19 @@ export class GalleryWebview {
 						viewColumn: vscode.ViewColumn.Two,
 					},
 				);
-				reporter.sendTelemetryEvent('gallery.openImageViewer', {
+				reporter.sendTelemetryEvent(`${telemetryPrefix}.openImageViewer`, {
 					'preview': message.preview.toString(),
 				});
 				break;
+
 			case "POST.gallery.requestSort":
 				this.gFolders = this.customSorter.sort(this.gFolders, message.valueName, message.ascending);
-				reporter.sendTelemetryEvent('gallery.requestSort', {
-					'valueName': message.valueName,
-					'ascending': message.ascending.toString(),
+				reporter.sendTelemetryEvent(`${telemetryPrefix}.requestSort`, {
+					'valueName': this.customSorter.valueName,
+					'ascending': this.customSorter.ascending.toString(),
 				});
 			// DO NOT BREAK HERE; FALL THROUGH TO UPDATE DOMS
+
 			case "POST.gallery.requestContentDOMs":
 				const htmlProvider = new HTMLProvider(this.context, webview);
 				const response: Record<string, any> = {};
@@ -122,20 +135,32 @@ export class GalleryWebview {
 					command: "POST.gallery.responseContentDOMs",
 					content: JSON.stringify(response),
 				});
-				reporter.sendTelemetryEvent('gallery.requestContentDOMs');
+				const imageSizeStat = utils.getImageSizeStat(this.gFolders);
+				reporter.sendTelemetryEvent(`${telemetryPrefix}.requestContentDOMs`, {}, {
+					"folderCount": Object.keys(this.gFolders).length,
+					"imageCount": imageSizeStat.count,
+					"imageSizeMean": imageSizeStat.mean,
+					"imageSizeStd": imageSizeStat.std,
+				});
 				break;
 		}
 	}
 
 	public createFileWatcher(webview: vscode.Webview, galleryFolder?: vscode.Uri) {
+		const telemetryPrefix = "gallery.createFileWatcher";
+		const getMeasurementProperties = (folders: Record<string, TFolder>) => ({
+			"folderCount": Object.keys(folders).length,
+			"imageCount": Object.values(folders).reduce((acc, folder) => acc + Object.keys(folder.images).length, 0),
+		});
+
 		const globPattern = utils.getGlob();
 		const watcher = vscode.workspace.createFileSystemWatcher(
 			galleryFolder ?
 				new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
 		);
 		watcher.onDidCreate(async uri => {
-			reporter.sendTelemetryEvent('gallery.fileWatcher.didCreate');
-			const folder = Object.values(await utils.getFolders([uri], "create"))[0];
+			const folders = await utils.getFolders([uri], "create");
+			const folder = Object.values(folders)[0];
 			const image = Object.values(folder.images)[0];
 			if (this.gFolders.hasOwnProperty(folder.id)) {
 				if (!this.gFolders[folder.id].images.hasOwnProperty(image.id)) {
@@ -145,10 +170,11 @@ export class GalleryWebview {
 				this.gFolders[folder.id] = folder;
 			}
 			this.messageListener({ command: "POST.gallery.requestSort" }, webview);
+			reporter.sendTelemetryEvent(`${telemetryPrefix}.didCreate`, {}, getMeasurementProperties(folders));
 		});
 		watcher.onDidDelete(async uri => {
-			reporter.sendTelemetryEvent('gallery.fileWatcher.didDelete');
-			const folder = Object.values(await utils.getFolders([uri], "delete"))[0];
+			const folders = await utils.getFolders([uri], "delete");
+			const folder = Object.values(folders)[0];
 			const imageId = utils.hash256(webview.asWebviewUri(uri).path);
 			if (this.gFolders.hasOwnProperty(folder.id)) {
 				if (this.gFolders[folder.id].images.hasOwnProperty(imageId)) {
@@ -159,12 +185,13 @@ export class GalleryWebview {
 				}
 			}
 			this.messageListener({ command: "POST.gallery.requestSort" }, webview);
+			reporter.sendTelemetryEvent(`${telemetryPrefix}.didDelete`, {}, getMeasurementProperties(folders));
 		});
 		watcher.onDidChange(async uri => {
 			// rename is NOT handled here; it's handled automatically by Delete & Create
 			// hence we can assume imageId and folderId to be the same
-			reporter.sendTelemetryEvent('gallery.fileWatcher.didChange');
-			const folder = Object.values(await utils.getFolders([uri], "change"))[0];
+			const folders = await utils.getFolders([uri], "change");
+			const folder = Object.values(folders)[0];
 			const image = Object.values(folder.images)[0];
 			if (this.gFolders.hasOwnProperty(folder.id) && this.gFolders[folder.id].images.hasOwnProperty(image.id)) {
 				image.status = "refresh";
@@ -172,6 +199,7 @@ export class GalleryWebview {
 				this.messageListener({ command: "POST.gallery.requestSort" }, webview);
 				this.gFolders[folder.id].images[image.id].status = "";
 			}
+			reporter.sendTelemetryEvent(`${telemetryPrefix}.didChange`, {}, getMeasurementProperties(folders));
 		});
 		return watcher;
 	}
