@@ -3,8 +3,13 @@ import * as utils from '../utils';
 import { TFolder } from 'custom_typings';
 import CustomSorter from './sorter';
 import HTMLProvider from '../html_provider';
+import { reporter } from '../telemetry';
+
+export let disposable: vscode.Disposable;
 
 export function activate(context: vscode.ExtensionContext) {
+	reporter.sendTelemetryEvent('gallery.activate');
+
 	const gallery = new GalleryWebview(context);
 	const callback = async (galleryFolder?: vscode.Uri) => {
 		const panel = await gallery.createPanel(galleryFolder);
@@ -22,9 +27,14 @@ export function activate(context: vscode.ExtensionContext) {
 			context.subscriptions,
 		);
 	};
-	const disposable = vscode.commands.registerCommand('gryc.openGallery', callback);
+	disposable = vscode.commands.registerCommand('gryc.openGallery', callback);
 	context.subscriptions.push(disposable);
-	return disposable;
+}
+
+export function deactivate() {
+	if (!disposable) { return; }
+	disposable.dispose();
+	reporter.sendTelemetryEvent('gallery.deactivate');
 }
 
 export class GalleryWebview {
@@ -79,9 +89,11 @@ export class GalleryWebview {
 						viewColumn: vscode.ViewColumn.Two,
 					},
 				);
+				reporter.sendTelemetryEvent('gallery.openImageViewer', { preview: message.preview });
 				break;
 			case "POST.gallery.requestSort":
 				this.gFolders = this.customSorter.sort(this.gFolders, message.valueName, message.ascending);
+				reporter.sendTelemetryEvent('gallery.requestSort', { valueName: message.valueName, ascending: message.ascending });
 			// DO NOT BREAK HERE; FALL THROUGH TO UPDATE DOMS
 			case "POST.gallery.requestContentDOMs":
 				const htmlProvider = new HTMLProvider(this.context, webview);
@@ -105,6 +117,7 @@ export class GalleryWebview {
 					command: "POST.gallery.responseContentDOMs",
 					content: JSON.stringify(response),
 				});
+				reporter.sendTelemetryEvent('gallery.requestContentDOMs');
 				break;
 		}
 	}
@@ -116,6 +129,7 @@ export class GalleryWebview {
 				new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
 		);
 		watcher.onDidCreate(async uri => {
+			reporter.sendTelemetryEvent('gallery.fileWatcher.didCreate');
 			const folder = Object.values(await utils.getFolders([uri], "create"))[0];
 			const image = Object.values(folder.images)[0];
 			if (this.gFolders.hasOwnProperty(folder.id)) {
@@ -128,6 +142,7 @@ export class GalleryWebview {
 			this.messageListener({ command: "POST.gallery.requestSort" }, webview);
 		});
 		watcher.onDidDelete(async uri => {
+			reporter.sendTelemetryEvent('gallery.fileWatcher.didDelete');
 			const folder = Object.values(await utils.getFolders([uri], "delete"))[0];
 			const imageId = utils.hash256(webview.asWebviewUri(uri).path);
 			if (this.gFolders.hasOwnProperty(folder.id)) {
@@ -143,6 +158,7 @@ export class GalleryWebview {
 		watcher.onDidChange(async uri => {
 			// rename is NOT handled here; it's handled automatically by Delete & Create
 			// hence we can assume imageId and folderId to be the same
+			reporter.sendTelemetryEvent('gallery.fileWatcher.didChange');
 			const folder = Object.values(await utils.getFolders([uri], "change"))[0];
 			const image = Object.values(folder.images)[0];
 			if (this.gFolders.hasOwnProperty(folder.id) && this.gFolders[folder.id].images.hasOwnProperty(image.id)) {

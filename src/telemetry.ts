@@ -1,10 +1,16 @@
 import * as vscode from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
 
+export let reporter: ExtensionReporter;
+
 export function activate(context: vscode.ExtensionContext) {
-    const reporter = new ExtensionReporter(context);
+    reporter = new ExtensionReporter(context);
     context.subscriptions.push(reporter);
-    return reporter;
+}
+
+export function deactivate() {
+    if (!reporter) { return; }
+    reporter.dispose();
 }
 
 export class ExtensionReporter extends TelemetryReporter {
