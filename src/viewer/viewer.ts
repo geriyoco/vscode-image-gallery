@@ -1,6 +1,22 @@
 import * as vscode from 'vscode';
 import * as utils from '../utils';
 
+export function activate(context: vscode.ExtensionContext) {
+	const viewer = new ViewerWebview(context);
+	const disposable = vscode.window.registerCustomEditorProvider(
+		ViewerWebview.viewType,
+		viewer,
+		{
+			supportsMultipleEditorsPerDocument: true,
+			webviewOptions: {
+				retainContextWhenHidden: true,
+			}
+		},
+	);
+	context.subscriptions.push(disposable);
+	return disposable;
+}
+
 export class ViewerWebview implements vscode.CustomReadonlyEditorProvider {
 	public static readonly viewType = 'gryc.viewer';
 

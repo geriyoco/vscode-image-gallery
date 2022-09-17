@@ -4,6 +4,29 @@ import { TFolder } from 'custom_typings';
 import CustomSorter from './sorter';
 import HTMLProvider from '../html_provider';
 
+export function activate(context: vscode.ExtensionContext) {
+	const gallery = new GalleryWebview(context);
+	const callback = async (galleryFolder?: vscode.Uri) => {
+		const panel = await gallery.createPanel(galleryFolder);
+		panel.webview.onDidReceiveMessage(
+			message => gallery.messageListener(message, panel.webview),
+			undefined,
+			context.subscriptions,
+		);
+
+		const fileWatcher = gallery.createFileWatcher(panel.webview, galleryFolder);
+		context.subscriptions.push(fileWatcher);
+		panel.onDidDispose(
+			() => fileWatcher.dispose(),
+			undefined,
+			context.subscriptions,
+		);
+	};
+	const disposable = vscode.commands.registerCommand('gryc.openGallery', callback);
+	context.subscriptions.push(disposable);
+	return disposable;
+}
+
 export class GalleryWebview {
 	private gFolders: Record<string, TFolder> = {};
 	private customSorter: CustomSorter = new CustomSorter();
@@ -40,7 +63,7 @@ export class GalleryWebview {
 		const imageUris = await this.getImageUris(galleryFolder);
 		this.gFolders = await utils.getFolders(imageUris);
 		this.gFolders = this.customSorter.sort(this.gFolders);
-		panel.webview.html = htmlProvider.fullHTML(this.gFolders);
+		panel.webview.html = htmlProvider.fullHTML();
 		return panel;
 	}
 
@@ -63,7 +86,7 @@ export class GalleryWebview {
 			case "POST.gallery.requestContentDOMs":
 				const htmlProvider = new HTMLProvider(this.context, webview);
 				const response: Record<string, any> = {};
-				for (const [idx, folder] of Object.values(this.gFolders).entries()) {
+				for (const [_idx, folder] of Object.values(this.gFolders).entries()) {
 					response[folder.id] = {
 						status: "",
 						barHtml: htmlProvider.folderBarHTML(folder),

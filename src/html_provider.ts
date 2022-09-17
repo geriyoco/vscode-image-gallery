@@ -27,12 +27,12 @@ export default class HTMLProvider {
 		this.cssFileUri = asWebviewUri("src", "gallery", "style.css");
 	}
 
-	fullHTML(folders: Record<string, TFolder>) {
+	fullHTML() {
 		return `
 		<!DOCTYPE html>
 		<html lang="en">
 		<head>${this.headHTML()}</head>
-		<body>${this.bodyHTML(folders)}</body>
+		<body>${this.bodyHTML()}</body>
 		</html>
 		`.trim();
 	}
@@ -54,7 +54,7 @@ export default class HTMLProvider {
 		`.trim();
 	}
 
-	bodyHTML(folders: Record<string, TFolder>) {
+	bodyHTML() {
 		let htmlContents: Array<string> = [];
 		htmlContents.push(this.toolbarHTML());
 		htmlContents.push(`<div class="gallery-content"></div>`);
