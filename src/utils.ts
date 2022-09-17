@@ -96,3 +96,22 @@ export async function getFolders(imgUris: vscode.Uri[], action: "create" | "chan
 	}
 	return folders;
 }
+
+export function getImageSizeStat(folders: Record<string, TFolder>) {
+	const sizes: number[] = [];
+	for (const folderId in folders) {
+		for (const imageId in folders[folderId].images) {
+			sizes.push(folders[folderId].images[imageId].size);
+		}
+	}
+	const count = sizes.length;
+	const sum = (a: number, b: number) => a + b;
+	const mean = (count > 0) ? sizes.reduce(sum, 0) / count : 0;
+	const std = (count > 1) ? Math.sqrt(sizes.map(x => Math.pow(x - mean, 2)).reduce(sum, 0) / count) : 0;
+
+	return {
+		count,
+		mean: Math.round(mean),
+		std: Math.round(std),
+	};
+}
