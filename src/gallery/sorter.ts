@@ -4,6 +4,8 @@ import { TImage, TFolder } from 'custom_typings';
 export default class CustomSorter {
     sortType: Array<string>;
     comparator: (a: string, b: string) => number;
+    valueName: "name" | "ext" | "size" | "ctime" | "mtime";
+    ascending: boolean;
 
     private initComparator(configName: string = "sorting.byPathOptions") {
         const config = vscode.workspace.getConfiguration(configName);
@@ -23,14 +25,21 @@ export default class CustomSorter {
             "collation",
         ];
         this.comparator = this.initComparator();
+        this.valueName = "name";
+        this.ascending = true;
     }
 
-
-    public sort(folders: Record<string, TFolder>, valueName: string = "path", ascending: boolean = true) {
+    public sort(
+        folders: Record<string, TFolder>,
+        valueName?: "name" | "ext" | "size" | "ctime" | "mtime",
+        ascending?: boolean,
+    ) {
+        this.valueName = valueName ?? this.valueName;
+        this.ascending = ascending ?? this.ascending;
         const sortedFolders = this.getSortedFolders(folders);
         for (const [name, folder] of Object.entries(sortedFolders)) {
             sortedFolders[name].images = Object.fromEntries(
-                this.getSortedImages(Object.values(folder.images), valueName, ascending)
+                this.getSortedImages(Object.values(folder.images))
                     .map(image => [image.id, image])
             );
         }
@@ -49,10 +58,10 @@ export default class CustomSorter {
         );
     }
 
-    private getSortedImages(images: TImage[], valueName: string, ascending: boolean) {
-        const sign = ascending ? +1 : -1;
+    private getSortedImages(images: TImage[]) {
+        const sign = this.ascending ? +1 : -1;
         let comparator: (a: TImage, b: TImage) => number;
-        switch (valueName) {
+        switch (this.valueName) {
             case "ext":
                 comparator = (a: TImage, b: TImage) => sign * this.comparator(a.ext, b.ext);
                 break;
@@ -65,7 +74,7 @@ export default class CustomSorter {
             case "mtime":
                 comparator = (a: TImage, b: TImage) => sign * (a.mtime - b.mtime);
                 break;
-            default: // "path"
+            default: // "name"
                 comparator = (a: TImage, b: TImage) => sign * this.comparator(a.uri.path, b.uri.path);
         }
         return images.sort(comparator);

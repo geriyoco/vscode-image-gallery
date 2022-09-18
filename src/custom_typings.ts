@@ -1,4 +1,3 @@
-
 declare module 'custom_typings' {
     import * as vscode from 'vscode';
 

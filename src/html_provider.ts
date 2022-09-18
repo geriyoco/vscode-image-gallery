@@ -27,12 +27,12 @@ export default class HTMLProvider {
 		this.cssFileUri = asWebviewUri("src", "gallery", "style.css");
 	}
 
-	fullHTML(folders: Record<string, TFolder>) {
+	fullHTML() {
 		return `
 		<!DOCTYPE html>
 		<html lang="en">
 		<head>${this.headHTML()}</head>
-		<body>${this.bodyHTML(folders)}</body>
+		<body>${this.bodyHTML()}</body>
 		</html>
 		`.trim();
 	}
@@ -54,7 +54,7 @@ export default class HTMLProvider {
 		`.trim();
 	}
 
-	bodyHTML(folders: Record<string, TFolder>) {
+	bodyHTML() {
 		let htmlContents: Array<string> = [];
 		htmlContents.push(this.toolbarHTML());
 		htmlContents.push(`<div class="gallery-content"></div>`);
@@ -75,7 +75,7 @@ export default class HTMLProvider {
 			<div class="sort-options">
 				<span>Sort by</span>
 				<select id="dropdown-sort" class="dropdown">
-					<option value="path">Name</option>
+					<option value="name">Name</option>
 					<option value="ext">File type</option>
 					<option value="size">File size</option>
 					<option value="ctime">Created date</option>

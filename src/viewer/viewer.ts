@@ -1,5 +1,31 @@
 import * as vscode from 'vscode';
 import * as utils from '../utils';
+import { reporter } from '../telemetry';
+
+export let disposable: vscode.Disposable;
+
+export function activate(context: vscode.ExtensionContext) {
+	reporter.sendTelemetryEvent('viewer.activate');
+
+	const viewer = new ViewerWebview(context);
+	disposable = vscode.window.registerCustomEditorProvider(
+		ViewerWebview.viewType,
+		viewer,
+		{
+			supportsMultipleEditorsPerDocument: true,
+			webviewOptions: {
+				retainContextWhenHidden: true,
+			}
+		},
+	);
+	context.subscriptions.push(disposable);
+}
+
+export function deactivate() {
+	if (!disposable) { return; }
+	disposable.dispose();
+	reporter.sendTelemetryEvent('viewer.deactivate');
+}
 
 export class ViewerWebview implements vscode.CustomReadonlyEditorProvider {
 	public static readonly viewType = 'gryc.viewer';

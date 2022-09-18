@@ -17,9 +17,9 @@
 		"vscode": "^1.65.0"
 	},
 	"categories": [
+		"Visualization",
 		"Data Science",
-		"Machine Learning",
-		"Visualization"
+		"Machine Learning"
 	],
 	"keywords": [
 		"image",
@@ -67,11 +67,18 @@
 					"type": "string",
 					"default": null,
 					"markdownDescription": "Variant collations for certain locales. Possible values include:\n- \"`compat`\" - Arabic\n- \"`dict`\" - Sinhala\n- \"`emoji`\" - root\n- \"`eor`\" - root\n- \"`phonebk`\" - German\n- \"`phonetic`\" - Lingala\n- \"`pinyin`\" - Chinese\n- \"`reformed`\" - Swedish\n- \"`stroke`\" - Chinese\n- \"`trad`\"\n- \"`zhuyin`\" - Chinese"
+				},
+
+				"telemetry.geriyocoImageGallery.isTelemetryEnabled": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Enable / disable telemetry of this extension. If any of the global telemetry settings, including `telemetryLevel`, `isTelemetryEnabled`, `onDidChangeTelemetryEnabled`, rejects telemetry, this setting will be treated as `false`, i.e. this extension will not send any telemetry."
 				}
 			}
 		},
 		"customEditors": [
 			{
+				"displayName": "Viewer (GeriYoco Image Gallery)",
 				"viewType": "gryc.viewer",
 				"priority": "default",
 				"selector": [
@@ -121,7 +128,6 @@
 		"@typescript-eslint/parser": "^5.16.0",
 		"@vscode/test-electron": "^2.1.3",
 		"@vscode/test-web": "^0.0.24",
-		"@vscode/codicons": "^0.0.31",
 		"eslint": "^8.11.0",
 		"glob": "^7.2.0",
 		"mocha": "^9.2.2",
@@ -132,6 +138,7 @@
 		"webpack-cli": "^4.9.2"
 	},
 	"dependencies": {
+		"@vscode/extension-telemetry": "^0.6.2",
 		"panzoom": "^9.4.2"
 	}
 }
