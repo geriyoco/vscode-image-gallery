@@ -1,8 +1,9 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { TFolder } from '.';
+import { TFolder } from 'custom_typings';
 import crypto from 'crypto';
 import fileSystem from 'fs';
+import { imgExtensions } from './img_extensions';
 
 export function getCwd() {
 	if (!vscode.workspace.workspaceFolders) {
@@ -25,45 +26,6 @@ function getNonce() {
 export const nonce = getNonce();
 
 export function getGlob() {
-	const imgExtensions = [
-		'ai',
-		'avif',
-		'bmp',
-		'dib',
-		'gif',
-		'heif',
-		'heic',
-		'eps',
-		'ico',
-		'ind',
-		'indd',
-		'indt',
-		'jp2',
-		'j2k',
-		'jpf',
-		'jpx',
-		'jpm',
-		'mj2',
-		'jpg',
-		'jpe',
-		'jpeg',
-		'jpg_orig',
-		'jif',
-		'jfif',
-		'jfi',
-		'tif',
-		'tiff',
-		'psd',
-		'png',
-		'raw',
-		'arw',
-		'cr2',
-		'nrw',
-		'k25',
-		'webp',
-		'svg',
-		'svgz',
-	];
 	let upperCaseImg = imgExtensions.map(ext => ext.toUpperCase());
 	const globPattern = `**/*.{${[...imgExtensions, ...upperCaseImg].join(',')}}`;
 	return globPattern;
@@ -133,4 +95,23 @@ export async function getFolders(imgUris: vscode.Uri[], action: "create" | "chan
 		}
 	}
 	return folders;
+}
+
+export function getImageSizeStat(folders: Record<string, TFolder>) {
+	const sizes: number[] = [];
+	for (const folderId in folders) {
+		for (const imageId in folders[folderId].images) {
+			sizes.push(folders[folderId].images[imageId].size);
+		}
+	}
+	const count = sizes.length;
+	const sum = (a: number, b: number) => a + b;
+	const mean = (count > 0) ? sizes.reduce(sum, 0) / count : 0;
+	const std = (count > 1) ? Math.sqrt(sizes.map(x => Math.pow(x - mean, 2)).reduce(sum, 0) / count) : 0;
+
+	return {
+		count,
+		mean: Math.round(mean),
+		std: Math.round(std),
+	};
 }

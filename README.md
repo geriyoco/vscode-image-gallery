@@ -1,5 +1,9 @@
 # Image Gallery
-[![.github/workflows/vsce_publish.yml](https://github.com/geriyoco/vscode-image-gallery/actions/workflows/vsce_publish.yml/badge.svg?branch=production)](https://github.com/geriyoco/vscode-image-gallery/actions/workflows/vsce_publish.yml)
+
+[![](https://github.com/geriyoco/vscode-image-gallery/actions/workflows/vsce_publish.yml/badge.svg?branch=production)](https://github.com/geriyoco/vscode-image-gallery/actions/workflows/vsce_publish.yml)
+[![](https://vsmarketplacebadge.apphb.com/version-short/geriyoco.vscode-image-gallery.svg?label=Version)](https://marketplace.visualstudio.com/items?itemName=geriyoco.vscode-image-gallery)
+[![](https://vsmarketplacebadge.apphb.com/installs-short/geriyoco.vscode-image-gallery.svg?label=Installs)](https://marketplace.visualstudio.com/items?itemName=geriyoco.vscode-image-gallery)
+[![](https://vsmarketplacebadge.apphb.com/rating-short/geriyoco.vscode-image-gallery.svg?label=Rating)](https://marketplace.visualstudio.com/items?itemName=GeriYoco.vscode-image-gallery&ssr=false#review-details)
 
 A light-weighted extension that brings you the best image browsing experience in VS Code, especially for remote / cloud development.
 
@@ -8,7 +12,7 @@ A light-weighted extension that brings you the best image browsing experience in
 - **Gallery**: Collapsible grid view of all images in the selected folder, including its sub-folders
 - **Performance**: Lazy loading of images (tested on 10k images with a start-up time of 1.5s)
 - **Refresh**: Automatically update view as images are modified, added, or deleted
-- **Light**: Extension size less than 500 kB, installation time is typically negligible
+- **Light**: Extension size less than 1 MB, installation time is typically negligible
 
 ## Usage
 ![demo](docs/demo-v1.0.0.gif)

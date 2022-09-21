@@ -1,0 +1,107 @@
+{
+    "events": {
+        "GeriYoco.vscode-image-gallery/gallery.activate": { },
+        "GeriYoco.vscode-image-gallery/gallery.deactivate": { },
+        "GeriYoco.vscode-image-gallery/gallery.createPanel": {
+            "duration": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            },
+            "folderCount": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            },
+            "imageCount": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            },
+            "imageSizeMean": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            },
+            "imageSizeStd": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            }
+        },
+        "GeriYoco.vscode-image-gallery/gallery.messageListener.openImageViewer": {
+            "preview": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight"
+            }
+        },
+        "GeriYoco.vscode-image-gallery/gallery.messageListener.requestSort": {
+            "valueName": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight"
+            },
+            "ascending": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight"
+            }
+        },
+        "GeriYoco.vscode-image-gallery/gallery.messageListener.requestContentDOMs": {
+            "folderCount": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            },
+            "imageCount": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            },
+            "imageSizeMean": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            },
+            "imageSizeStd": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            }
+        },
+        "GeriYoco.vscode-image-gallery/gallery.createFileWatcher.didCreate": {
+            "folderCount": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            },
+            "imageCount": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            }
+        },
+        "GeriYoco.vscode-image-gallery/gallery.createFileWatcher.didDelete": {
+            "folderCount": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            },
+            "imageCount": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            }
+        },
+        "GeriYoco.vscode-image-gallery/gallery.createFileWatcher.didChange": {
+            "folderCount": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            },
+            "imageCount": {
+                "classification": "SystemMetaData",
+                "purpose": "FeatureInsight",
+                "isMeasurement": true
+            }
+        }
+    }
+}
