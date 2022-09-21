@@ -12,7 +12,7 @@ A light-weighted extension that brings you the best image browsing experience in
 - **Gallery**: Collapsible grid view of all images in the selected folder, including its sub-folders
 - **Performance**: Lazy loading of images (tested on 10k images with a start-up time of 1.5s)
 - **Refresh**: Automatically update view as images are modified, added, or deleted
-- **Light**: Extension size less than 500 kB, installation time is typically negligible
+- **Light**: Extension size less than 1 MB, installation time is typically negligible
 
 ## Usage
 ![demo](docs/demo-v1.0.0.gif)
