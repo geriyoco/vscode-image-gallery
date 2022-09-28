@@ -1,8 +1,12 @@
 # Change Log
 
+## [1.2.1] - 2022-09-28
+### Fixed
+- Supported file extensions are now consistent between [`package.json`](package.json) and [`src/utils.ts`](src/utils.ts).
+
 ## [1.2.0] - 2022-09-21
 ### Added
-- Telemetry for feature insights. We strive to be transparent at what we collect. See [telemetry.json](telemetry.json) for all the events we collect. Following the [Microsoft Privacy Statement](https://privacy.microsoft.com/en-us/privacystatement), we do not collect any Personally Identifiable Information (PII). Check out the open-source repository at [here](https://github.com/geriyoco/vscode-image-gallery) to inspect the code. You can always opt-out of telemetry by setting `geriyocoImageGallery.isTelemetryEnabled` to `false` in your VS Code settings. Visit [here](https://code.visualstudio.com/docs/getstarted/telemetry) to learn more about VS Code telemetry.
+- Telemetry for feature insights. We strive to be transparent at what we collect. See [`telemetry.json`](telemetry.json) for all the events we collect. Following the [Microsoft Privacy Statement](https://privacy.microsoft.com/en-us/privacystatement), we do not collect any Personally Identifiable Information (PII). Check out the open-source repository at [here](https://github.com/geriyoco/vscode-image-gallery) to inspect the code. You can always opt-out of telemetry by setting `geriyocoImageGallery.isTelemetryEnabled` to `false` in your VS Code settings. Visit [here](https://code.visualstudio.com/docs/getstarted/telemetry) to learn more about VS Code telemetry.
 
 ### Fixed
 - Image sort preference was not respected when file watcher is involved, e.g. after an image is added, deleted, or modified.

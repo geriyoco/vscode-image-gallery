@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import TelemetryReporter, {
     TelemetryEventMeasurements, TelemetryEventProperties
 } from '@vscode/extension-telemetry';
+import * as utils from './utils';
 
 export let reporter: ExtensionReporter;
 
@@ -22,9 +23,8 @@ export class ExtensionReporter extends TelemetryReporter {
         public readonly enableTelemetry: boolean = getUserTelemetrySetting(),
         private readonly instrumentationKey = "a5e759de-afbd-4f36-a9c9-2fc95385683b",
     ) {
-        const packageJson = context.extension.packageJSON;
-        const extId = packageJson.publisher + '.' + packageJson.name;
-        const extVersion = packageJson.version;
+        const extId = utils.packageJSON.publisher + '.' + utils.packageJSON.name;
+        const extVersion = utils.packageJSON.version;
         super(extId, extVersion, instrumentationKey);
     }
 

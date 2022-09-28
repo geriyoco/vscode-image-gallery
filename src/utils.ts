@@ -3,7 +3,11 @@ import * as vscode from 'vscode';
 import { TFolder } from 'custom_typings';
 import crypto from 'crypto';
 import fileSystem from 'fs';
-import { imgExtensions } from './img_extensions';
+
+export let packageJSON: any; // global variable
+export function readPackageJSON(context: vscode.ExtensionContext) {
+	packageJSON = context.extension.packageJSON;
+}
 
 export function getCwd() {
 	if (!vscode.workspace.workspaceFolders) {
@@ -25,8 +29,17 @@ function getNonce() {
 }
 export const nonce = getNonce();
 
+function getImageExtensions() {
+	const pattern = packageJSON.contributes.customEditors[0].selector[0].filenamePattern;
+	const regex = /(?<=\{)(.*?)(?=\})/g;
+	const match = pattern.match(regex)[0];
+	const imageExtensions: string[] = match.split(',');
+	return imageExtensions;
+}
+
 export function getGlob() {
-	let upperCaseImg = imgExtensions.map(ext => ext.toUpperCase());
+	const imgExtensions = getImageExtensions();
+	const upperCaseImg = imgExtensions.map(ext => ext.toUpperCase());
 	const globPattern = `**/*.{${[...imgExtensions, ...upperCaseImg].join(',')}}`;
 	return globPattern;
 }
