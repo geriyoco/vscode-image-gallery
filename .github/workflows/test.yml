@@ -1,0 +1,14 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - test/actions
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Test
+      shell: bash
+      run: "echo 'Actions on branch test/actions'"
