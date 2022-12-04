@@ -12,3 +12,6 @@ jobs:
     - name: Test
       shell: bash
       run: "echo 'Actions on branch test/actions'"
+    - run: npm install
+    - run: npm run compile
+    - run: npm run compile-tests
