@@ -2,6 +2,7 @@
 .vscode-test/**
 .vscode-test-web/**
 out/**
+src/test/**
 node_modules/**
 src/**/*.ts
 .gitignore

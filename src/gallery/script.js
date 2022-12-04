@@ -1,16 +1,16 @@
 const vscode = acquireVsCodeApi();
 let gFolders = {}; // a global holder for all content DOMs to preserve attributes
 /** {folderId: {
- * 		status: "",
- * 		bar: domBarButton,
- *		grid: domGridDiv,
- *		images: {
+		status: "",
+		bar: domBarButton,
+		grid: domGridDiv,
+		images: {
 			imageId: {
 				status: "" | "refresh",
 				container: domContainerDiv,
 			}, ...
 		},
- *	}, ...}
+	}, ...}
  **/
 
 function init() {

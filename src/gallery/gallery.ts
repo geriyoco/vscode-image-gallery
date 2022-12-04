@@ -9,25 +9,25 @@ export let disposable: vscode.Disposable;
 
 export function activate(context: vscode.ExtensionContext) {
 	const gallery = new GalleryWebview(context);
-	const callback = async (galleryFolder?: vscode.Uri) => {
-		const panel = await gallery.createPanel(galleryFolder);
-		panel.webview.onDidReceiveMessage(
-			message => gallery.messageListener(message, panel.webview),
-			undefined,
-			context.subscriptions,
-		);
+	disposable = vscode.commands.registerCommand('gryc.openGallery',
+		async (galleryFolder?: vscode.Uri) => {
+			const panel = await gallery.createPanel(galleryFolder);
+			panel.webview.onDidReceiveMessage(
+				message => gallery.messageListener(message, panel.webview),
+				undefined,
+				context.subscriptions,
+			);
 
-		const fileWatcher = gallery.createFileWatcher(panel.webview, galleryFolder);
-		context.subscriptions.push(fileWatcher);
-		panel.onDidDispose(
-			() => fileWatcher.dispose(),
-			undefined,
-			context.subscriptions,
-		);
-	};
-	disposable = vscode.commands.registerCommand("gryc.openGallery", callback);
+			const fileWatcher = gallery.createFileWatcher(panel.webview, galleryFolder);
+			context.subscriptions.push(fileWatcher);
+			panel.onDidDispose(
+				() => fileWatcher.dispose(),
+				undefined,
+				context.subscriptions,
+			);
+	});
 	context.subscriptions.push(disposable);
-	reporter.sendTelemetryEvent("gallery.activate");
+	reporter.sendTelemetryEvent('gallery.activate');
 }
 
 export function deactivate() {
