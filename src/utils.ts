@@ -1,8 +1,8 @@
-import * as path from 'path';
-import * as vscode from 'vscode';
-import { TFolder } from 'custom_typings';
+import path from 'path';
+import vscode from 'vscode';
 import crypto from 'crypto';
 import fileSystem from 'fs';
+import { TFolder } from 'custom_typings';
 
 export let packageJSON: any; // global variable
 export function readPackageJSON(context: vscode.ExtensionContext) {
@@ -15,13 +15,13 @@ export function getCwd() {
 		vscode.window.showErrorMessage(message);
 		return '';
 	}
-	let cwd = vscode.workspace.workspaceFolders[0].uri.path;
+	const cwd = vscode.workspace.workspaceFolders[0].uri.path;
 	return cwd;
 }
 
 function getNonce() {
-	let text = '';
-	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	let text = 'N';
+	const possible = '0123456789ABCDEF';
 	for (let i = 0; i < 16; i++) {
 		text += possible.charAt(Math.floor(Math.random() * possible.length));
 	}
