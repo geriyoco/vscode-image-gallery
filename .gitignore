@@ -3,4 +3,5 @@
 **/out/
 test/samples/env/
 test/samples/folder*
+.vscode-test/
 .vscode-test-web/

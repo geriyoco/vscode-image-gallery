@@ -9,6 +9,7 @@
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",
+			"runtimeExecutable": "${execPath}",
 			"args": [
 				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}"
@@ -22,14 +23,15 @@
 			"name": "Run Test",
 			"type": "extensionHost",
 			"request": "launch",
+			"runtimeExecutable": "${execPath}",
 			"args": [
-				"${workspaceFolder}/src/test/samples",
+				"${workspaceFolder}/examples",
 				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/dist/test/suite/index"
+				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
 			],
 			"outFiles": [
-				"${workspaceFolder}/dist/**/*.js",
+				"${workspaceFolder}/out/test/**/*.js",
 			],
 			"preLaunchTask": "${defaultBuildTask}"
 		}
