@@ -1,6 +1,6 @@
 **/node_modules/
 **/dist/
 **/out/
-src/test/samples/env/
-src/test/samples/folder*
+test/samples/env/
+test/samples/folder*
 .vscode-test-web/
