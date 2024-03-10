@@ -2,7 +2,7 @@
 	"name": "vscode-image-gallery",
 	"displayName": "Image Gallery",
 	"description": "Improve image browsing experience, especially for remote development.",
-	"version": "1.2.1",
+	"version": "1.3.0",
 	"publisher": "GeriYoco",
 	"repository": {
 		"type": "git",
@@ -101,6 +101,11 @@
 					"command": "gryc.openGallery",
 					"group": "2_grycImageGallery@1",
 					"when": "explorerResourceIsFolder && !virtualWorkspace"
+				},
+				{
+					"command": "gryc.openGallery",
+					"group": "2_grycImageGallery@1",
+					"when": "resourceFilename =~ /.*\\.txt/"
 				}
 			]
 		}
