@@ -4,6 +4,7 @@ import { TFolder } from 'custom_typings';
 import CustomSorter from './sorter';
 import HTMLProvider from '../html_provider';
 import { reporter } from '../telemetry';
+import { minimatch } from 'minimatch';
 
 export let disposable: vscode.Disposable;
 
@@ -42,23 +43,45 @@ class GalleryWebview {
 
 	constructor(private readonly context: vscode.ExtensionContext) { }
 
-	private async getImageUris(galleryFolder?: vscode.Uri | string) {
+	private async parseTxt(path: vscode.Uri, globPattern: string) {
+		/**
+		 * Parse the TXT file and extract the URIs of the images from lines matching the glob pattern.
+		 * 
+		 * @param path The path to the TXT file.
+		 * @param globPattern The glob pattern to match the lines.
+		 */
+		let fileContents = (await vscode.workspace.openTextDocument(path)).getText();
+		let fileLines = fileContents.split('\n');
+		let validPaths = fileLines.filter((line) => minimatch(line, globPattern));
+		let validUris = validPaths.map((path) => vscode.Uri.file(path));
+		return validUris;
+	}
+
+	private async getImageUris(galleryTarget?: vscode.Uri) {
 		/**
 		 * Recursively get the URIs of all the images within the folder.
 		 * 
-		 * @param galleryFolder The folder to search. If not provided, the
+		 * @param galleryTarget The TXT/folder to search. If not provided, the
 		 * workspace folder will be used.
 		 */
+		vscode.window.showInformationMessage("Gallery target:"+galleryTarget);
 		let globPattern = utils.getGlob();
-		let imgUris = await vscode.workspace.findFiles(
-			galleryFolder ? new vscode.RelativePattern(galleryFolder, globPattern) : globPattern
-		);
-		return imgUris;
+		if (galleryTarget?.toString().endsWith('.txt')) {
+			return await this.parseTxt(galleryTarget, globPattern);
+		}
+		else { // assume the target is a folder
+			return await vscode.workspace.findFiles(
+				galleryTarget ? new vscode.RelativePattern(galleryTarget, globPattern) : globPattern
+			);
+		}
 	}
 
 	public async createPanel(galleryFolder?: vscode.Uri) {
 		const startTime = Date.now();
 		vscode.commands.executeCommand('setContext', 'ext.viewType', 'gryc.gallery');
+		const imageUris = await this.getImageUris(galleryFolder);
+		this.gFolders = await utils.getFolders(imageUris);
+		this.gFolders = this.customSorter.sort(this.gFolders);
 		const panel = vscode.window.createWebviewPanel(
 			'gryc.gallery',
 			`Image Gallery${galleryFolder ? ': ' + utils.getFilename(galleryFolder.path) : ''}`,
@@ -66,13 +89,14 @@ class GalleryWebview {
 			{
 				enableScripts: true,
 				retainContextWhenHidden: true,
+				localResourceRoots: [vscode.Uri.file('/'),
+				// adding all directories is not needded
+				// ideally would only add the ones containing images
+				]
 			}
 		);
-
+		panel.webview.options.localResourceRoots
 		const htmlProvider = new HTMLProvider(this.context, panel.webview);
-		const imageUris = await this.getImageUris(galleryFolder);
-		this.gFolders = await utils.getFolders(imageUris);
-		this.gFolders = this.customSorter.sort(this.gFolders);
 		panel.webview.html = htmlProvider.fullHTML();
 
 		const imageSizeStat = utils.getImageSizeStat(this.gFolders);
