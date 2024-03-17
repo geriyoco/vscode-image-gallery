@@ -63,7 +63,7 @@ export function getWebviewContent(
 			<link href="${styleHref}" rel="stylesheet" />
 			<script nonce="${utils.nonce}" src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
 
-			<title>Image Gallery: Viewer</title>
+			<title>Image Gallery Viewer</title>
 			</head>
 		<body>
 			<div id="container">
