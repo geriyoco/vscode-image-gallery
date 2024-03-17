@@ -3,7 +3,6 @@ import * as utils from '../utils';
 import { TFolder } from 'custom_typings';
 import CustomSorter from './sorter';
 import HTMLProvider from '../html_provider';
-import { reporter } from '../telemetry';
 
 export let disposable: vscode.Disposable;
 
@@ -27,13 +26,11 @@ export function activate(context: vscode.ExtensionContext) {
 			);
 	});
 	context.subscriptions.push(disposable);
-	reporter.sendTelemetryEvent('gallery.activate');
 }
 
 export function deactivate() {
 	if (!disposable) { return; }
 	disposable.dispose();
-	reporter.sendTelemetryEvent('gallery.deactivate');
 }
 
 class GalleryWebview {
@@ -61,7 +58,7 @@ class GalleryWebview {
 		vscode.commands.executeCommand('setContext', 'ext.viewType', 'gryc.gallery');
 		const panel = vscode.window.createWebviewPanel(
 			'gryc.gallery',
-			`Image Gallery${galleryFolder ? ': ' + utils.getFilename(galleryFolder.path) : ''}`,
+			`${galleryFolder ? utils.getFilename(galleryFolder.path) : ''}`,
 			vscode.ViewColumn.One,
 			{
 				enableScripts: true,
@@ -74,15 +71,6 @@ class GalleryWebview {
 		this.gFolders = await utils.getFolders(imageUris);
 		this.gFolders = this.customSorter.sort(this.gFolders);
 		panel.webview.html = htmlProvider.fullHTML();
-
-		const imageSizeStat = utils.getImageSizeStat(this.gFolders);
-		reporter.sendTelemetryEvent('gallery.createPanel', {}, {
-			"duration": Date.now() - startTime,
-			"folderCount": Object.keys(this.gFolders).length,
-			"imageCount": imageSizeStat.count,
-			"imageSizeMean": imageSizeStat.mean,
-			"imageSizeStd": imageSizeStat.std,
-		});
 
 		return panel;
 	}
@@ -100,17 +88,10 @@ class GalleryWebview {
 						viewColumn: vscode.ViewColumn.Two,
 					},
 				);
-				reporter.sendTelemetryEvent(`${telemetryPrefix}.openImageViewer`, {
-					'preview': message.preview.toString(),
-				});
 				break;
 
 			case "POST.gallery.requestSort":
 				this.gFolders = this.customSorter.sort(this.gFolders, message.valueName, message.ascending);
-				reporter.sendTelemetryEvent(`${telemetryPrefix}.requestSort`, {
-					'valueName': this.customSorter.valueName,
-					'ascending': this.customSorter.ascending.toString(),
-				});
 			// DO NOT BREAK HERE; FALL THROUGH TO UPDATE DOMS
 
 			case "POST.gallery.requestContentDOMs":
@@ -136,18 +117,11 @@ class GalleryWebview {
 					content: JSON.stringify(response),
 				});
 				const imageSizeStat = utils.getImageSizeStat(this.gFolders);
-				reporter.sendTelemetryEvent(`${telemetryPrefix}.requestContentDOMs`, {}, {
-					"folderCount": Object.keys(this.gFolders).length,
-					"imageCount": imageSizeStat.count,
-					"imageSizeMean": imageSizeStat.mean,
-					"imageSizeStd": imageSizeStat.std,
-				});
 				break;
 		}
 	}
 
 	public createFileWatcher(webview: vscode.Webview, galleryFolder?: vscode.Uri) {
-		const telemetryPrefix = "gallery.createFileWatcher";
 		const getMeasurementProperties = (folders: Record<string, TFolder>) => ({
 			"folderCount": Object.keys(folders).length,
 			"imageCount": Object.values(folders).reduce((acc, folder) => acc + Object.keys(folder.images).length, 0),
@@ -170,7 +144,6 @@ class GalleryWebview {
 				this.gFolders[folder.id] = folder;
 			}
 			this.messageListener({ command: "POST.gallery.requestSort" }, webview);
-			reporter.sendTelemetryEvent(`${telemetryPrefix}.didCreate`, {}, getMeasurementProperties(folders));
 		});
 		watcher.onDidDelete(async uri => {
 			const folders = await utils.getFolders([uri], "delete");
@@ -185,7 +158,6 @@ class GalleryWebview {
 				}
 			}
 			this.messageListener({ command: "POST.gallery.requestSort" }, webview);
-			reporter.sendTelemetryEvent(`${telemetryPrefix}.didDelete`, {}, getMeasurementProperties(folders));
 		});
 		watcher.onDidChange(async uri => {
 			// rename is NOT handled here; it's handled automatically by Delete & Create
@@ -199,7 +171,6 @@ class GalleryWebview {
 				this.messageListener({ command: "POST.gallery.requestSort" }, webview);
 				this.gFolders[folder.id].images[image.id].status = "";
 			}
-			reporter.sendTelemetryEvent(`${telemetryPrefix}.didChange`, {}, getMeasurementProperties(folders));
 		});
 		return watcher;
 	}

@@ -1,12 +1,9 @@
 import * as vscode from 'vscode';
 import * as utils from '../utils';
-import { reporter } from '../telemetry';
 
 export let disposable: vscode.Disposable;
 
 export function activate(context: vscode.ExtensionContext) {
-	reporter.sendTelemetryEvent('viewer.activate');
-
 	const viewer = new ViewerWebview(context);
 	disposable = vscode.window.registerCustomEditorProvider(
 		ViewerWebview.viewType,
@@ -24,7 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 	if (!disposable) { return; }
 	disposable.dispose();
-	reporter.sendTelemetryEvent('viewer.deactivate');
 }
 
 export class ViewerWebview implements vscode.CustomReadonlyEditorProvider {
