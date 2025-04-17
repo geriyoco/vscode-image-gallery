@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.3.0] - 2024-03-10
+### Added
+- TXT files can now be right-clicked and opened like directories in file explorer.
+
 ## [1.2.1] - 2022-09-28
 ### Fixed
 - Supported file extensions are now consistent between [`package.json`](package.json) and [`src/utils.ts`](src/utils.ts).

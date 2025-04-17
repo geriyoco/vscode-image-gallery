@@ -141,7 +141,7 @@ class DOMManager {
 			})
 		);
 		if (content.childElementCount === 0) {
-			content.innerHTML = "<p>No image found in this folder.</p>";
+			content.innerHTML = "<p>No image found in this gallery target.</p>";
 		}
 	}
 }
