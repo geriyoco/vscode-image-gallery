@@ -17,6 +17,8 @@ function init() {
 	initMessageListeners();
 	DOMManager.requestContentDOMs();
 	EventListener.addAllToToolbar();
+	// Initialize thumbnail size
+	EventListener.updateThumbnailSize(250);
 }
 
 function initMessageListeners() {
@@ -28,6 +30,15 @@ function initMessageListeners() {
 			case "POST.gallery.responseContentDOMs":
 				DOMManager.updateGlobalDoms(message);
 				DOMManager.updateGalleryContent();
+				break;
+			case "POST.gallery.metadataProgress":
+				ProgressManager.updateProgress(message);
+				break;
+			case "POST.gallery.metadataComplete":
+				ProgressManager.hideProgress();
+				break;
+			case "POST.gallery.sortBusy":
+				ProgressManager.showSortBusy(message);
 				break;
 		}
 	});
@@ -144,6 +155,71 @@ class DOMManager {
 			content.innerHTML = "<p>No image found in this folder.</p>";
 		}
 	}
+
+}
+
+class ProgressManager {
+	static updateProgress(message) {
+		const progress = message.progress;
+		let progressBar = document.querySelector('.progress-bar');
+		
+		if (!progressBar) {
+			// Create progress bar
+			const toolbar = document.querySelector('.toolbar');
+			const progressContainer = document.createElement('div');
+			progressContainer.className = 'progress-container';
+			progressContainer.innerHTML = `
+				<div class="progress-text">Loading metadata...</div>
+				<div class="progress-bar-container">
+					<div class="progress-bar"></div>
+				</div>
+			`;
+			toolbar.appendChild(progressContainer);
+			progressBar = progressContainer.querySelector('.progress-bar');
+		}
+		
+		const percentage = Math.round((progress.loaded / progress.total) * 100);
+		progressBar.style.width = percentage + '%';
+		
+		const progressText = document.querySelector('.progress-text');
+		if (progressText) {
+			progressText.textContent = `Loading metadata... ${progress.loaded}/${progress.total} (${percentage}%)`;
+		}
+	}
+	
+	static hideProgress() {
+		const progressContainer = document.querySelector('.progress-container');
+		if (progressContainer) {
+			progressContainer.remove();
+		}
+		ProgressManager.hideSortBusy();
+	}
+	
+	static showSortBusy(message) {
+		const dropdown = document.querySelector('.toolbar .dropdown');
+		const sortArrow = document.querySelector('.toolbar .sort-order-arrow');
+		
+		// Disable sort controls
+		dropdown.disabled = true;
+		sortArrow.style.opacity = '0.5';
+		sortArrow.style.pointerEvents = 'none';
+		
+		// Show busy indicator
+		const progressText = document.querySelector('.progress-text');
+		if (progressText) {
+			progressText.textContent = `Sorting by ${message.sortType}... ${message.progress.loaded}/${message.progress.total} loaded`;
+		}
+	}
+	
+	static hideSortBusy() {
+		const dropdown = document.querySelector('.toolbar .dropdown');
+		const sortArrow = document.querySelector('.toolbar .sort-order-arrow');
+		
+		// Re-enable sort controls
+		dropdown.disabled = false;
+		sortArrow.style.opacity = '1';
+		sortArrow.style.pointerEvents = 'auto';
+	}
 }
 
 class EventListener {
@@ -163,6 +239,18 @@ class EventListener {
 				EventListener.sortRequest();
 			}
 		);
+		const thumbnailSlider = document.querySelector("#thumbnail-size-slider");
+		if (thumbnailSlider) {
+			thumbnailSlider.addEventListener(
+				"input", (event) => EventListener.updateThumbnailSize(event.target.value)
+			);
+		}
+		const searchInput = document.querySelector("#search-input");
+		if (searchInput) {
+			searchInput.addEventListener(
+				"input", (event) => EventListener.filterImages(event.target.value)
+			);
+		}
 	}
 
 	static addToFolderBar(folderBar) {
@@ -257,6 +345,20 @@ class EventListener {
 
 	static expandFolderBar(folderDOM) {
 		const elements = EventListener.getFolderAssociatedElements(folderDOM);
+		
+		// Load metadata for this folder if not loaded
+		if (folderDOM.dataset.loaded === "false") {
+			const countElement = folderDOM.querySelector(`#${folderDOM.id}-items-count`);
+			if (countElement) {
+				countElement.textContent = "⏳ Loading...";
+			}
+			
+			vscode.postMessage({
+				command: "POST.gallery.loadFolderMetadata",
+				folderId: folderDOM.id
+			});
+		}
+		
 		if (elements.arrowImg.src.includes("chevron-right.svg")) {
 			elements.arrowImg.src = elements.arrowImg.dataset.chevronDown;
 		}
@@ -302,6 +404,48 @@ class EventListener {
 			command: "POST.gallery.requestSort",
 			valueName: dropdownDOM.value,
 			ascending: sortOrderDOM.src.includes("arrow-up.svg") ? true : false,
+		});
+	}
+
+	static updateThumbnailSize(size) {
+		document.documentElement.style.setProperty('--thumbnail-size', size + 'px');
+	}
+
+	static filterImages(searchTerm) {
+		const term = searchTerm.toLowerCase().trim();
+		
+		// Get all image containers
+		Object.values(gFolders).forEach(folder => {
+			let visibleCount = 0;
+			
+			Object.values(folder.images).forEach(image => {
+				const container = image.container;
+				const filename = container.querySelector('.filename').textContent.toLowerCase();
+				
+				if (term === '' || filename.includes(term)) {
+					container.style.display = '';
+					visibleCount++;
+				} else {
+					container.style.display = 'none';
+				}
+			});
+			
+			// Update folder visibility and count
+			const folderGrid = folder.grid;
+			if (visibleCount === 0 && term !== '') {
+				folderGrid.style.display = 'none';
+				folder.bar.style.display = 'none';
+			} else {
+				folderGrid.style.display = 'grid';
+				folder.bar.style.display = 'flex';
+			}
+			
+			// Update the image count in folder bar
+			const countText = (object, count) => `${count} ${object}${count === 1 ? "" : "s"} found`;
+			const countElement = folder.bar.querySelector(`#${folder.bar.id}-items-count`);
+			if (countElement) {
+				countElement.textContent = countText("image", visibleCount);
+			}
 		});
 	}
 }

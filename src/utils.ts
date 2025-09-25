@@ -73,7 +73,64 @@ export async function getFileStats(imgUris: vscode.Uri[]) {
 	return resultObj;
 }
 
+export async function getFoldersStructure(imgUris: vscode.Uri[]) {
+	// Fast folder structure loading without file stats
+	let folders: Record<string, TFolder> = {};
+
+	for (const imgUri of imgUris) {
+		const folderPath = path.dirname(imgUri.path);
+		const folderId = hash256(folderPath);
+
+		if (!folders[folderId]) {
+			folders[folderId] = {
+				id: folderId,
+				path: folderPath,
+				images: {},
+				imageCount: 0,
+				loaded: false
+			};
+		}
+
+		// Add basic image structure without stats
+		const imageId = hash256(imgUri.path);
+		const dotIndex = imgUri.fsPath.lastIndexOf('.');
+		folders[folderId].images[imageId] = {
+			id: imageId,
+			uri: imgUri,
+			ext: imgUri.fsPath.slice(dotIndex + 1).toUpperCase(),
+			size: 0, // Placeholder
+			mtime: 0,
+			ctime: 0,
+			status: "",
+			loaded: false
+		};
+		folders[folderId].imageCount = (folders[folderId].imageCount || 0) + 1;
+	}
+	return folders;
+}
+
+export async function loadFolderMetadata(folder: TFolder) {
+	// Load file stats only for this folder's images
+	const imageUris = Object.values(folder.images).map(img => img.uri);
+	const fileStats = await getFileStats(imageUris);
+	
+	// Update images with real metadata
+	for (const image of Object.values(folder.images)) {
+		const stat = fileStats[image.uri.fsPath as keyof typeof fileStats];
+		if (stat) {
+			image.size = stat['size'];
+			image.mtime = new Date(stat['mtime']).getTime();
+			image.ctime = new Date(stat['ctime']).getTime();
+			image.loaded = true;
+		}
+	}
+	
+	folder.loaded = true;
+	return folder;
+}
+
 export async function getFolders(imgUris: vscode.Uri[], action: "create" | "change" | "delete" = "create") {
+	// Keep original function for backward compatibility (file watchers, etc.)
 	let folders: Record<string, TFolder> = {};
 
 	let fileStats;
@@ -89,6 +146,8 @@ export async function getFolders(imgUris: vscode.Uri[], action: "create" | "chan
 				id: folderId,
 				path: folderPath,
 				images: {},
+				imageCount: 0,
+				loaded: true
 			};
 		}
 
@@ -101,10 +160,12 @@ export async function getFolders(imgUris: vscode.Uri[], action: "create" | "chan
 				uri: imgUri,
 				ext: imgUri.fsPath.slice(dotIndex + 1).toUpperCase(),
 				size: fileStat['size'],
-				mtime: fileStat['mtime'],
-				ctime: fileStat['ctime'],
+				mtime: new Date(fileStat['mtime']).getTime(),
+				ctime: new Date(fileStat['ctime']).getTime(),
 				status: "",
+				loaded: true
 			};
+			folders[folderId].imageCount = (folders[folderId].imageCount || 0) + 1;
 		}
 	}
 	return folders;

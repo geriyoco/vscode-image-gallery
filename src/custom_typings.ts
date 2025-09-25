@@ -9,6 +9,7 @@ declare module 'custom_typings' {
         mtime: number,
         ctime: number,
         status: "" | "refresh",
+        loaded?: boolean, // Whether metadata has been loaded
     };
 
     export type TFolder = {
@@ -17,5 +18,7 @@ declare module 'custom_typings' {
         images: {
             [imageId: string]: TImage,
         },
+        imageCount?: number, // Quick count without loading metadata
+        loaded?: boolean, // Whether metadata has been loaded for this folder
     };
 }

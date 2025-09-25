@@ -93,6 +93,14 @@ export default class HTMLProvider {
 					</button>
 				</div>
 			</div>
+			<div class="thumbnail-size-control">
+				<span>Size</span>
+				<input type="range" id="thumbnail-size-slider" class="thumbnail-slider" min="150" max="1024" value="250" step="25">
+			</div>
+			<div class="search-control">
+				<span>Search</span>
+				<input type="text" id="search-input" class="search-input" placeholder="Filter images...">
+			</div>
 			<div class="folder-count"></div>
 		</div>
 		`.trim();
@@ -106,6 +114,7 @@ export default class HTMLProvider {
 			id="${folder.id}"
 			data-path="${folder.path}"
 			data-state="${collapsed ? 'collapsed' : 'expanded'}"
+			data-loaded="${folder.loaded !== false}"
 			class="folder"
 		>
 			<div

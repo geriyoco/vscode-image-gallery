@@ -4,3 +4,6 @@
 src/test/samples/env/
 src/test/samples/folder*
 .vscode-test-web/
+.history
+.github
+.vscode-test
