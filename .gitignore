@@ -4,3 +4,4 @@
 src/test/samples/env/
 src/test/samples/folder*
 .vscode-test-web/
+.vscode-test/

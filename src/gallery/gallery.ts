@@ -105,6 +105,16 @@ class GalleryWebview {
 				});
 				break;
 
+			case "POST.gallery.updateColumnCount":
+				webview.postMessage({
+					command: "POST.gallery.setColumnCount",
+					columnCount: message.columnCount
+				});
+				reporter.sendTelemetryEvent(`${telemetryPrefix}.updateColumnCount`, {
+					'columnCount': message.columnCount.toString()
+				});
+				break;
+
 			case "POST.gallery.requestSort":
 				this.gFolders = this.customSorter.sort(this.gFolders, message.valueName, message.ascending);
 				reporter.sendTelemetryEvent(`${telemetryPrefix}.requestSort`, {

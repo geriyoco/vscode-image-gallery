@@ -93,6 +93,24 @@ export default class HTMLProvider {
 					</button>
 				</div>
 			</div>
+			<div class="column-control">
+				<span>Columns</span>
+				<div class="column-input-group">
+					<input type="number" id="column-count" class="column-input" min="1" max="100" value="4" />
+					<div class="column-arrows">
+						<button class="column-arrow codicon" data-direction="up">
+							<img src="${this.codicons["arrowUp"]}" alt="Increase columns" />
+						</button>
+						<button class="column-arrow codicon" data-direction="down">
+							<img src="${this.codicons["arrowDown"]}" alt="Decrease columns" />
+						</button>
+					</div>
+				</div>
+				<label class="auto-checkbox">
+					<input type="checkbox" id="auto-columns" checked />
+					<span>Auto</span>
+				</label>
+			</div>
 			<div class="folder-count"></div>
 		</div>
 		`.trim();

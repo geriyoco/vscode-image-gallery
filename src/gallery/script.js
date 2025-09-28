@@ -29,6 +29,9 @@ function initMessageListeners() {
 				DOMManager.updateGlobalDoms(message);
 				DOMManager.updateGalleryContent();
 				break;
+			case "POST.gallery.setColumnCount":
+				updateColumnCount(message.columnCount);
+				break;
 		}
 	});
 }
@@ -305,6 +308,72 @@ class EventListener {
 		});
 	}
 }
+
+// Column control functionality
+const columnInput = document.getElementById('column-count');
+const columnArrows = document.querySelectorAll('.column-arrow');
+const autoCheckbox = document.getElementById('auto-columns');
+
+function updateColumnCount(count) {
+	const grids = document.querySelectorAll('.grid');
+	grids.forEach(grid => {
+		if (autoCheckbox.checked) {
+			grid.style.removeProperty('--column-count');
+			grid.style.removeProperty('--column-width');
+		} else {
+			grid.style.setProperty('--column-count', count);
+			grid.style.setProperty('--column-width', '1fr');
+		}
+	});
+}
+
+// Update column input and arrows state based on auto checkbox
+function updateColumnControlState() {
+	const isAuto = autoCheckbox.checked;
+	columnInput.disabled = isAuto;
+	columnArrows.forEach(arrow => arrow.disabled = isAuto);
+	updateColumnCount(isAuto ? null : columnInput.value);
+}
+
+columnInput.addEventListener('change', (e) => {
+	if (autoCheckbox.checked) {return;}
+	const value = Math.min(Math.max(parseInt(e.target.value) || 1, 1), 100);
+	e.target.value = value;
+	vscode.postMessage({
+		command: 'POST.gallery.updateColumnCount',
+		columnCount: value
+	});
+	updateColumnCount(value);
+});
+
+columnArrows.forEach(arrow => {
+	arrow.addEventListener('click', () => {
+		if (autoCheckbox.checked) {return;}
+		const currentValue = parseInt(columnInput.value) || 1;
+		const direction = arrow.dataset.direction;
+		const newValue = direction === 'up' 
+			? Math.min(currentValue + 1, 100)
+			: Math.max(currentValue - 1, 1);
+		
+		columnInput.value = newValue;
+		vscode.postMessage({
+			command: 'POST.gallery.updateColumnCount',
+			columnCount: newValue
+		});
+		updateColumnCount(newValue);
+	});
+});
+
+autoCheckbox.addEventListener('change', () => {
+	updateColumnControlState();
+	vscode.postMessage({
+		command: 'POST.gallery.updateColumnCount',
+		columnCount: autoCheckbox.checked ? null : columnInput.value
+	});
+});
+
+// Initialize column control state
+updateColumnControlState();
 
 (function () {
 	init();
