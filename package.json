@@ -2,7 +2,7 @@
 	"name": "vscode-image-gallery",
 	"displayName": "Image Gallery",
 	"description": "Improve image browsing experience, especially for remote development.",
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"publisher": "GeriYoco",
 	"repository": {
 		"type": "git",

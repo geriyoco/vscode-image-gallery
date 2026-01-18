@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.2.2] - 2026-01-18
+### Added
+- Viewer: Images now auto-refresh when the file changes.
+
 ## [1.2.1] - 2022-09-28
 ### Fixed
 - Supported file extensions are now consistent between [`package.json`](package.json) and [`src/utils.ts`](src/utils.ts).

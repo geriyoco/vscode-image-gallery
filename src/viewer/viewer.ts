@@ -46,6 +46,20 @@ export class ViewerWebview implements vscode.CustomReadonlyEditorProvider {
 			enableForms: false
 		};
 		webviewPanel.webview.html = getWebviewContent(this.context, webviewPanel.webview, documentPath);
+
+		const watcher = vscode.workspace.createFileSystemWatcher(document.uri.fsPath);
+		watcher.onDidChange(() => {
+			webviewPanel.webview.postMessage({ type: 'refreshImage' });
+		});
+		watcher.onDidCreate(() => {
+			webviewPanel.webview.postMessage({ type: 'refreshImage' });
+		});
+		watcher.onDidDelete(() => {
+			webviewPanel.webview.postMessage({ type: 'refreshImage' });
+		});
+		webviewPanel.onDidDispose(() => {
+			watcher.dispose();
+		});
 	}
 }
 
